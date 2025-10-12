@@ -474,7 +474,7 @@ export default function IncomeOutcomePage() {
                 )}
                 {budgets.some(b => b.category.toLowerCase() === formData.category.toLowerCase() && b.parent_type === formData.type) && (
                   <p className="text-xs text-green-400 mt-1">
-                    ✓ Will be linked to your "{formData.category}" budget
+                    ✓ Will be linked to your &quot;{formData.category}&quot; budget
                   </p>
                 )}
               </div>

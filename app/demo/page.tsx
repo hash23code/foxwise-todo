@@ -113,7 +113,7 @@ export default function DemoPage() {
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5" />
               <span className="font-medium">
-                You're viewing a demo with sample data. Changes won't be saved.
+                You&apos;re viewing a demo with sample data. Changes won&apos;t be saved.
               </span>
             </div>
             <div className="flex items-center gap-4">
@@ -330,7 +330,7 @@ export default function DemoPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"

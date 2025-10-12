@@ -105,7 +105,7 @@ export default function AboutPage() {
             About FoxWise Finance
           </h1>
           <p className="text-xl text-gray-400 mb-8">
-            We're on a mission to make personal finance management simple, intelligent, and accessible to everyone.
+            We&apos;re on a mission to make personal finance management simple, intelligent, and accessible to everyone.
           </p>
         </motion.div>
       </section>
@@ -127,7 +127,7 @@ export default function AboutPage() {
             </div>
             <div className="space-y-4 text-gray-300 text-lg">
               <p>
-                FoxWise Finance was born from a simple observation: managing personal finances shouldn't be complicated. We saw people struggling with spreadsheets, multiple apps, and confusing financial jargon.
+                FoxWise Finance was born from a simple observation: managing personal finances shouldn&apos;t be complicated. We saw people struggling with spreadsheets, multiple apps, and confusing financial jargon.
               </p>
               <p>
                 Our team of developers and financial experts came together with one goal: create a platform that combines powerful features with beautiful design and intuitive user experience.

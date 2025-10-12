@@ -81,7 +81,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-xl text-gray-400 mb-8">
-            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
           </p>
         </motion.div>
       </section>
@@ -118,7 +118,7 @@ export default function ContactPage() {
                   info@foxwisefinance.com
                 </a>
                 <p className="text-gray-400 text-sm mt-2">
-                  We'll respond within 24 hours
+                  We&apos;ll respond within 24 hours
                 </p>
               </div>
             </motion.div>
@@ -175,7 +175,7 @@ export default function ContactPage() {
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
                 <p className="text-gray-400 text-center">
-                  Thank you for contacting us. We'll get back to you soon.
+                  Thank you for contacting us. We&apos;ll get back to you soon.
                 </p>
               </motion.div>
             ) : (

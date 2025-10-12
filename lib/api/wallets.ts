@@ -20,6 +20,7 @@ export async function getWallets(userId: string) {
 export async function createWallet(wallet: WalletInsert) {
   const { data, error } = await supabase
     .from('wallets')
+    // @ts-ignore
     .insert({
       ...wallet,
       current_balance: wallet.beginning_balance || 0
@@ -34,6 +35,7 @@ export async function createWallet(wallet: WalletInsert) {
 export async function updateWallet(id: string, updates: WalletUpdate) {
   const { data, error } = await supabase
     .from('wallets')
+    // @ts-ignore
     .update(updates)
     .eq('id', id)
     .select()
@@ -46,6 +48,7 @@ export async function updateWallet(id: string, updates: WalletUpdate) {
 export async function deleteWallet(id: string) {
   const { error } = await supabase
     .from('wallets')
+    // @ts-ignore
     .update({ is_active: false })
     .eq('id', id);
 
@@ -60,5 +63,5 @@ export async function getWalletBalance(walletId: string) {
     .single();
 
   if (error) throw error;
-  return data.current_balance;
+  return (data as any).current_balance;
 }

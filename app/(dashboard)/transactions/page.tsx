@@ -12,7 +12,7 @@ interface Transaction {
   type: "income" | "expense" | "bills" | "debt_payment" | "savings";
   category: string;
   amount: number;
-  description: string;
+  description: string | null;
   date: Date;
   is_recurring: boolean;
   recurring_frequency: "daily" | "weekly" | "monthly" | "yearly" | null;
@@ -80,7 +80,7 @@ export default function TransactionsPage() {
     .filter((t) => {
       const matchesSearch =
         t.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.description.toLowerCase().includes(searchTerm.toLowerCase());
+        (t.description && t.description.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesType = filterType === "all" || t.type === filterType;
       return matchesSearch && matchesType;
     })

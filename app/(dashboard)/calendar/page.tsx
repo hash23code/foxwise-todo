@@ -12,7 +12,7 @@ interface Transaction {
   type: "income" | "expense" | "bills" | "debt_payment" | "savings";
   category: string;
   amount: number;
-  description: string;
+  description: string | null;
   date: Date;
   is_recurring: boolean;
   recurring_frequency: "daily" | "weekly" | "monthly" | "yearly" | null;

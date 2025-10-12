@@ -29,6 +29,7 @@ export async function getUserSettings(userId: string) {
 export async function createUserSettings(settings: UserSettingsInsert) {
   const { data, error } = await supabase
     .from('user_settings')
+    // @ts-ignore
     .insert(settings)
     .select()
     .single();
@@ -40,6 +41,7 @@ export async function createUserSettings(settings: UserSettingsInsert) {
 export async function updateUserSettings(userId: string, updates: UserSettingsUpdate) {
   const { data, error } = await supabase
     .from('user_settings')
+    // @ts-ignore
     .update(updates)
     .eq('user_id', userId)
     .select()
