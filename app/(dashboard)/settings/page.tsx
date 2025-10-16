@@ -35,9 +35,10 @@ export default function SettingsPage() {
       setLoading(true);
       const userSettings = await getUserSettings(user!.id);
       if (userSettings) {
+        // Settings loaded (currency is for display only in ToDo app)
         setSettings({
           ...settings,
-          currency: userSettings.default_currency || "CAD",
+          theme: userSettings.theme || "dark",
         });
       }
     } catch (error) {
@@ -50,7 +51,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       await updateUserSettings(user!.id, {
-        default_currency: settings.currency,
+        theme: settings.theme as 'light' | 'dark',
       });
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);
