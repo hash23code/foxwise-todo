@@ -378,7 +378,7 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-4 text-gray-300 text-sm italic"
                 >
-                  "{recordingText}"
+                  &quot;{recordingText}&quot;
                 </motion.p>
               )}
             </div>
