@@ -5,70 +5,59 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Wallet,
-  TrendingUp,
-  ArrowUpDown,
-  PiggyBank,
+  CheckSquare,
+  ListTodo,
   Settings,
   CalendarDays,
-  LogOut
+  FolderKanban,
+  Clock
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-
-const navItems = [
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    gradient: "from-blue-500 to-cyan-500"
-  },
-  {
-    name: "Wallets",
-    href: "/wallets",
-    icon: Wallet,
-    gradient: "from-cyan-500 to-blue-500"
-  },
-  {
-    name: "Budget",
-    href: "/budget",
-    icon: PiggyBank,
-    gradient: "from-purple-500 to-pink-500"
-  },
-  {
-    name: "Income/Outcome",
-    href: "/income-outcome",
-    icon: ArrowUpDown,
-    gradient: "from-green-500 to-emerald-500"
-  },
-  {
-    name: "Transactions",
-    href: "/transactions",
-    icon: TrendingUp,
-    gradient: "from-orange-500 to-red-500"
-  },
-  {
-    name: "Investments",
-    href: "/investments",
-    icon: TrendingUp,
-    gradient: "from-indigo-500 to-purple-500"
-  },
-  {
-    name: "Calendar",
-    href: "/calendar",
-    icon: CalendarDays,
-    gradient: "from-yellow-500 to-orange-500"
-  },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Settings,
-    gradient: "from-gray-500 to-slate-500"
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { language, setLanguage, t } = useLanguage();
+
+  const navItems = [
+    {
+      name: t.nav?.dashboard || "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      gradient: "from-blue-500 to-cyan-500"
+    },
+    {
+      name: t.nav?.tasks || "My Tasks",
+      href: "/tasks",
+      icon: CheckSquare,
+      gradient: "from-purple-500 to-pink-500"
+    },
+    {
+      name: t.nav?.dayPlanner || "Day Planner",
+      href: "/day-planner",
+      icon: Clock,
+      gradient: "from-indigo-500 to-blue-500"
+    },
+    {
+      name: t.nav?.categories || "Categories",
+      href: "/categories",
+      icon: FolderKanban,
+      gradient: "from-green-500 to-emerald-500"
+    },
+    {
+      name: t.nav?.calendar || "Calendar",
+      href: "/calendar",
+      icon: CalendarDays,
+      gradient: "from-yellow-500 to-orange-500"
+    },
+    {
+      name: t.nav?.settings || "Settings",
+      href: "/settings",
+      icon: Settings,
+      gradient: "from-gray-500 to-slate-500"
+    },
+  ];
 
   return (
     <motion.aside
@@ -78,16 +67,16 @@ export default function Sidebar() {
       className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-gray-900 via-gray-900 to-black border-r border-gray-800 flex flex-col"
     >
       {/* Logo */}
-      <div className="p-6 border-b border-gray-800 flex items-center justify-center">
+      <Link href="/" className="p-6 border-b border-gray-800 flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer">
         <Image
           src="/logo.png"
-          alt="FoxWise Finance"
-          width={200}
-          height={80}
+          alt="FoxWise ToDo"
+          width={160}
+          height={160}
           className="object-contain"
           priority
         />
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
@@ -125,7 +114,7 @@ export default function Sidebar() {
       <div className="p-4 border-t border-gray-800">
         <div className="flex items-center gap-3 px-4 py-3">
           <UserButton afterSignOutUrl="/sign-in" />
-          <span className="text-sm text-gray-400">Profile</span>
+          <span className="text-sm text-gray-400">{t.nav.profile}</span>
         </div>
       </div>
     </motion.aside>

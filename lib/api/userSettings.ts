@@ -1,71 +1,77 @@
-import { supabase } from '../supabase';
-import { Database } from '../database.types';
-
-type UserSettings = Database['public']['Tables']['user_settings']['Row'];
-type UserSettingsInsert = Database['public']['Tables']['user_settings']['Insert'];
-type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update'];
-
-export async function getUserSettings(userId: string) {
-  const { data, error } = await supabase
-    .from('user_settings')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (error) {
-    // If no settings exist, create default ones
-    if (error.code === 'PGRST116') {
-      return await createUserSettings({
-        user_id: userId,
-        default_currency: 'CAD',
-        date_format: 'MM/DD/YYYY'
-      });
-    }
-    throw error;
-  }
-  return data as UserSettings;
+export interface UserSettings {
+  id: string;
+  user_id: string;
+  default_list_id?: string;
+  email_reminders_enabled: boolean;
+  push_reminders_enabled: boolean;
+  default_reminder_time: number; // Minutes before due date
+  theme: 'light' | 'dark';
+  language: 'en' | 'fr';
+  timezone: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export async function createUserSettings(settings: UserSettingsInsert) {
-  const { data, error } = await supabase
-    .from('user_settings')
-    // @ts-ignore
-    .insert(settings)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data as UserSettings;
-}
-
-export async function updateUserSettings(userId: string, updates: UserSettingsUpdate) {
-  const { data, error } = await supabase
-    .from('user_settings')
-    // @ts-ignore
-    .update(updates)
-    .eq('user_id', userId)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data as UserSettings;
-}
-
-// Currency options with symbols
+// For compatibility with Finance app (not used in ToDo)
 export const CURRENCIES = [
-  { code: 'CAD', symbol: '$', name: 'Canadian Dollar' },
   { code: 'USD', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
   { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
-  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  { code: 'MXN', symbol: '$', name: 'Mexican Peso' }
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
 ];
 
-export function getCurrencySymbol(currencyCode: string): string {
-  const currency = CURRENCIES.find(c => c.code === currencyCode);
-  return currency ? currency.symbol : '$';
+export async function getUserSettings(userId: string): Promise<UserSettings | null> {
+  try {
+    const response = await fetch(`/api/user-settings?userId=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch user settings');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching user settings:', error);
+    throw error;
+  }
+}
+
+export async function updateUserSettings(
+  userId: string,
+  settings: Partial<UserSettings>
+): Promise<UserSettings> {
+  try {
+    const response = await fetch('/api/user-settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, ...settings }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update user settings');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating user settings:', error);
+    throw error;
+  }
+}
+
+export async function createUserSettings(
+  userId: string,
+  settings: Partial<UserSettings>
+): Promise<UserSettings> {
+  return updateUserSettings(userId, settings);
 }

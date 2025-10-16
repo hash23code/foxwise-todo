@@ -9,163 +9,212 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      budgets: {
+      todo_lists: {
         Row: {
           id: string
           user_id: string
-          category: string
-          amount: number
-          period: 'monthly' | 'yearly'
-          parent_type: 'income' | 'expense' | 'bills' | 'debt_payment' | 'savings'
+          name: string
+          color: string
+          icon: string
+          is_default: boolean
+          position: number
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          category: string
-          amount: number
-          period: 'monthly' | 'yearly'
-          parent_type?: 'income' | 'expense' | 'bills' | 'debt_payment' | 'savings'
+          name: string
+          color?: string
+          icon?: string
+          is_default?: boolean
+          position?: number
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          category?: string
-          amount?: number
-          period?: 'monthly' | 'yearly'
-          parent_type?: 'income' | 'expense' | 'bills' | 'debt_payment' | 'savings'
+          name?: string
+          color?: string
+          icon?: string
+          is_default?: boolean
+          position?: number
           created_at?: string
           updated_at?: string
         }
       }
-      transactions: {
+      tasks: {
         Row: {
           id: string
           user_id: string
-          type: 'income' | 'expense' | 'bills' | 'debt_payment' | 'savings'
-          category: string
-          amount: number
+          list_id: string
+          title: string
           description: string | null
-          date: string
+          priority: 'low' | 'medium' | 'high' | 'urgent'
+          status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+          due_date: string | null
+          completed_at: string | null
           is_recurring: boolean
           recurring_frequency: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
           recurring_end_date: string | null
-          wallet_id: string | null
-          budget_id: string | null
-          is_completed: boolean
+          tags: string[] | null
+          position: number
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          type: 'income' | 'expense' | 'bills' | 'debt_payment' | 'savings'
-          category: string
-          amount: number
+          list_id: string
+          title: string
           description?: string | null
+          priority?: 'low' | 'medium' | 'high' | 'urgent'
+          status?: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+          due_date?: string | null
+          completed_at?: string | null
+          is_recurring?: boolean
+          recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          recurring_end_date?: string | null
+          tags?: string[] | null
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          list_id?: string
+          title?: string
+          description?: string | null
+          priority?: 'low' | 'medium' | 'high' | 'urgent'
+          status?: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+          due_date?: string | null
+          completed_at?: string | null
+          is_recurring?: boolean
+          recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          recurring_end_date?: string | null
+          tags?: string[] | null
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      task_reminders: {
+        Row: {
+          id: string
+          task_id: string
+          user_id: string
+          reminder_type: 'email' | 'push' | 'both'
+          reminder_time: string
+          is_sent: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          task_id: string
+          user_id: string
+          reminder_type: 'email' | 'push' | 'both'
+          reminder_time: string
+          is_sent?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          task_id?: string
+          user_id?: string
+          reminder_type?: 'email' | 'push' | 'both'
+          reminder_time?: string
+          is_sent?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      calendar_notes: {
+        Row: {
+          id: string
+          user_id: string
           date: string
-          is_recurring?: boolean
-          recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
-          recurring_end_date?: string | null
-          wallet_id?: string | null
-          budget_id?: string | null
-          is_completed?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          type?: 'income' | 'expense' | 'bills' | 'debt_payment' | 'savings'
-          category?: string
-          amount?: number
-          description?: string | null
-          date?: string
-          is_recurring?: boolean
-          recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
-          recurring_end_date?: string | null
-          wallet_id?: string | null
-          budget_id?: string | null
-          is_completed?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      investments: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          type: string
-          amount: number
-          current_value: number
-          purchase_date: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          type: string
-          amount: number
-          current_value: number
-          purchase_date: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          type?: string
-          amount?: number
-          current_value?: number
-          purchase_date?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      wallets: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          type: 'main' | 'savings' | 'business' | 'investment' | 'other'
-          currency: string
-          beginning_balance: number
-          current_balance: number
+          note: string
           color: string
-          is_active: boolean
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          name: string
-          type: 'main' | 'savings' | 'business' | 'investment' | 'other'
-          currency?: string
-          beginning_balance?: number
-          current_balance?: number
+          date: string
+          note: string
           color?: string
-          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          name?: string
-          type?: 'main' | 'savings' | 'business' | 'investment' | 'other'
-          currency?: string
-          beginning_balance?: number
-          current_balance?: number
+          date?: string
+          note?: string
           color?: string
-          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      task_attachments: {
+        Row: {
+          id: string
+          task_id: string
+          user_id: string
+          file_name: string
+          file_url: string
+          file_type: string
+          file_size: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          task_id: string
+          user_id: string
+          file_name: string
+          file_url: string
+          file_type: string
+          file_size: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          task_id?: string
+          user_id?: string
+          file_name?: string
+          file_url?: string
+          file_type?: string
+          file_size?: number
+          created_at?: string
+        }
+      }
+      task_comments: {
+        Row: {
+          id: string
+          task_id: string
+          user_id: string
+          comment: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          task_id: string
+          user_id: string
+          comment: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          task_id?: string
+          user_id?: string
+          comment?: string
           created_at?: string
           updated_at?: string
         }
@@ -174,27 +223,39 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          default_currency: string
-          date_format: string
-          default_wallet_id: string | null
+          default_list_id: string | null
+          email_reminders_enabled: boolean
+          push_reminders_enabled: boolean
+          default_reminder_time: number
+          theme: string
+          language: string
+          timezone: string
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          default_currency?: string
-          date_format?: string
-          default_wallet_id?: string | null
+          default_list_id?: string | null
+          email_reminders_enabled?: boolean
+          push_reminders_enabled?: boolean
+          default_reminder_time?: number
+          theme?: string
+          language?: string
+          timezone?: string
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          default_currency?: string
-          date_format?: string
-          default_wallet_id?: string | null
+          default_list_id?: string | null
+          email_reminders_enabled?: boolean
+          push_reminders_enabled?: boolean
+          default_reminder_time?: number
+          theme?: string
+          language?: string
+          timezone?: string
           created_at?: string
           updated_at?: string
         }
@@ -211,3 +272,20 @@ export interface Database {
     }
   }
 }
+
+// Convenience type exports
+export type TodoList = Database['public']['Tables']['todo_lists']['Row']
+export type Task = Database['public']['Tables']['tasks']['Row']
+export type TaskReminder = Database['public']['Tables']['task_reminders']['Row']
+export type CalendarNote = Database['public']['Tables']['calendar_notes']['Row']
+export type TaskAttachment = Database['public']['Tables']['task_attachments']['Row']
+export type TaskComment = Database['public']['Tables']['task_comments']['Row']
+export type UserSettings = Database['public']['Tables']['user_settings']['Row']
+
+export type TodoListInsert = Database['public']['Tables']['todo_lists']['Insert']
+export type TaskInsert = Database['public']['Tables']['tasks']['Insert']
+export type TaskReminderInsert = Database['public']['Tables']['task_reminders']['Insert']
+export type CalendarNoteInsert = Database['public']['Tables']['calendar_notes']['Insert']
+export type TaskAttachmentInsert = Database['public']['Tables']['task_attachments']['Insert']
+export type TaskCommentInsert = Database['public']['Tables']['task_comments']['Insert']
+export type UserSettingsInsert = Database['public']['Tables']['user_settings']['Insert']

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FoxWise Finance",
-  description: "Smart financial management with FoxWise Finance",
+  title: "FoxWise ToDo",
+  description: "Smart task management with FoxWise ToDo",
 };
 
 export default function RootLayout({
@@ -14,9 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased">
-          {children}
+      <html lang="en" suppressHydrationWarning>
+        <body className="antialiased" suppressHydrationWarning>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
         </body>
       </html>
     </ClerkProvider>

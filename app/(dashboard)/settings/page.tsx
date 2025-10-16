@@ -5,13 +5,14 @@ import { motion } from "framer-motion";
 import { User, Bell, Lock, Palette, Globe, Save } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { getUserSettings, updateUserSettings, CURRENCIES } from "@/lib/api/userSettings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function SettingsPage() {
   const { user } = useUser();
+  const { language, setLanguage, t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState({
     currency: "CAD",
-    language: "English",
     notifications: {
       email: true,
       push: false,
@@ -62,7 +63,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-400">Loading settings...</p>
+        <p className="text-gray-400">{t.common.loading}...</p>
       </div>
     );
   }
@@ -75,9 +76,9 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-400 to-slate-400 bg-clip-text text-transparent">
-          Settings
+          {t.settings.title}
         </h1>
-        <p className="text-gray-400 mt-2">Manage your account preferences</p>
+        <p className="text-gray-400 mt-2">{t.settings.subtitle}</p>
       </motion.div>
 
       {/* Settings Sections */}
@@ -160,16 +161,12 @@ export default function SettingsPage() {
                 Language
               </label>
               <select
-                value={settings.language}
-                onChange={(e) =>
-                  setSettings({ ...settings, language: e.target.value })
-                }
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as 'en' | 'fr')}
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
               >
-                <option value="English">English</option>
-                <option value="Spanish">Spanish</option>
-                <option value="French">French</option>
-                <option value="German">German</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
               </select>
             </div>
           </div>
@@ -371,7 +368,7 @@ export default function SettingsPage() {
           }`}
         >
           <Save className="w-5 h-5" />
-          {isSaved ? "Saved!" : "Save Changes"}
+          {isSaved ? (language === 'en' ? 'Saved!' : 'Enregistré!') : (language === 'en' ? 'Save Changes' : 'Enregistrer les modifications')}
         </button>
       </motion.div>
     </div>

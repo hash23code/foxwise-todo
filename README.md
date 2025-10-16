@@ -1,18 +1,19 @@
-# Budget Tracker
+# FoxWise ToDo
 
-A modern, feature-rich budget tracking application built with Next.js 14, featuring a beautiful dark UI with smooth animations, comprehensive financial tracking, and secure authentication.
+A modern, feature-rich todo management application built with Next.js 14, featuring a beautiful dark UI with smooth animations, AI-powered task creation with voice input, comprehensive task organization, and smart reminders.
 
 ## Features
 
 - **Modern Dark UI** - Beautiful gradient-based dark theme with smooth animations using Framer Motion
 - **Secure Authentication** - User authentication powered by Clerk
-- **Dashboard** - Comprehensive overview with animated charts showing budget distribution, income vs expenses, and investment growth
-- **Budget Management** - Create, edit, and track budgets by category with visual progress indicators
-- **Income/Outcome Tracking** - Manage and categorize income and expenses with detailed transaction views
-- **Transaction History** - View all transactions with advanced filtering and search capabilities
-- **Investment Tracking** - Monitor your investment portfolio with gain/loss calculations
-- **Settings** - Customize preferences including currency, language, and notifications
-- **Real-time Charts** - Interactive charts using Recharts with gradient colors and animations
+- **Dashboard** - Comprehensive overview with animated charts showing task completion, productivity trends, and category distribution
+- **Multiple List Categories** - Organize tasks into different lists (Home, Family, Work, Business 01, Business 02, and custom categories)
+- **AI-Powered Task Creation** - Add tasks naturally using voice input with AI interpretation
+- **Smart Calendar Integration** - Visual calendar with task scheduling and deadline tracking
+- **Push Notifications** - Real-time push notifications for task reminders and deadlines
+- **Email Reminders** - Configurable email reminders for important tasks and deadlines
+- **Task Management** - Create, edit, complete, and organize tasks with priorities and due dates
+- **Real-time Charts** - Interactive charts using Recharts showing productivity metrics
 - **Database Integration** - Supabase for data persistence and management
 
 ## Tech Stack
@@ -22,10 +23,12 @@ A modern, feature-rich budget tracking application built with Next.js 14, featur
 - **Styling**: Tailwind CSS
 - **Authentication**: Clerk
 - **Database**: Supabase
+- **AI**: Google Generative AI (Gemini)
 - **Charts**: Recharts
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 - **Date Utilities**: date-fns
+- **Email**: Resend
 
 ## Getting Started
 
@@ -34,12 +37,13 @@ A modern, feature-rich budget tracking application built with Next.js 14, featur
 - Node.js 18+ installed
 - A Clerk account ([clerk.com](https://clerk.com))
 - A Supabase account ([supabase.com](https://supabase.com))
+- A Google AI API key ([ai.google.dev](https://ai.google.dev))
 
 ### 1. Clone the repository
 
 ```bash
 git clone <your-repo-url>
-cd budget_tracker
+cd FoxWise_ToDo
 ```
 
 ### 2. Install dependencies
@@ -82,7 +86,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    - Copy and paste the contents of `supabase_schema.sql`
    - Click "Run" to create all tables and policies
 
-### 5. Run the development server
+### 5. Set up Google AI API
+
+1. Get your API key from [ai.google.dev](https://ai.google.dev)
+2. Add it to `.env.local`:
+
+```env
+GOOGLE_AI_API_KEY=your_google_ai_api_key
+```
+
+### 6. Run the development server
 
 ```bash
 npm run dev
@@ -93,31 +106,34 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 ## Project Structure
 
 ```
-budget_tracker/
+FoxWise_ToDo/
 ├── app/
 │   ├── (dashboard)/          # Dashboard layout group
 │   │   ├── dashboard/        # Main dashboard page
-│   │   ├── budget/           # Budget management page
-│   │   ├── income-outcome/   # Income/Outcome page
-│   │   ├── transactions/     # Transactions page
-│   │   ├── investments/      # Investments page
+│   │   ├── tasks/            # Task management page
+│   │   ├── calendar/         # Calendar view page
+│   │   ├── categories/       # List categories page
 │   │   ├── settings/         # Settings page
 │   │   └── layout.tsx        # Dashboard layout
+│   ├── api/                  # API routes
+│   │   ├── tasks/            # Task management endpoints
+│   │   ├── reminders/        # Reminder endpoints
+│   │   └── ai/               # AI voice processing
 │   ├── sign-in/              # Sign-in page
 │   ├── sign-up/              # Sign-up page
 │   ├── globals.css           # Global styles
 │   ├── layout.tsx            # Root layout
-│   └── page.tsx              # Home page (redirects to dashboard)
+│   └── page.tsx              # Home page
 ├── components/
 │   ├── charts/               # Chart components
-│   │   ├── BudgetChart.tsx
-│   │   ├── IncomeExpenseChart.tsx
-│   │   └── InvestmentsChart.tsx
+│   ├── TaskModal.tsx         # Add/Edit task modal
+│   ├── VoiceInput.tsx        # AI voice input component
 │   ├── Sidebar.tsx           # Navigation sidebar
 │   └── StatCard.tsx          # Stat card component
 ├── lib/
 │   ├── supabase.ts           # Supabase client
-│   └── database.types.ts     # Database TypeScript types
+│   ├── database.types.ts     # Database TypeScript types
+│   └── api/                  # API utilities
 ├── middleware.ts             # Clerk authentication middleware
 ├── supabase_schema.sql       # Database schema
 └── package.json
@@ -125,58 +141,68 @@ budget_tracker/
 
 ## Database Schema
 
-The application uses three main tables:
+The application uses the following main tables:
 
-- **budgets** - Stores budget categories and limits
-- **transactions** - Stores income and expense transactions
-- **investments** - Stores investment portfolio data
+- **todo_lists** - Stores list categories (Home, Family, Work, Business, etc.)
+- **tasks** - Stores all tasks with priorities, deadlines, and completion status
+- **task_reminders** - Stores reminder configurations for tasks
+- **calendar_notes** - Stores calendar events and notes
 
 All tables include Row Level Security (RLS) policies for data protection.
 
 ## Features in Detail
 
 ### Dashboard
-- Overview of total balance, monthly income, monthly expenses, and investments
-- Visual charts showing budget distribution, income vs expenses trend, and investment growth
-- Recent transactions list
+- Overview of total tasks, completed tasks, pending tasks, and overdue tasks
+- Visual charts showing task completion trends, category distribution, and productivity metrics
+- Recent tasks list with quick actions
 
-### Budget Management
-- Create and manage budget categories
-- Set monthly or yearly budget limits
-- Visual progress bars showing spending vs budget
-- Edit and delete budgets
+### Task Management
+- Create and manage tasks across different list categories
+- Set priorities (Low, Medium, High, Urgent)
+- Add due dates and deadlines
+- Mark tasks as complete
+- Add notes and descriptions
+- Voice-powered task creation with AI
 
-### Income/Outcome
-- Add income and expense transactions
-- Filter by type (all, income, expense)
-- View total income, expenses, and balance
-- Detailed transaction information with dates
+### List Categories
+- Pre-configured categories: Home, Family, Work, Business 01, Business 02
+- Create custom categories
+- Color-coded organization
+- Filter tasks by category
+- Category-specific statistics
 
-### Transactions
-- Comprehensive transaction history
-- Search by description or category
-- Filter by transaction type
-- Sort by date or amount
-- Summary statistics
+### Calendar View
+- Visual calendar interface
+- Task scheduling and deadline visualization
+- Drag-and-drop task rescheduling
+- Calendar notes and events
+- Monthly, weekly, and daily views
 
-### Investments
-- Track investment portfolio
-- Calculate gains/losses automatically
-- View return percentages
-- Monitor total portfolio value
-- Add, edit, and delete investments
+### AI Voice Input
+- Natural language task creation
+- Voice-to-text conversion
+- AI interpretation of task details (priority, deadline, category)
+- Supports multiple languages
+
+### Reminders
+- Push notifications for upcoming deadlines
+- Email reminders (customizable timing)
+- Recurring reminders for repeated tasks
+- Smart reminder scheduling
 
 ### Settings
 - Profile management
-- Currency and language preferences
-- Notification settings (email, push, budget alerts, transaction alerts)
+- Notification preferences (push, email)
+- Default list category
+- Reminder timing configuration
 - Theme customization
 
 ## Customization
 
-### Adding New Categories
+### Adding New List Categories
 
-You can customize budget and transaction categories by modifying the form validation or adding predefined options in the respective pages.
+You can add new list categories directly from the Categories page or by modifying the default categories in the database migration.
 
 ### Changing Colors
 
