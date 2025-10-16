@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowRight,
-  TrendingUp,
-  Wallet,
-  PieChart,
+  CheckSquare,
+  Calendar,
+  ListTodo,
   Shield,
   Zap,
   Globe,
@@ -16,17 +16,16 @@ import {
   Brain,
   Lock,
   Mic,
-  Upload,
-  BarChart3,
-  DollarSign,
-  Eye,
   Target,
   FileText,
-  CreditCard,
-  RefreshCw,
+  Clock,
   CheckCircle2,
   Smartphone,
-  TrendingDown,
+  Bell,
+  BarChart3,
+  Lightbulb,
+  Layers,
+  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -61,33 +60,33 @@ export default function LandingPage() {
   const aiFeatures = [
     {
       icon: Brain,
-      title: "AI-Powered Transaction Analysis",
-      description: "Speak or type naturally - our AI understands and categorizes your transactions automatically",
-      demo: "Just say: 'I just bought $50 of groceries' - AI handles the rest!",
+      title: "AI-Powered Task Planning",
+      description: "Speak or type naturally - our AI understands and creates your tasks automatically with smart scheduling",
+      demo: "Just say: 'Remind me to buy groceries tomorrow at 3pm' - AI handles everything!",
       gradient: "from-purple-600 via-pink-600 to-indigo-600",
       badge: "AI"
     },
     {
-      icon: Upload,
-      title: "Smart Bank Statement Import",
-      description: "Upload CSV, OFX, or QFX files and AI automatically detects duplicates and categorizes everything",
-      demo: "Drag & drop your bank statement - AI compares with existing data",
+      icon: Calendar,
+      title: "Smart Day Planner",
+      description: "AI analyzes your tasks and creates an optimized daily schedule based on priorities and estimated time",
+      demo: "AI automatically plans your day with time blocks for each task",
       gradient: "from-blue-600 via-cyan-600 to-teal-600",
       badge: "AI"
     },
     {
       icon: Mic,
-      title: "Voice-Activated Transactions",
-      description: "Record transactions hands-free with voice commands in any language",
-      demo: "🎤 'Je viens d'acheter 100$ de Bitcoin' → Auto-translated & added!",
+      title: "Voice-Activated Task Creation",
+      description: "Create tasks and calendar notes hands-free with voice commands in English or French",
+      demo: "🎤 'Ajouter une tâche: finir le rapport pour vendredi' → Auto-created!",
       gradient: "from-green-600 via-emerald-600 to-teal-600",
       badge: "VOICE"
     },
     {
-      icon: BarChart3,
-      title: "Intelligent Budget Insights",
-      description: "AI analyzes your spending patterns and provides personalized recommendations",
-      demo: "Get alerts before you exceed budgets with smart predictions",
+      icon: Lightbulb,
+      title: "Intelligent Suggestions",
+      description: "AI provides smart recommendations for task priorities, time estimates, and optimal scheduling",
+      demo: "Get suggestions on task breakdown and time management",
       gradient: "from-orange-600 via-amber-600 to-yellow-600",
       badge: "AI"
     }
@@ -96,13 +95,13 @@ export default function LandingPage() {
   const securityFeatures = [
     {
       icon: Lock,
-      title: "Military-Grade Encryption (AES-256-GCM)",
-      description: "Your exchange API keys and sensitive data are encrypted with the same technology used by governments and military organizations worldwide",
+      title: "Bank-Level Data Protection",
+      description: "Your tasks and personal data are encrypted with enterprise-grade security standards used by financial institutions",
       details: [
-        "AES-256-GCM encryption standard",
-        "Unique encryption keys per user",
-        "Secure key storage with auth tags",
-        "Zero-knowledge architecture"
+        "End-to-end encryption",
+        "Secure cloud storage",
+        "Protected user sessions",
+        "Zero data leakage"
       ]
     },
     {
@@ -117,9 +116,9 @@ export default function LandingPage() {
       ]
     },
     {
-      icon: Eye,
+      icon: Users,
       title: "Privacy First",
-      description: "Your data is yours. We never sell your information or share it with third parties",
+      description: "Your tasks are yours. We never sell your information or share it with third parties",
       details: [
         "No data selling policy",
         "GDPR & CCPA compliant",
@@ -131,65 +130,61 @@ export default function LandingPage() {
 
   const monitoringFeatures = [
     {
-      icon: TrendingUp,
-      title: "Real-Time Investment Tracking",
-      description: "Monitor stocks, crypto, and traditional investments with live price updates",
-      screenshot: "📊 Bitcoin: $45,234.56 (+2.3%) | Portfolio: +$1,234.56",
+      icon: CheckSquare,
+      title: "Smart Task Management",
+      description: "Organize tasks by categories, set priorities, due dates, and track progress with beautiful visuals",
+      screenshot: "✅ Completed: 12 | ⏳ In Progress: 5 | 📝 Pending: 8",
       color: "from-purple-500 to-pink-500"
     },
     {
-      icon: PieChart,
-      title: "Complete Budget Management",
-      description: "Set budgets by category and track spending with beautiful visual analytics",
-      screenshot: "🍔 Food: $234 / $500 (47%) | 📱 Bills: $156 / $200 (78%)",
+      icon: Calendar,
+      title: "Integrated Calendar View",
+      description: "See all your tasks and events in one beautiful calendar interface with notes and reminders",
+      screenshot: "📅 Oct 16: 3 tasks due | 📝 2 notes | 🔔 1 reminder",
       color: "from-blue-500 to-cyan-500"
     },
     {
-      icon: CreditCard,
-      title: "Multi-Category Transactions",
-      description: "Track Income, Expenses, Bills, Debt Payments, and Savings - all in one place",
-      screenshot: "💰 Income: $5,234 | 💸 Expenses: $3,456 | 💳 Bills: $890",
+      icon: Clock,
+      title: "Day Planner with Time Blocks",
+      description: "Plan your day with time-blocked tasks and AI-generated schedules for maximum productivity",
+      screenshot: "🕐 9:00-10:30: Project work | 🕑 10:30-11:00: Meeting | 🕒 11:00-12:00: Emails",
       color: "from-green-500 to-emerald-500"
     },
     {
-      icon: Wallet,
-      title: "Multi-Wallet System",
-      description: "Manage unlimited wallets with different currencies and track consolidated net worth",
-      screenshot: "🏦 Bank: $12,345 | 💵 Cash: $234 | 💳 Credit: -$890",
+      icon: Layers,
+      title: "Category Organization",
+      description: "Create unlimited categories with custom icons and colors to organize your tasks efficiently",
+      screenshot: "🏠 Home: 12 tasks | 💼 Work: 8 tasks | 🎯 Personal: 5 tasks",
       color: "from-orange-500 to-amber-500"
     },
     {
-      icon: DollarSign,
-      title: "Multi-Currency Support",
-      description: "Support for 10+ currencies including USD, CAD, EUR, GBP, JPY, and more",
-      screenshot: "💵 USD | 🍁 CAD | 💶 EUR | 💷 GBP | 💴 JPY | 🇨🇭 CHF",
+      icon: Bell,
+      title: "Email Reminders",
+      description: "Never miss a deadline with customizable email reminders sent before your task due dates",
+      screenshot: "🔔 Reminder: Task due in 1 day | 📧 Email sent at 9:00 AM",
       color: "from-indigo-500 to-purple-500"
     },
     {
       icon: BarChart3,
-      title: "Advanced Analytics",
-      description: "Beautiful charts, trend analysis, and insights to understand your financial health",
-      screenshot: "📈 Net Worth Trend | 📊 Spending by Category | 💹 ROI Analysis",
+      title: "Productivity Analytics",
+      description: "Beautiful charts and insights to track your productivity, completion rates, and task patterns",
+      screenshot: "📈 Completion Rate: 85% | 📊 Tasks by Priority | 💪 Weekly Progress",
       color: "from-red-500 to-pink-500"
     }
   ];
 
-  const exchangeFeatures = [
-    { name: "Binance", supported: true },
-    { name: "Coinbase", supported: true },
-    { name: "Kraken", supported: true },
-    { name: "Bybit", supported: true },
-    { name: "OKX", supported: true },
-    { name: "KuCoin", supported: true },
-    { name: "Alpaca (Stocks)", supported: true },
-    { name: "+ More Coming", supported: true },
+  const languageFeatures = [
+    { name: "English", supported: true },
+    { name: "Français", supported: true },
+    { name: "Voice (EN)", supported: true },
+    { name: "Voice (FR)", supported: true },
   ];
 
   const stats = [
-    { value: "10+", label: "Currencies Supported", icon: Globe },
-    { value: "7+", label: "Exchange Integrations", icon: TrendingUp },
-    { value: "∞", label: "Transactions Tracked", icon: FileText },
-    { value: "100%", label: "AI-Powered", icon: Brain }
+    { value: "2", label: "Languages Supported", icon: Globe },
+    { value: "AI", label: "Powered Planning", icon: Brain },
+    { value: "∞", label: "Tasks & Categories", icon: ListTodo },
+    { value: "100%", label: "Free Forever", icon: CheckCircle2 }
   ];
 
   return (
@@ -234,7 +229,7 @@ export default function LandingPage() {
         >
           <Image
             src="/logo.png"
-            alt="FoxWise Finance"
+            alt="FoxWise ToDo"
             width={180}
             height={60}
             className="object-contain"
@@ -295,11 +290,11 @@ export default function LandingPage() {
             className="text-6xl md:text-8xl font-bold mb-6 leading-tight"
           >
             <span className="bg-gradient-to-r from-white via-orange-200 to-amber-200 bg-clip-text text-transparent">
-              Master Your Money
+              Master Your Tasks
             </span>
             <br />
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-              with AI Intelligence
+              with AI Planning
             </span>
           </motion.h1>
 
@@ -309,11 +304,11 @@ export default function LandingPage() {
             transition={{ delay: 0.4 }}
             className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed"
           >
-            The world's first <span className="text-purple-400 font-semibold">AI-powered</span> budget tracker with{" "}
+            The ultimate <span className="text-purple-400 font-semibold">AI-powered</span> todo app with{" "}
             <span className="text-green-400 font-semibold">voice commands</span>,{" "}
-            <span className="text-blue-400 font-semibold">automatic bank sync</span>,{" "}
-            <span className="text-orange-400 font-semibold">military-grade encryption</span>, and{" "}
-            <span className="text-pink-400 font-semibold">real-time investment tracking</span>.
+            <span className="text-blue-400 font-semibold">smart day planning</span>,{" "}
+            <span className="text-orange-400 font-semibold">email reminders</span>, and{" "}
+            <span className="text-pink-400 font-semibold">beautiful calendar integration</span>.
           </motion.p>
 
           <motion.div
@@ -340,10 +335,10 @@ export default function LandingPage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => router.push("/demo")}
+              onClick={() => router.push("/dashboard")}
               className="px-10 py-5 rounded-xl border-2 border-purple-500/50 text-purple-300 font-bold text-lg hover:bg-purple-500/10 transition-colors"
             >
-              Watch Demo
+              View Demo
             </motion.button>
           </motion.div>
 
@@ -403,7 +398,7 @@ export default function LandingPage() {
             Revolutionary AI Features
           </h2>
           <p className="text-2xl text-gray-300 max-w-3xl mx-auto">
-            Experience the future of finance management with cutting-edge AI technology
+            Experience the future of task management with cutting-edge AI technology
           </p>
         </motion.div>
 
@@ -437,7 +432,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Military-Grade Security Section */}
+      {/* Security Section */}
       <section className="relative z-10 container mx-auto px-6 py-32 bg-gradient-to-b from-transparent via-red-900/5 to-transparent">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -447,15 +442,15 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 mb-6">
             <Lock className="w-5 h-5 text-red-400" />
-            <span className="text-red-300 font-semibold">Bank-Level Security</span>
+            <span className="text-red-300 font-semibold">Enterprise Security</span>
             <Shield className="w-5 h-5 text-red-400" />
           </div>
           <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
-            Military-Grade Encryption
+            Your Data is Secure
           </h2>
           <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Your financial data deserves <span className="text-red-400 font-bold">maximum protection</span>.
-            We use the same encryption technology trusted by governments and military organizations worldwide.
+            Your tasks and personal information deserve <span className="text-red-400 font-bold">maximum protection</span>.
+            We use enterprise-grade security trusted by organizations worldwide.
           </p>
         </motion.div>
 
@@ -486,23 +481,9 @@ export default function LandingPage() {
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="p-8 rounded-3xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-yellow-600/10 border border-red-500/30 text-center"
-        >
-          <Lock className="w-16 h-16 mx-auto mb-4 text-red-400" />
-          <h3 className="text-3xl font-bold mb-4 text-white">AES-256-GCM Encryption Standard</h3>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            All exchange API keys and sensitive data are encrypted with <span className="text-red-400 font-bold">AES-256-GCM</span>,
-            the gold standard in encryption technology. Your data remains secure even if our servers are compromised.
-          </p>
-        </motion.div>
       </section>
 
-      {/* Complete Financial Monitoring */}
+      {/* Complete Task Management */}
       <section className="relative z-10 container mx-auto px-6 py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -511,14 +492,14 @@ export default function LandingPage() {
           className="text-center mb-20"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 mb-6">
-            <Eye className="w-5 h-5 text-blue-400" />
-            <span className="text-blue-300 font-semibold">360° Financial View</span>
+            <Target className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-300 font-semibold">Complete Productivity Suite</span>
           </div>
           <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
-            Monitor Every Aspect of Your Financial Life
+            Everything You Need to Stay Productive
           </h2>
           <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            From daily expenses to cryptocurrency investments - track, analyze, and optimize everything in one beautiful dashboard
+            From daily tasks to long-term projects - manage, schedule, and track everything in one beautiful dashboard
           </p>
         </motion.div>
 
@@ -546,7 +527,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Exchange Integrations */}
+      {/* Multi-Language Support */}
       <section className="relative z-10 container mx-auto px-6 py-32 bg-gradient-to-b from-transparent via-green-900/5 to-transparent">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -555,14 +536,14 @@ export default function LandingPage() {
           className="text-center mb-20"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 mb-6">
-            <RefreshCw className="w-5 h-5 text-green-400" />
-            <span className="text-green-300 font-semibold">Auto-Sync Exchanges</span>
+            <Globe className="w-5 h-5 text-green-400" />
+            <span className="text-green-300 font-semibold">Multi-Language Support</span>
           </div>
           <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            Connect Your Favorite Exchanges
+            Work in Your Language
           </h2>
           <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Seamlessly integrate with major cryptocurrency and stock exchanges. Your portfolio updates automatically with real-time prices.
+            Full support for English and French with voice commands in both languages
           </p>
         </motion.div>
 
@@ -573,7 +554,7 @@ export default function LandingPage() {
           className="max-w-4xl mx-auto"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {exchangeFeatures.map((exchange, index) => (
+            {languageFeatures.map((lang, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -584,7 +565,7 @@ export default function LandingPage() {
                 className="p-6 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-green-500/30 text-center"
               >
                 <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-3" />
-                <p className="text-white font-semibold">{exchange.name}</p>
+                <p className="text-white font-semibold">{lang.name}</p>
               </motion.div>
             ))}
           </div>
@@ -593,120 +574,19 @@ export default function LandingPage() {
             whileHover={{ scale: 1.02 }}
             className="p-8 rounded-3xl bg-gradient-to-r from-green-600/10 via-emerald-600/10 to-teal-600/10 border border-green-500/30"
           >
-            <h3 className="text-3xl font-bold mb-4 text-center text-white">How Auto-Sync Works</h3>
+            <h3 className="text-3xl font-bold mb-4 text-center text-white">How It Works</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div>
                 <div className="w-12 h-12 rounded-full bg-green-500 text-white font-bold flex items-center justify-center mx-auto mb-3">1</div>
-                <p className="text-gray-300">Connect exchange with API keys</p>
+                <p className="text-gray-300">Choose your language (EN/FR)</p>
               </div>
               <div>
                 <div className="w-12 h-12 rounded-full bg-green-500 text-white font-bold flex items-center justify-center mx-auto mb-3">2</div>
-                <p className="text-gray-300">Auto-creates dedicated portfolio</p>
+                <p className="text-gray-300">Use voice or text input</p>
               </div>
               <div>
                 <div className="w-12 h-12 rounded-full bg-green-500 text-white font-bold flex items-center justify-center mx-auto mb-3">3</div>
-                <p className="text-gray-300">Syncs holdings & prices automatically</p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Bank Statement Sync Demo */}
-      <section className="relative z-10 container mx-auto px-6 py-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-6xl mx-auto"
-        >
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 mb-6">
-              <Upload className="w-5 h-5 text-indigo-400" />
-              <span className="text-indigo-300 font-semibold">Smart Import</span>
-              <span className="px-2 py-0.5 bg-yellow-400 text-indigo-900 text-xs font-bold rounded-full">AI</span>
-            </div>
-            <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Bank & Credit Card Auto-Sync
-            </h2>
-            <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              Upload your bank statements and let AI handle the rest. Automatically detects duplicates, categorizes transactions, and adds only new entries.
-            </p>
-          </div>
-
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="p-10 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-800 border border-indigo-500/30 shadow-2xl"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-3xl font-bold mb-6 text-white flex items-center gap-3">
-                  <Upload className="w-8 h-8 text-indigo-400" />
-                  Step 1: Upload Files
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-green-400" />
-                    <span className="text-gray-300">Drag & drop bank statements</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-green-400" />
-                    <span className="text-gray-300">Supports CSV, OFX, QFX formats</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-green-400" />
-                    <span className="text-gray-300">Multiple files at once</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-green-400" />
-                    <span className="text-gray-300">Secure upload with encryption</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-3xl font-bold mb-6 text-white flex items-center gap-3">
-                  <Brain className="w-8 h-8 text-purple-400" />
-                  Step 2: AI Analysis
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Brain className="w-6 h-6 text-purple-400" />
-                    <span className="text-gray-300">AI parses transactions</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Brain className="w-6 h-6 text-purple-400" />
-                    <span className="text-gray-300">Detects duplicates (±2 days, fuzzy match)</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Brain className="w-6 h-6 text-purple-400" />
-                    <span className="text-gray-300">Auto-categorizes (Income, Expense, Bills...)</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Brain className="w-6 h-6 text-purple-400" />
-                    <span className="text-gray-300">Adds only new entries</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-indigo-500/30">
-              <p className="text-center text-xl text-white font-semibold mb-4">
-                ✨ AI Processing Result Example
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30">
-                  <p className="text-3xl font-bold text-green-400 mb-1">245</p>
-                  <p className="text-gray-300">New Transactions Added</p>
-                </div>
-                <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
-                  <p className="text-3xl font-bold text-yellow-400 mb-1">18</p>
-                  <p className="text-gray-300">Duplicates Skipped</p>
-                </div>
-                <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                  <p className="text-3xl font-bold text-blue-400 mb-1">98%</p>
-                  <p className="text-gray-300">Accuracy Rate</p>
-                </div>
+                <p className="text-gray-300">AI understands and creates tasks</p>
               </div>
             </div>
           </motion.div>
@@ -726,11 +606,11 @@ export default function LandingPage() {
           <div className="relative z-10">
             <Brain className="w-20 h-20 mx-auto mb-6 text-white" />
             <h2 className="text-6xl font-bold mb-6 text-white">
-              Ready to Experience AI-Powered Finance?
+              Ready to Supercharge Your Productivity?
             </h2>
             <p className="text-2xl mb-10 text-purple-100 max-w-3xl mx-auto leading-relaxed">
-              Join thousands of users managing their finances smarter with military-grade encryption,
-              AI intelligence, and complete financial monitoring - all in one place
+              Join thousands of users managing their tasks smarter with AI planning,
+              voice commands, and beautiful calendar integration - all completely free
             </p>
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 60px rgba(255, 255, 255, 0.6)" }}
@@ -743,7 +623,7 @@ export default function LandingPage() {
               <ArrowRight className="w-8 h-8" />
             </motion.button>
             <p className="mt-6 text-purple-100 text-lg">
-              No credit card required • Free forever plan available • Cancel anytime
+              No credit card required • Free forever • AI-powered features included
             </p>
           </div>
         </motion.div>
@@ -758,7 +638,7 @@ export default function LandingPage() {
           >
             <Image
               src="/logo.png"
-              alt="FoxWise Finance"
+              alt="FoxWise ToDo"
               width={150}
               height={50}
               className="object-contain"
@@ -766,36 +646,22 @@ export default function LandingPage() {
           </motion.div>
           <div className="flex gap-8 text-gray-400">
             <motion.button
-              onClick={() => router.push("/features")}
+              onClick={() => router.push("/dashboard")}
               whileHover={{ scale: 1.1, color: "#a855f7" }}
               className="hover:text-purple-400 transition-colors"
             >
               Features
             </motion.button>
             <motion.button
-              onClick={() => router.push("/pricing")}
+              onClick={() => router.push("/sign-up")}
               whileHover={{ scale: 1.1, color: "#a855f7" }}
               className="hover:text-purple-400 transition-colors"
             >
-              Pricing
-            </motion.button>
-            <motion.button
-              onClick={() => router.push("/about")}
-              whileHover={{ scale: 1.1, color: "#a855f7" }}
-              className="hover:text-purple-400 transition-colors"
-            >
-              About
-            </motion.button>
-            <motion.button
-              onClick={() => router.push("/contact")}
-              whileHover={{ scale: 1.1, color: "#a855f7" }}
-              className="hover:text-purple-400 transition-colors"
-            >
-              Contact
+              Get Started
             </motion.button>
           </div>
           <div className="text-gray-500 text-sm">
-            © 2025 FoxWise Finance. All rights reserved.
+            © 2025 FoxWise ToDo. All rights reserved.
           </div>
         </div>
       </footer>
