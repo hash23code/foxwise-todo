@@ -33,6 +33,7 @@ interface Task {
   due_date: string | null;
   list_id: string;
   tags: string[] | null;
+  estimated_hours: number | null;
   todo_lists: TodoList;
 }
 
@@ -360,10 +361,10 @@ export default function TasksPage() {
                           </span>
 
                           {/* Estimated Hours */}
-                          {(task as any).estimated_hours && (
+                          {task.estimated_hours && (
                             <span className="flex items-center gap-1 text-blue-400 text-sm">
                               <Clock className="w-4 h-4" />
-                              {(task as any).estimated_hours}h est.
+                              {task.estimated_hours}h est.
                             </span>
                           )}
 
