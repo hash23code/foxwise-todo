@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('todo_lists')
+    const { data, error } = await (supabase
+      .from('todo_lists') as any)
       .select('*')
       .eq('user_id', userId)
       .order('position', { ascending: true });
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('todo_lists')
+    const { data, error } = await (supabase
+      .from('todo_lists') as any)
       .insert({
         user_id: userId,
         name,
@@ -99,8 +99,8 @@ export async function PATCH(request: NextRequest) {
     if (is_default !== undefined) updateData.is_default = is_default;
     if (position !== undefined) updateData.position = position;
 
-    const { data, error } = await supabase
-      .from('todo_lists')
+    const { data, error } = await (supabase
+      .from('todo_lists') as any)
       .update(updateData)
       .eq('id', id)
       .eq('user_id', userId)
@@ -137,8 +137,8 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from('todo_lists')
+    const { error } = await (supabase
+      .from('todo_lists') as any)
       .delete()
       .eq('id', id)
       .eq('user_id', userId);

@@ -1,0 +1,40 @@
+================================================================================
+  PORTFOLIO FEATURE - DATABASE MIGRATION INSTRUCTIONS
+================================================================================
+
+The portfolios table doesn't exist yet. Please follow these steps:
+
+METHOD 1: Via Supabase Dashboard (RECOMMENDED)
+-----------------------------------------------
+1. Go to: https://supabase.com/dashboard
+2. Select your project
+3. Click on "SQL Editor" in the left sidebar
+4. Click "+ New Query"
+5. Copy EVERYTHING from: supabase/migrations/add_portfolios.sql
+6. Paste it into the SQL editor
+7. Click "Run" or press Ctrl+Enter
+
+METHOD 2: Direct SQL Editor Link
+---------------------------------
+If you know your project reference, go to:
+https://supabase.com/dashboard/project/YOUR_PROJECT_REF/sql/new
+
+Replace YOUR_PROJECT_REF with your actual project reference (found in your Supabase URL)
+
+WHAT THIS MIGRATION DOES:
+--------------------------
+✓ Creates the 'portfolios' table
+✓ Adds 'portfolio_id' column to investments table
+✓ Creates a "Main Portfolio" for each user who has existing investments
+✓ Assigns all existing investments to the Main Portfolio
+✓ Sets up Row Level Security (RLS) policies
+✓ Creates indexes for better performance
+
+AFTER RUNNING THE MIGRATION:
+-----------------------------
+- Refresh your app
+- You'll see portfolio management features
+- All your existing investments will be in "Main Portfolio"
+- You can create additional portfolios
+
+================================================================================

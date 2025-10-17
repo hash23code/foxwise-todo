@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    let query = supabase
-      .from('task_reminders')
+    let query = (supabase
+      .from('task_reminders') as any)
       .select('*')
       .eq('user_id', userId);
 
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('task_reminders')
+    const { data, error } = await (supabase
+      .from('task_reminders') as any)
       .insert({
         task_id,
         user_id: userId,
@@ -98,8 +98,8 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from('task_reminders')
+    const { error } = await (supabase
+      .from('task_reminders') as any)
       .delete()
       .eq('id', id)
       .eq('user_id', userId);

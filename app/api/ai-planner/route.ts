@@ -185,7 +185,7 @@ Generate a realistic, achievable plan. Return ONLY valid JSON.`;
       plan: aiPlan.plan.map((dayPlan: any) => ({
         ...dayPlan,
         tasks: dayPlan.tasks.map((plannedTask: any) => {
-          const task = tasks.find((t: any) => t.id === plannedTask.taskId);
+          const task: any = tasks.find((t: any) => t.id === plannedTask.taskId);
           return {
             ...plannedTask,
             task: task ? {

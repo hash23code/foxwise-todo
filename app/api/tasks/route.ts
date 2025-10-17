@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    let query = supabase
-      .from('tasks')
+    let query = (supabase
+      .from('tasks') as any)
       .select('*, todo_lists(*)')
       .eq('user_id', userId)
       .order('position', { ascending: true });
@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('tasks')
+    const { data, error } = await (supabase
+      .from('tasks') as any)
       .insert({
         user_id: userId,
         list_id,
@@ -159,8 +159,8 @@ export async function PATCH(request: NextRequest) {
     if (tags !== undefined) updateData.tags = tags;
     if (position !== undefined) updateData.position = position;
 
-    const { data, error } = await supabase
-      .from('tasks')
+    const { data, error } = await (supabase
+      .from('tasks') as any)
       .update(updateData)
       .eq('id', id)
       .eq('user_id', userId)
@@ -197,8 +197,8 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from('tasks')
+    const { error } = await (supabase
+      .from('tasks') as any)
       .delete()
       .eq('id', id)
       .eq('user_id', userId);

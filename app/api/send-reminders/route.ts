@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 'dummy-key-for-build');
 
 // This endpoint will be called by a cron job to send pending reminders
 export async function POST(request: NextRequest) {
@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
     const errors: any[] = [];
 
     // Process each reminder
-    for (const reminder of reminders) {
+    for (const reminderData of reminders) {
+      const reminder = reminderData as any;
       try {
         // Get user email from Clerk
         const userResponse = await fetch(`https://api.clerk.com/v1/users/${reminder.task.user_id}`, {
@@ -79,8 +80,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Mark reminder as sent
-        await supabase
-          .from('task_reminders')
+        await (supabase
+          .from('task_reminders') as any)
           .update({ is_sent: true })
           .eq('id', reminder.id);
 

@@ -28,19 +28,19 @@ export default function Sidebar() {
       gradient: "from-blue-500 to-cyan-500"
     },
     {
-      name: t.nav?.tasks || "My Tasks",
+      name: (t.nav as any)?.tasks || "My Tasks",
       href: "/tasks",
       icon: CheckSquare,
       gradient: "from-purple-500 to-pink-500"
     },
     {
-      name: t.nav?.dayPlanner || "Day Planner",
+      name: (t.nav as any)?.dayPlanner || "Day Planner",
       href: "/day-planner",
       icon: Clock,
       gradient: "from-indigo-500 to-blue-500"
     },
     {
-      name: t.nav?.categories || "Categories",
+      name: (t.nav as any)?.categories || "Categories",
       href: "/categories",
       icon: FolderKanban,
       gradient: "from-green-500 to-emerald-500"

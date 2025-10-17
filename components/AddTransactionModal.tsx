@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { X, Mic, MicOff, Loader2, Plus, Upload, Image as ImageIcon, Trash2, Camera, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // GoogleGenerativeAI is now called from API route
-import { createTransaction } from "@/lib/api/transactions";
 
 // Helper function to get local date in YYYY-MM-DD format
 const getLocalDateString = (): string => {
@@ -672,18 +671,22 @@ export default function AddTransactionModal({ isOpen, onClose, userId, onSuccess
     }
 
     try {
-      await createTransaction({
-        user_id: userId,
-        ...formData,
-        wallet_id: null,
-        is_recurring: false,
-        recurring_frequency: null,
-        recurring_end_date: null,
-      });
+      // TODO: This component is from a finance app and needs to be removed or properly integrated
+      console.error("createTransaction not implemented - this component needs proper API integration");
+      setError("Transaction functionality not available in ToDo app");
 
-      onSuccess();
-      onClose();
-      resetForm();
+      // await createTransaction({
+      //   user_id: userId,
+      //   ...formData,
+      //   wallet_id: null,
+      //   is_recurring: false,
+      //   recurring_frequency: null,
+      //   recurring_end_date: null,
+      // });
+
+      // onSuccess();
+      // onClose();
+      // resetForm();
     } catch (err) {
       console.error("Error adding transaction:", err);
       setError("Failed to add transaction. Please try again.");

@@ -82,6 +82,8 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
           due_date: editTask.due_date ? new Date(editTask.due_date).toISOString().split('T')[0] : '',
           estimated_hours: editTask.estimated_hours?.toString() || '1',
           tags: editTask.tags || [],
+          email_reminder: false,
+          reminder_days_before: 1,
         });
       }
 

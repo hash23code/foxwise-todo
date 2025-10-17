@@ -60,6 +60,7 @@ export interface Database {
           recurring_end_date: string | null
           tags: string[] | null
           position: number
+          estimated_hours: number | null
           created_at: string
           updated_at: string
         }
@@ -78,6 +79,7 @@ export interface Database {
           recurring_end_date?: string | null
           tags?: string[] | null
           position?: number
+          estimated_hours?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -96,6 +98,7 @@ export interface Database {
           recurring_end_date?: string | null
           tags?: string[] | null
           position?: number
+          estimated_hours?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -260,6 +263,38 @@ export interface Database {
           updated_at?: string
         }
       }
+      day_planner: {
+        Row: {
+          id: string
+          user_id: string
+          task_id: string
+          date: string
+          start_time: string
+          duration_hours: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          task_id: string
+          date: string
+          start_time: string
+          duration_hours: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          task_id?: string
+          date?: string
+          start_time?: string
+          duration_hours?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -281,6 +316,7 @@ export type CalendarNote = Database['public']['Tables']['calendar_notes']['Row']
 export type TaskAttachment = Database['public']['Tables']['task_attachments']['Row']
 export type TaskComment = Database['public']['Tables']['task_comments']['Row']
 export type UserSettings = Database['public']['Tables']['user_settings']['Row']
+export type DayPlanner = Database['public']['Tables']['day_planner']['Row']
 
 export type TodoListInsert = Database['public']['Tables']['todo_lists']['Insert']
 export type TaskInsert = Database['public']['Tables']['tasks']['Insert']
@@ -289,3 +325,4 @@ export type CalendarNoteInsert = Database['public']['Tables']['calendar_notes'][
 export type TaskAttachmentInsert = Database['public']['Tables']['task_attachments']['Insert']
 export type TaskCommentInsert = Database['public']['Tables']['task_comments']['Insert']
 export type UserSettingsInsert = Database['public']['Tables']['user_settings']['Insert']
+export type DayPlannerInsert = Database['public']['Tables']['day_planner']['Insert']

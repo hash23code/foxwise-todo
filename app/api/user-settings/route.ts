@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('user_settings')
+    const { data, error } = await (supabase
+      .from('user_settings') as any)
       .select('*')
       .eq('user_id', userId)
       .single();
@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Check if settings exist
-    const { data: existing } = await supabase
-      .from('user_settings')
+    const { data: existing } = await (supabase
+      .from('user_settings') as any)
       .select('id')
       .eq('user_id', userId)
       .single();
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       // Update existing settings
-      const { data, error } = await supabase
-        .from('user_settings')
+      const { data, error } = await (supabase
+        .from('user_settings') as any)
         .update(settingsData)
         .eq('user_id', userId)
         .select()
@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data);
     } else {
       // Create new settings
-      const { data, error } = await supabase
-        .from('user_settings')
+      const { data, error } = await (supabase
+        .from('user_settings') as any)
         .insert(settingsData)
         .select()
         .single();

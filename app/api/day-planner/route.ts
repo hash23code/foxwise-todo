@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('day_planner')
+    const { data, error } = await (supabase
+      .from('day_planner') as any)
       .select(`
         *,
         task:tasks (
@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('day_planner')
+    const { data, error } = await (supabase
+      .from('day_planner') as any)
       .insert({
         user_id: userId,
         task_id,
@@ -124,8 +124,8 @@ export async function PATCH(request: NextRequest) {
     if (start_time !== undefined) updateData.start_time = start_time;
     if (duration_hours !== undefined) updateData.duration_hours = duration_hours;
 
-    const { data, error } = await supabase
-      .from('day_planner')
+    const { data, error } = await (supabase
+      .from('day_planner') as any)
       .update(updateData)
       .eq('id', id)
       .eq('user_id', userId)
@@ -162,8 +162,8 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from('day_planner')
+    const { error } = await (supabase
+      .from('day_planner') as any)
       .delete()
       .eq('id', id)
       .eq('user_id', userId);
