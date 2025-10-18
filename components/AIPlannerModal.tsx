@@ -110,30 +110,52 @@ export default function AIPlannerModal({
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      console.log('[Voice] Recognition started');
       setIsListening(true);
     };
 
     recognition.onresult = (event: any) => {
+      console.log('[Voice] Got result:', event.results[0][0].transcript);
       const transcript = event.results[0][0].transcript;
       setPreferences((prev) => prev ? `${prev} ${transcript}` : transcript);
       setIsListening(false);
     };
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      console.error('[Voice] Error:', event.error);
       setIsListening(false);
+
+      // Don't show alert for network errors - just fail silently
+      // Network errors happen when Google's speech service is unreachable
+      // User can just type instead
+      if (event.error === 'network') {
+        console.warn('[Voice] Network error - Google speech service unavailable. User can type instead.');
+        // Don't show alert - just stop listening
+        return;
+      }
+
+      // For other errors (not network, not aborted), show the error
       if (event.error !== 'aborted') {
         alert(language === "en"
-          ? `Voice recognition error: ${event.error}`
-          : `Erreur de reconnaissance vocale: ${event.error}`);
+          ? `Voice recognition error: ${event.error}. Please type your preferences instead.`
+          : `Erreur de reconnaissance vocale: ${event.error}. Veuillez taper vos préférences à la place.`);
       }
     };
 
     recognition.onend = () => {
+      console.log('[Voice] Recognition ended');
       setIsListening(false);
     };
 
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error('[Voice] Failed to start:', error);
+      setIsListening(false);
+      alert(language === "en"
+        ? "Could not start voice recognition. Please type your preferences instead."
+        : "Impossible de démarrer la reconnaissance vocale. Veuillez taper vos préférences à la place.");
+    }
   };
 
   const stopVoiceRecognition = () => {
