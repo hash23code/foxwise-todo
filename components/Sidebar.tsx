@@ -10,7 +10,8 @@ import {
   Settings,
   CalendarDays,
   FolderKanban,
-  Clock
+  Clock,
+  Folder
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
@@ -38,6 +39,12 @@ export default function Sidebar() {
       href: "/day-planner",
       icon: Clock,
       gradient: "from-indigo-500 to-blue-500"
+    },
+    {
+      name: language === 'fr' ? "Projets" : "Projects",
+      href: "/projects",
+      icon: Folder,
+      gradient: "from-teal-500 to-cyan-500"
     },
     {
       name: (t.nav as any)?.categories || "Categories",
