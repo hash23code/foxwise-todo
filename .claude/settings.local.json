@@ -35,7 +35,8 @@
       "Read(//h/Ai_Projects/app/claude/budget_tracker/app/(dashboard)/transactions/**)",
       "Bash(copy:*)",
       "Read(//h/Ai_Projects/app/claude/**)",
-      "Bash(git push origin main --force)"
+      "Bash(git push origin main --force)",
+      "Bash(git push origin main)"
     ],
     "deny": [],
     "ask": []

@@ -16,6 +16,7 @@ import {
   Send,
   Calendar,
   TrendingUp,
+  AlertTriangle,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -259,6 +260,42 @@ export default function ProjectDetailModal({
     }
   };
 
+  const handleDeleteProject = async () => {
+    const confirmMessage = language === 'fr'
+      ? `Êtes-vous sûr de vouloir supprimer le projet "${project.title}" ?\n\nToutes les étapes seront également supprimées. Cette action est IRRÉVERSIBLE.`
+      : `Are you sure you want to delete the project "${project.title}"?\n\nAll steps will also be deleted. This action is IRREVERSIBLE.`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: project.id }),
+      });
+
+      if (response.ok) {
+        onUpdate();
+        onClose();
+      } else {
+        alert(
+          language === 'fr'
+            ? 'Erreur lors de la suppression du projet'
+            : 'Error deleting project'
+        );
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert(
+        language === 'fr'
+          ? 'Erreur lors de la suppression du projet'
+          : 'Error deleting project'
+      );
+    }
+  };
+
   const handleChatSubmit = async () => {
     if (!chatMessage.trim() || chatLoading) return;
 
@@ -349,12 +386,21 @@ export default function ProjectDetailModal({
                   <p className="text-gray-400 text-sm">{project.description}</p>
                 )}
               </div>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors ml-4"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-2 ml-4">
+                <button
+                  onClick={handleDeleteProject}
+                  className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all"
+                  title={language === 'fr' ? 'Supprimer le projet' : 'Delete project'}
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
             {/* Status and Progress */}
