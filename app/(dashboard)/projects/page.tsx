@@ -15,6 +15,19 @@ import CreateProjectModal from "@/components/CreateProjectModal";
 import ProjectDetailModal from "@/components/ProjectDetailModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+interface ProjectStep {
+  id: string;
+  title: string;
+  description: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+  order_index?: number;
+  order?: number;
+  effort: string | null;
+  dependencies: string[] | null;
+  tips: string | null;
+  todo_list_id: string | null;
+}
+
 interface Project {
   id: string;
   title: string;
@@ -25,10 +38,7 @@ interface Project {
   color: string;
   ai_plan: any;
   created_at: string;
-  project_steps: Array<{
-    id: string;
-    status: string;
-  }>;
+  project_steps: ProjectStep[];
 }
 
 export default function ProjectsPage() {

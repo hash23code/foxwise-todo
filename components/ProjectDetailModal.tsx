@@ -24,8 +24,9 @@ interface ProjectStep {
   id: string;
   title: string;
   description: string | null;
-  status: 'pending' | 'in_progress' | 'completed';
-  order: number;
+  status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+  order_index?: number;
+  order?: number;
   effort: string | null;
   dependencies: string[] | null;
   tips: string | null;
@@ -191,7 +192,7 @@ export default function ProjectDetailModal({
     if (!newStepTitle.trim()) return;
 
     try {
-      const maxOrder = Math.max(...project.project_steps.map(s => s.order), 0);
+      const maxOrder = Math.max(...project.project_steps.map(s => s.order || s.order_index || 0), 0);
 
       const response = await fetch('/api/project-steps', {
         method: 'POST',
@@ -521,7 +522,7 @@ export default function ProjectDetailModal({
               ) : (
                 <div className="space-y-2">
                   {project.project_steps
-                    .sort((a, b) => a.order - b.order)
+                    .sort((a, b) => (a.order || a.order_index || 0) - (b.order || b.order_index || 0))
                     .map((step) => (
                       <motion.div
                         key={step.id}
