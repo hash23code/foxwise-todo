@@ -15,6 +15,7 @@ import {
   Trash2,
 } from "lucide-react";
 import AIPlannerModal from "@/components/AIPlannerModal";
+import WeatherWidget from "@/components/WeatherWidget";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Task {
@@ -50,6 +51,7 @@ export default function DayPlannerPage() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [showAIPlanner, setShowAIPlanner] = useState(false);
+  const [weatherData, setWeatherData] = useState<any>(null);
 
   // Generate hours from 6 AM to 5 AM (next day)
   // 6,7,8...23 (18 hours), then 0,1,2,3,4,5 (6 hours) = 24 hours total
@@ -332,6 +334,14 @@ export default function DayPlannerPage() {
           </div>
         </div>
 
+        {/* Weather Widget */}
+        <div className="mb-6 sm:mb-8">
+          <WeatherWidget
+            date={selectedDate.toISOString().split('T')[0]}
+            onWeatherLoad={setWeatherData}
+          />
+        </div>
+
         {/* Timeline */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700">
           <div className="space-y-1.5 sm:space-y-2">
@@ -502,6 +512,7 @@ export default function DayPlannerPage() {
             setShowAIPlanner(false);
           }}
           selectedDate={selectedDate}
+          weatherData={weatherData}
         />
       </motion.div>
     </div>

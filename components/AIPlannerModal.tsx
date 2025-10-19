@@ -20,6 +20,7 @@ interface AIPlannerModalProps {
   onClose: () => void;
   onPlanApplied: () => void;
   selectedDate: Date;
+  weatherData?: any;
 }
 
 interface DayPlan {
@@ -38,6 +39,7 @@ export default function AIPlannerModal({
   onClose,
   onPlanApplied,
   selectedDate,
+  weatherData,
 }: AIPlannerModalProps) {
   const { t, language } = useLanguage();
   const [step, setStep] = useState(1); // 1: choose type, 2: configure, 3: generating, 4: review
@@ -191,6 +193,7 @@ export default function AIPlannerModal({
           breakTimes,
           preferences,
           language: aiLanguage,
+          weatherData,
         }),
       });
 

@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       breakTimes, // array of {start, duration}
       preferences,
       language = 'en', // 'en' or 'fr'
+      weatherData, // weather forecast for planning
     } = body;
 
     const supabase = await createClient();
@@ -91,63 +92,72 @@ export async function POST(request: NextRequest) {
     // 5. Use Gemini AI to generate plan - Using 2.5 Flash model for fast, accurate planning
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+    // Prepare weather context for AI
+    const weatherContext = weatherData ? `
+**Weather Forecast:**
+- Date: ${weatherData.date}
+- Temperature: ${weatherData.daily?.temp?.min}°-${weatherData.daily?.temp?.max}°C
+- Conditions: ${weatherData.daily?.description}
+- Precipitation: ${Math.round(weatherData.daily?.precipitation || 0)}%
+- Periods:
+  * Morning (6h-12h): ${weatherData.periods?.morning?.temp}°C, ${weatherData.periods?.morning?.description}, ${Math.round(weatherData.periods?.morning?.precipitation || 0)}% rain - ${weatherData.suitable?.morning?.suitable ? 'GOOD for outdoor' : 'BAD weather - indoor preferred'}
+  * Afternoon (12h-18h): ${weatherData.periods?.afternoon?.temp}°C, ${weatherData.periods?.afternoon?.description}, ${Math.round(weatherData.periods?.afternoon?.precipitation || 0)}% rain - ${weatherData.suitable?.afternoon?.suitable ? 'GOOD for outdoor' : 'BAD weather - indoor preferred'}
+  * Evening (18h-23h): ${weatherData.periods?.evening?.temp}°C, ${weatherData.periods?.evening?.description}, ${Math.round(weatherData.periods?.evening?.precipitation || 0)}% rain - ${weatherData.suitable?.evening?.suitable ? 'GOOD for outdoor' : 'BAD weather - indoor preferred'}
+
+**Weather-based scheduling rules:**
+- Schedule outdoor tasks ONLY during periods marked "GOOD for outdoor"
+- If task is URGENT priority, schedule regardless of weather (urgent = must be done)
+- If ALL periods are BAD weather, schedule outdoor tasks only if URGENT
+- Prefer indoor tasks during bad weather periods
+- Group outdoor tasks together during good weather windows
+` : '';
+
     const languageInstruction = language === 'fr'
-      ? 'IMPORTANT: Respond in French. The "summary" and "recommendations" fields must be in French.'
-      : 'IMPORTANT: Respond in English. The "summary" and "recommendations" fields must be in English.';
+      ? 'Réponds en français (summary et recommendations en français).'
+      : 'Respond in English.';
 
-    const prompt = `You are an AI planning assistant. Create a realistic ${planType} schedule plan.
+    const prompt = `AI Planner: Create ${planType} schedule for ${startDate}${endDate ? `-${endDate}` : ''}. ${languageInstruction}
 
-${languageInstruction}
+**Tasks:**
+${JSON.stringify(tasksWithAnalysis.map((t: any) => ({
+  id: t.id,
+  title: t.title,
+  desc: t.description?.substring(0, 80) || '',
+  priority: t.priority,
+  status: t.status,
+  est: t.estimatedHours,
+  hist: t.historicalAvgTime,
+  cat: t.categoryName,
+  tags: t.tags
+})), null, 1)}
+${weatherContext}
+**Constraints:**
+- Hours: ${workStartHour}:00-${workEndHour}:00
+${breakTimes?.length > 0 ? `- Breaks: ${JSON.stringify(breakTimes)}` : ''}
+${preferences ? `- Prefs: ${preferences}` : ''}
 
-**CRITICAL: You MUST use exactly the start date provided below. Do not use today's date or any other date.**
+**Rules:**
+1. Time: Use hist>est>estimate (simple:0.5-1h, med:1-2h, complex:2-4h). In-progress: -30-50%
+2. Priority: HIGH/URGENT early (peak energy)
+3. Max 6h focus/day, 15-30min buffers
+4. Group similar tasks
+5. Weather: Outdoor only in good weather UNLESS urgent
+6. USE EXACT date ${startDate}
 
-**Available tasks:**
-${JSON.stringify(tasksWithAnalysis, null, 2)}
-
-**Schedule constraints:**
-- Work hours: ${workStartHour}:00 to ${workEndHour}:00
-- Plan type: ${planType === 'day' ? 'Single day' : 'Full week'}
-- Start date: ${startDate} (USE THIS EXACT DATE - DO NOT CHANGE IT)
-${endDate ? `- End date: ${endDate}` : ''}
-${breakTimes && breakTimes.length > 0 ? `- Break times: ${JSON.stringify(breakTimes)}` : ''}
-${preferences ? `- Additional preferences: ${preferences}` : ''}
-
-**Time estimation rules:**
-1. If a task has historicalAvgTime, use that as it's more accurate than estimatedHours
-2. If estimatedHours exists but no historicalAvgTime, use estimatedHours
-3. If neither exists, estimate based on task complexity and description:
-   - Simple tasks (emails, quick updates): 0.5-1 hour
-   - Medium tasks (code reviews, meetings, documentation): 1-2 hours
-   - Complex tasks (feature development, research, analysis): 2-4 hours
-   - Very complex tasks (architecture design, major refactoring): 4-6 hours
-4. Tasks marked as "in_progress" may need less time (they're partially done) - reduce estimate by 30-50%
-5. High priority tasks should be scheduled earlier in the day when energy is highest
-6. Don't overpack - leave 15-30 minute buffer time between tasks for breaks and context switching
-7. Respect work hours and break times strictly
-8. Consider task dependencies and logical grouping (similar tasks together for efficiency)
-9. Account for realistic human productivity - don't schedule more than 6 hours of focused work per day
-10. For estimation, consider: task description complexity, technical requirements, and potential unknowns
-
-**Output format (JSON only, no markdown):**
+JSON only:
 {
-  "plan": [
-    {
-      "date": "YYYY-MM-DD",
-      "tasks": [
-        {
-          "taskId": "uuid",
-          "startTime": "HH:00",
-          "durationHours": 2,
-          "reasoning": "Why this time allocation"
-        }
-      ]
-    }
-  ],
-  "summary": "Brief explanation of the planning strategy",
-  "recommendations": ["tip 1", "tip 2"]
-}
-
-Generate a realistic, achievable plan. Return ONLY valid JSON.`;
+  "plan": [{
+    "date": "YYYY-MM-DD",
+    "tasks": [{
+      "taskId": "uuid",
+      "startTime": "HH:00",
+      "durationHours": 1.5,
+      "reasoning": "brief why"
+    }]
+  }],
+  "summary": "strategy",
+  "recommendations": ["tip1","tip2"]
+}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
