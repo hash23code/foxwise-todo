@@ -26,7 +26,7 @@ export default function TasksByCategoryChart({ data }: TasksByCategoryChartProps
       transition={{ duration: 0.5, delay: 0.3 }}
       className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
     >
-      <h3 className="text-xl font-semibold text-white mb-4">Tasks by Category</h3>
+      <h3 className="text-xl font-semibold text-white mb-4">Time by Category (Hours)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -50,6 +50,7 @@ export default function TasksByCategoryChart({ data }: TasksByCategoryChartProps
               borderRadius: "8px",
               color: "#fff"
             }}
+            formatter={(value: any) => [`${value}h`, 'Hours']}
           />
         </PieChart>
       </ResponsiveContainer>

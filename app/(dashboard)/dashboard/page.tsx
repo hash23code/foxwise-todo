@@ -17,6 +17,7 @@ import { format, startOfWeek, endOfWeek, subDays } from "date-fns";
 import TaskCompletionChart from "@/components/charts/TaskCompletionChart";
 import TasksByCategoryChart from "@/components/charts/TasksByCategoryChart";
 import TasksByPriorityChart from "@/components/charts/TasksByPriorityChart";
+import ProjectsProgressChart from "@/components/charts/ProjectsProgressChart";
 import AddTaskModal from "@/components/AddTaskModal";
 import Link from "next/link";
 
@@ -28,6 +29,8 @@ interface Task {
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   due_date: string | null;
   list_id: string;
+  estimated_hours: number | null;
+  tags: string[] | null;
   todo_lists: {
     id: string;
     name: string;
@@ -37,15 +40,26 @@ interface Task {
   completed_at: string | null;
 }
 
+interface Project {
+  id: string;
+  title: string;
+  color: string;
+  project_steps: Array<{
+    status: string;
+  }>;
+}
+
 export default function DashboardPage() {
   const { user } = useUser();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchTasks();
+      fetchProjects();
     }
   }, [user]);
 
@@ -61,6 +75,39 @@ export default function DashboardPage() {
       console.error("Error loading tasks:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('/api/projects');
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
+    }
+  };
+
+  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+      const response = await fetch('/api/tasks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: taskId,
+          status: newStatus,
+          completed_at: newStatus === 'completed' ? new Date().toISOString() : null
+        }),
+      });
+
+      if (response.ok) {
+        fetchTasks(); // Refresh tasks
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
     }
   };
 
@@ -93,26 +140,42 @@ export default function DashboardPage() {
     return { date: dateStr, completed, created };
   });
 
-  // Tasks by category
-  const tasksByCategory = tasks.reduce((acc, task) => {
-    const existing = acc.find(item => item.name === task.todo_lists.name);
-    if (existing) {
-      existing.value++;
-    } else {
-      acc.push({
-        name: task.todo_lists.name,
-        value: 1,
-        color: task.todo_lists.color
-      });
-    }
-    return acc;
-  }, [] as Array<{ name: string; value: number; color: string }>);
+  // Tasks by category (using estimated hours, excluding projects)
+  const tasksByCategory = tasks
+    .filter(task => !task.tags?.some(tag => tag.startsWith('project:'))) // Exclude project tasks
+    .reduce((acc, task) => {
+      const existing = acc.find(item => item.name === task.todo_lists.name);
+      const hours = task.estimated_hours || 0;
+      if (existing) {
+        existing.value += hours;
+      } else {
+        acc.push({
+          name: task.todo_lists.name,
+          value: hours,
+          color: task.todo_lists.color
+        });
+      }
+      return acc;
+    }, [] as Array<{ name: string; value: number; color: string }>);
 
   // Tasks by priority
   const tasksByPriority = ['low', 'medium', 'high', 'urgent'].map(priority => ({
     priority,
     count: tasks.filter(t => t.priority === priority && t.status !== 'completed').length
   }));
+
+  // Projects progress
+  const projectsProgress = projects.map(project => {
+    const totalSteps = project.project_steps.length;
+    const completedSteps = project.project_steps.filter(s => s.status === 'completed').length;
+    const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+    return {
+      name: project.title.length > 15 ? project.title.substring(0, 15) + '...' : project.title,
+      progress,
+      color: project.color
+    };
+  });
 
   // Recent tasks
   const recentTasks = tasks
@@ -241,8 +304,9 @@ export default function DashboardPage() {
           {tasksByCategory.length > 0 && <TasksByCategoryChart data={tasksByCategory} />}
         </div>
 
-        {/* Priority Chart */}
-        <div className="mb-8">
+        {/* Projects and Priority Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ProjectsProgressChart data={projectsProgress} />
           <TasksByPriorityChart data={tasksByPriority} />
         </div>
 
@@ -274,11 +338,16 @@ export default function DashboardPage() {
                   transition={{ delay: 0.55 + index * 0.05 }}
                   className="flex items-center gap-4 p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-all"
                 >
-                  {task.status === 'completed' ? (
-                    <CheckSquare className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  ) : (
-                    <Square className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  )}
+                  <button
+                    onClick={() => toggleTaskStatus(task.id, task.status)}
+                    className="flex-shrink-0 hover:scale-110 transition-transform"
+                  >
+                    {task.status === 'completed' ? (
+                      <CheckSquare className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <Square className="w-5 h-5 text-gray-400 hover:text-green-400" />
+                    )}
+                  </button>
                   <div className="flex-1 min-w-0">
                     <p className={`text-white font-medium truncate ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
                       {task.title}

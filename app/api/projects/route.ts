@@ -71,6 +71,25 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
+    // First, create a dedicated todo list for this project
+    const { data: todoList, error: listError } = await (supabase
+      .from('todo_lists') as any)
+      .insert({
+        user_id: userId,
+        name: `📁 ${title}`,
+        color: color,
+        icon: 'folder',
+        is_default: false,
+        position: 999, // Put project lists at the end
+      })
+      .select()
+      .single();
+
+    if (listError) {
+      console.error('Error creating todo list:', listError);
+      // Continue even if todo list creation fails
+    }
+
     const { data: project, error } = await (supabase
       .from('projects') as any)
       .insert({
@@ -82,6 +101,7 @@ export async function POST(request: NextRequest) {
         target_end_date,
         color,
         ai_plan,
+        todo_list_id: todoList?.id || null,
       })
       .select()
       .single();
@@ -145,8 +165,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Support both query param and body
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    let id = searchParams.get('id');
+
+    if (!id) {
+      const body = await request.json();
+      id = body.id;
+    }
 
     if (!id) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });

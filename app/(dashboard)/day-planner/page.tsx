@@ -51,8 +51,12 @@ export default function DayPlannerPage() {
   const [loading, setLoading] = useState(true);
   const [showAIPlanner, setShowAIPlanner] = useState(false);
 
-  // Generate hours from 6 AM to 11 PM
-  const hours = Array.from({ length: 18 }, (_, i) => i + 6);
+  // Generate hours from 6 AM to 5 AM (next day)
+  // 6,7,8...23 (18 hours), then 0,1,2,3,4,5 (6 hours) = 24 hours total
+  const hours = [
+    ...Array.from({ length: 18 }, (_, i) => i + 6), // 6 AM to 11 PM (23:00)
+    ...Array.from({ length: 6 }, (_, i) => i)        // 12 AM to 5 AM (0:00 to 5:00)
+  ];
 
   useEffect(() => {
     fetchTasks();
@@ -388,28 +392,46 @@ export default function DayPlannerPage() {
 
                               {/* Action Buttons */}
                               <div className="flex flex-col gap-2 flex-shrink-0">
+                                {/* Complete Button */}
                                 <button
                                   onClick={() => updateTaskStatus(plannedTask.task.id, 'completed')}
-                                  className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap"
+                                  className={`px-3 py-2 border rounded-lg text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap ${
+                                    plannedTask.task.status === 'completed'
+                                      ? 'bg-green-500/30 border-green-500 text-green-400'
+                                      : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
+                                  }`}
                                   title={t.dayPlanner.markAsCompleted}
                                 >
                                   <CheckSquare className="w-3 h-3" />
                                   {t.dayPlanner.complete}
                                 </button>
+
+                                {/* In Progress Button */}
                                 <button
                                   onClick={() => updateTaskStatus(plannedTask.task.id, 'in_progress')}
-                                  className="px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 rounded-lg text-yellow-400 text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap"
+                                  className={`px-3 py-2 border rounded-lg text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap ${
+                                    plannedTask.task.status === 'in_progress'
+                                      ? 'bg-yellow-500/30 border-yellow-500 text-yellow-400'
+                                      : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
+                                  }`}
                                   title={t.dayPlanner.needMoreTime}
                                 >
                                   <Clock className="w-3 h-3" />
                                   {t.dayPlanner.moreTime}
                                 </button>
+
+                                {/* Postpone Button */}
                                 <button
-                                  onClick={() => plannedTask.id && removePlannedTask(plannedTask.id)}
-                                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                  title={t.dayPlanner.removeFromPlanner}
+                                  onClick={() => updateTaskStatus(plannedTask.task.id, 'pending')}
+                                  className={`px-3 py-2 border rounded-lg text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap ${
+                                    plannedTask.task.status === 'pending'
+                                      ? 'bg-red-500/30 border-red-500 text-red-400'
+                                      : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
+                                  }`}
+                                  title={t.dayPlanner.postponeTask}
                                 >
-                                  <X className="w-4 h-4" />
+                                  <X className="w-3 h-3" />
+                                  {t.dayPlanner.postpone}
                                 </button>
                               </div>
                             </motion.div>

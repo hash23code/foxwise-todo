@@ -13,7 +13,10 @@ import {
   Clock,
   Trash2,
   Edit,
-  MoreVertical
+  MoreVertical,
+  List,
+  Table as TableIcon,
+  FileDown
 } from "lucide-react";
 import AddTaskModal from "@/components/AddTaskModal";
 
@@ -47,6 +50,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
 
   useEffect(() => {
     fetchLists();
@@ -150,6 +154,13 @@ export default function TasksPage() {
     inProgress: tasks.filter(t => t.status === 'in_progress').length,
   };
 
+  const handlePrintPDF = () => {
+    // Add print title with date
+    const printDate = new Date().toLocaleDateString();
+    document.title = `My Tasks - ${printDate}`;
+    window.print();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-8">
       <motion.div
@@ -160,24 +171,66 @@ export default function TasksPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 print:text-black print:bg-none">
               My Tasks
             </h1>
-            <p className="text-gray-400 mt-2">Manage and organize your tasks efficiently</p>
+            <p className="text-gray-400 mt-2 print:text-gray-700 print:mb-4">
+              {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAddModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium flex items-center gap-2 shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            Add Task
-          </motion.button>
+          <div className="flex items-center gap-3">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg p-1 border border-gray-700">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-purple-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+                title="List View"
+              >
+                <List className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-purple-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+                title="Table View"
+              >
+                <TableIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Export PDF Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handlePrintPDF}
+              className="px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white font-medium flex items-center gap-2 hover:bg-gray-700/50 transition-all no-print"
+            >
+              <FileDown className="w-5 h-5" />
+              Export PDF
+            </motion.button>
+
+            {/* Add Task Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAddModal(true)}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium flex items-center gap-2 shadow-lg no-print"
+            >
+              <Plus className="w-5 h-5" />
+              Add Task
+            </motion.button>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 no-print">
           <motion.div
             whileHover={{ scale: 1.02 }}
             className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
@@ -232,7 +285,7 @@ export default function TasksPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 mb-8">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 mb-8 no-print">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
@@ -285,50 +338,205 @@ export default function TasksPage() {
           </div>
         </div>
 
-        {/* Tasks List */}
-        <div className="space-y-4">
-          {loading ? (
-            <div className="text-center text-gray-400 py-12">Loading tasks...</div>
-          ) : filteredTasks.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
-              <CheckSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p>No tasks found</p>
-            </div>
-          ) : (
-            filteredTasks.map((task, index) => (
-              <motion.div
-                key={task.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border ${getPriorityBg(task.priority)} hover:bg-gray-700/50 transition-all`}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Checkbox */}
-                  <button
-                    onClick={() => toggleTaskStatus(task)}
-                    className="mt-1"
-                  >
-                    {task.status === 'completed' ? (
-                      <CheckSquare className="w-6 h-6 text-green-500" />
-                    ) : (
-                      <Square className="w-6 h-6 text-gray-400 hover:text-purple-500 transition-colors" />
-                    )}
-                  </button>
+        {/* Tasks List or Table View */}
+        {viewMode === 'list' ? (
+          // LIST VIEW (Original)
+          <div className="space-y-4">
+            {loading ? (
+              <div className="text-center text-gray-400 py-12">Loading tasks...</div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="text-center text-gray-400 py-12">
+                <CheckSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <p>No tasks found</p>
+              </div>
+            ) : (
+              filteredTasks.map((task, index) => (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border ${getPriorityBg(task.priority)} hover:bg-gray-700/50 transition-all`}
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Checkbox */}
+                    <button
+                      onClick={() => toggleTaskStatus(task)}
+                      className="mt-1 no-print"
+                    >
+                      {task.status === 'completed' ? (
+                        <CheckSquare className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <Square className="w-6 h-6 text-gray-400 hover:text-purple-500 transition-colors" />
+                      )}
+                    </button>
 
-                  {/* Task Content */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className={`text-lg font-semibold ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-white'}`}>
-                          {task.title}
-                        </h3>
-                        {task.description && (
-                          <p className="text-gray-400 text-sm mt-1">{task.description}</p>
-                        )}
+                    {/* Task Content */}
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className={`text-lg font-semibold ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-white'}`}>
+                            {task.title}
+                          </h3>
+                          {task.description && (
+                            <p className="text-gray-400 text-sm mt-1">{task.description}</p>
+                          )}
 
-                        <div className="flex flex-wrap items-center gap-4 mt-3">
-                          {/* Status Dropdown */}
+                          <div className="flex flex-wrap items-center gap-4 mt-3">
+                            {/* Status Dropdown */}
+                            <select
+                              value={task.status}
+                              onChange={(e) => {
+                                fetch('/api/tasks', {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: task.id, status: e.target.value })
+                                }).then(() => fetchTasks());
+                              }}
+                              className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-purple-500 no-print"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <option value="pending">📋 Pending</option>
+                              <option value="in_progress">⏳ In Progress</option>
+                              <option value="completed">✅ Completed</option>
+                              <option value="cancelled">❌ Cancelled</option>
+                            </select>
+
+                            {/* List Badge */}
+                            <span
+                              className="px-3 py-1 rounded-full text-xs font-medium"
+                              style={{ backgroundColor: `${task.todo_lists.color}20`, color: task.todo_lists.color }}
+                            >
+                              {task.todo_lists.name}
+                            </span>
+
+                            {/* Priority Badge */}
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityBg(task.priority)} ${getPriorityColor(task.priority)}`}>
+                              {task.priority.toUpperCase()}
+                            </span>
+
+                            {/* Estimated Hours */}
+                            {task.estimated_hours && (
+                              <span className="flex items-center gap-1 text-blue-400 text-sm">
+                                <Clock className="w-4 h-4" />
+                                {task.estimated_hours}h est.
+                              </span>
+                            )}
+
+                            {/* Due Date */}
+                            {task.due_date && (
+                              <span className="flex items-center gap-1 text-gray-400 text-sm">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(task.due_date).toLocaleDateString()}
+                              </span>
+                            )}
+
+                            {/* Tags */}
+                            {task.tags && task.tags.map(tag => (
+                              <span key={tag} className="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 ml-4 no-print">
+                          <button
+                            onClick={() => {
+                              setEditingTask(task);
+                              setShowAddModal(true);
+                            }}
+                            className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+        ) : (
+          // TABLE VIEW (Compact)
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 overflow-hidden">
+            {loading ? (
+              <div className="text-center text-gray-400 py-12">Loading tasks...</div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="text-center text-gray-400 py-12">
+                <CheckSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <p>No tasks found</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-900/50 border-b border-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider no-print">
+                        ✓
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Task
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Priority
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        List
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Hours
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Due Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider no-print">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {filteredTasks.map((task) => (
+                      <motion.tr
+                        key={task.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="hover:bg-gray-700/30 transition-colors"
+                      >
+                        <td className="px-4 py-3 no-print">
+                          <button
+                            onClick={() => toggleTaskStatus(task)}
+                            className="hover:scale-110 transition-transform"
+                          >
+                            {task.status === 'completed' ? (
+                              <CheckSquare className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <Square className="w-5 h-5 text-gray-400 hover:text-purple-500" />
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <p className={`text-sm font-medium ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-white'}`}>
+                              {task.title}
+                            </p>
+                            {task.description && (
+                              <p className="text-xs text-gray-400 truncate max-w-xs">{task.description}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
                           <select
                             value={task.status}
                             onChange={(e) => {
@@ -338,78 +546,60 @@ export default function TasksPage() {
                                 body: JSON.stringify({ id: task.id, status: e.target.value })
                               }).then(() => fetchTasks());
                             }}
-                            className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            onClick={(e) => e.stopPropagation()}
+                            className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
                           >
                             <option value="pending">📋 Pending</option>
                             <option value="in_progress">⏳ In Progress</option>
                             <option value="completed">✅ Completed</option>
                             <option value="cancelled">❌ Cancelled</option>
                           </select>
-
-                          {/* List Badge */}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityBg(task.priority)} ${getPriorityColor(task.priority)}`}>
+                            {task.priority.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
                           <span
-                            className="px-3 py-1 rounded-full text-xs font-medium"
+                            className="px-2 py-1 rounded text-xs font-medium"
                             style={{ backgroundColor: `${task.todo_lists.color}20`, color: task.todo_lists.color }}
                           >
                             {task.todo_lists.name}
                           </span>
-
-                          {/* Priority Badge */}
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityBg(task.priority)} ${getPriorityColor(task.priority)}`}>
-                            {task.priority.toUpperCase()}
-                          </span>
-
-                          {/* Estimated Hours */}
-                          {task.estimated_hours && (
-                            <span className="flex items-center gap-1 text-blue-400 text-sm">
-                              <Clock className="w-4 h-4" />
-                              {task.estimated_hours}h est.
-                            </span>
-                          )}
-
-                          {/* Due Date */}
-                          {task.due_date && (
-                            <span className="flex items-center gap-1 text-gray-400 text-sm">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(task.due_date).toLocaleDateString()}
-                            </span>
-                          )}
-
-                          {/* Tags */}
-                          {task.tags && task.tags.map(tag => (
-                            <span key={tag} className="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-2 ml-4">
-                        <button
-                          onClick={() => {
-                            setEditingTask(task);
-                            setShowAddModal(true);
-                          }}
-                          className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))
-          )}
-        </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-300">
+                          {task.estimated_hours ? `${task.estimated_hours}h` : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-300">
+                          {task.due_date ? new Date(task.due_date).toLocaleDateString() : '-'}
+                        </td>
+                        <td className="px-4 py-3 no-print">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingTask(task);
+                                setShowAddModal(true);
+                              }}
+                              className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteTask(task.id)}
+                              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Add Task Modal */}
         <AddTaskModal

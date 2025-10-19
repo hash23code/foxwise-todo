@@ -18,3 +18,72 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Print styles for PDF export */
+@media print {
+  /* Hide elements with no-print class */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Remove page background for printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Ensure page breaks are proper */
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+
+  /* Better table printing */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  /* Adjust colors for printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Make borders visible */
+  table, th, td {
+    border-color: #999 !important;
+  }
+
+  /* Ensure white background for cards */
+  .bg-gray-800\/50,
+  .bg-gray-900\/50,
+  .bg-gray-700\/30 {
+    background: white !important;
+    border: 1px solid #ccc !important;
+  }
+
+  /* Make text darker for printing */
+  h1, h2, h3, h4, h5, h6, p, span, td, th {
+    color: black !important;
+  }
+
+  /* Hide decorative gradients */
+  .bg-gradient-to-br,
+  .bg-gradient-to-r {
+    background: white !important;
+  }
+
+  /* Remove box shadows */
+  * {
+    box-shadow: none !important;
+  }
+}

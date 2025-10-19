@@ -28,50 +28,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build the chat prompt
+    // Build the chat prompt - SIMPLIFIED for faster response
     const systemPrompt = language === 'fr' ? `
-Tu es un assistant de gestion de projet expert. L'utilisateur a un plan de projet et veut le modifier.
+Vous êtes un assistant de projet. Modifiez le plan selon la demande.
 
-PLAN ACTUEL:
+PLAN ACTUEL (JSON):
 ${JSON.stringify(currentPlan, null, 2)}
 
-L'utilisateur te dit ce qu'il veut changer. Tu dois:
-1. Comprendre la demande de modification
-2. Modifier le plan en conséquence
-3. Retourner le plan complet mis à jour au format JSON
+DEMANDE: ${message}
 
-RÈGLES IMPORTANTES:
-- Si l'utilisateur demande d'ajouter une tâche/phase: ajoute-la avec des détails complets
-- Si l'utilisateur demande de retirer quelque chose: retire-le
-- Si l'utilisateur demande de modifier: modifie avec les détails fournis
-- Si l'utilisateur demande plus de détails: enrichis les descriptions
-- TOUJOURS retourner le plan COMPLET au format JSON avec la même structure
-- Garde la même structure: {overview, phases, bestPractices, estimatedDuration}
+INSTRUCTIONS:
+- Modifiez uniquement ce qui est demandé
+- Gardez les descriptions courtes (max 50 mots par tâche)
+- Retournez le plan COMPLET en JSON valide
+- Structure: {overview, phases, bestPractices, estimatedDuration}
+- Phases contient des tasks avec: title, description, effort, order, dependencies, tips
 
-Retourne UNIQUEMENT le JSON du plan mis à jour, sans texte avant ou après.
+Retournez UNIQUEMENT le JSON valide, rien d'autre.
 ` : `
-You are an expert project management assistant. The user has a project plan and wants to modify it.
+You are a project assistant. Modify the plan as requested.
 
-CURRENT PLAN:
+CURRENT PLAN (JSON):
 ${JSON.stringify(currentPlan, null, 2)}
 
-The user will tell you what they want to change. You should:
-1. Understand the modification request
-2. Modify the plan accordingly
-3. Return the complete updated plan in JSON format
+REQUEST: ${message}
 
-IMPORTANT RULES:
-- If user asks to add a task/phase: add it with complete details
-- If user asks to remove something: remove it
-- If user asks to modify: modify with the provided details
-- If user asks for more details: enrich the descriptions
-- ALWAYS return the COMPLETE plan in JSON format with the same structure
-- Keep the same structure: {overview, phases, bestPractices, estimatedDuration}
+INSTRUCTIONS:
+- Modify only what is requested
+- Keep descriptions short (max 50 words per task)
+- Return COMPLETE plan in valid JSON
+- Structure: {overview, phases, bestPractices, estimatedDuration}
+- Phases contain tasks with: title, description, effort, order, dependencies, tips
 
-Return ONLY the updated plan JSON, no text before or after.
+Return ONLY valid JSON, nothing else.
 `;
 
-    const fullPrompt = `${systemPrompt}\n\nDemande de l'utilisateur / User request: ${message}`;
+    const fullPrompt = systemPrompt;
 
     // Call Gemini API
     const response = await fetch(
@@ -92,10 +84,11 @@ Return ONLY the updated plan JSON, no text before or after.
             },
           ],
           generationConfig: {
-            temperature: 0.5,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192,
+            temperature: 0.3,
+            topK: 20,
+            topP: 0.9,
+            maxOutputTokens: 4096,
+            responseMimeType: "application/json",
           },
         }),
       }

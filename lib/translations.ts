@@ -310,8 +310,10 @@ export const translations = {
       add: "Add",
       complete: "Complete",
       moreTime: "More Time",
+      postpone: "Postpone",
       markAsCompleted: "Mark as completed",
       needMoreTime: "Need more time (set to in progress)",
+      postponeTask: "Postpone task (keep as pending)",
       removeFromPlanner: "Remove from planner",
       addTaskFailed: "Failed to add task to planner.",
       errorAddingTask: "Error adding task to planner."
@@ -662,8 +664,10 @@ export const translations = {
       add: "Ajouter",
       complete: "Terminer",
       moreTime: "Plus de temps",
+      postpone: "Reporter",
       markAsCompleted: "Marquer comme terminé",
       needMoreTime: "Besoin de plus de temps (définir en cours)",
+      postponeTask: "Reporter la tâche (garder en attente)",
       removeFromPlanner: "Retirer du planificateur",
       addTaskFailed: "Échec de l'ajout de la tâche au planificateur.",
       errorAddingTask: "Erreur lors de l'ajout de la tâche au planificateur."

@@ -15,9 +15,6 @@ export async function POST(
     }
 
     const stepId = params.id;
-    const body = await request.json();
-    const { list_id } = body; // The dedicated todo_list for this project
-
     const supabase = await createClient();
 
     // Get the project step with project info
@@ -27,7 +24,9 @@ export async function POST(
         *,
         projects!inner(
           user_id,
-          title
+          title,
+          color,
+          todo_list_id
         )
       `)
       .eq('id', stepId)
@@ -37,6 +36,38 @@ export async function POST(
       return NextResponse.json({ error: 'Step not found' }, { status: 404 });
     }
 
+    // Get or create the todo list for this project
+    let listId = step.projects.todo_list_id;
+
+    if (!listId) {
+      // Create a todo list for this project if it doesn't exist
+      const { data: todoList, error: listError } = await (supabase
+        .from('todo_lists') as any)
+        .insert({
+          user_id: userId,
+          name: `📁 ${step.projects.title}`,
+          color: step.projects.color || '#667eea',
+          icon: 'folder',
+          is_default: false,
+          position: 999,
+        })
+        .select()
+        .single();
+
+      if (listError) {
+        console.error('Error creating todo list:', listError);
+        return NextResponse.json({ error: 'Failed to create todo list' }, { status: 500 });
+      }
+
+      listId = todoList.id;
+
+      // Update the project with the new list_id
+      await (supabase
+        .from('projects') as any)
+        .update({ todo_list_id: listId })
+        .eq('id', step.project_id);
+    }
+
     // Create the task in the tasks table
     const { data: task, error: taskError } = await (supabase
       .from('tasks') as any)
@@ -44,7 +75,7 @@ export async function POST(
         user_id: userId,
         title: step.title,
         description: step.description,
-        list_id: list_id,
+        list_id: listId,
         status: 'pending',
         priority: 'medium',
         estimated_hours: step.estimated_hours,
@@ -61,7 +92,7 @@ export async function POST(
     // Update the project step to link it to the todo_list
     const { error: updateError } = await (supabase
       .from('project_steps') as any)
-      .update({ todo_list_id: list_id })
+      .update({ todo_list_id: listId })
       .eq('id', stepId);
 
     if (updateError) {

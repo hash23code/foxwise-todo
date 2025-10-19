@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, description, targetEndDate, language = 'en' } = body;
 
+    console.log('[AI Planner] Language received:', language, 'Title:', title);
+
     if (!title) {
       return NextResponse.json({ error: 'Project title is required' }, { status: 400 });
     }
@@ -26,143 +28,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Construct the prompt for Gemini (bilingual support)
+    // Construct the prompt for Gemini (bilingual support) - OPTIMIZED for speed
     const prompt = language === 'fr' ?
-    `Vous êtes un consultant en stratégie d'entreprise et chef de projet senior avec 20 ans d'expérience. Créez un plan d'action COMPLET, DÉTAILLÉ et PROFESSIONNEL pour ce projet entrepreneurial réel.
+    `Créez un plan de projet en français pour: ${title}
+${description ? `Description: ${description}` : ''}
+${targetEndDate ? `Date: ${targetEndDate}` : ''}
 
-PROJET:
-Titre : ${title}
-Description : ${description || 'Aucune description supplémentaire fournie'}
-${targetEndDate ? `Date cible d'achèvement : ${targetEndDate}` : ''}
-
-INSTRUCTIONS CRITIQUES - LISEZ ATTENTIVEMENT:
-
-1. STRUCTURE OBLIGATOIRE:
-   - Divisez le projet en 4-6 PHASES MAJEURES (ex: Conceptualisation, Design & Production, Aspects Légaux, Lancement, Croissance)
-   - Chaque phase doit contenir 4-8 tâches détaillées
-   - MINIMUM TOTAL: 20-30 tâches actionnables
-
-2. NIVEAU DE DÉTAIL REQUIS:
-   - Chaque tâche doit expliquer QUOI faire, COMMENT le faire, et POURQUOI c'est important
-   - Incluez des exemples concrets, des outils spécifiques, des ressources
-   - Mentionnez les livrables attendus pour chaque tâche
-   - Ajoutez des conseils d'expert et pièges à éviter
-
-3. EXEMPLES DE QUALITÉ ATTENDUE:
-
-❌ INACCEPTABLE:
+Format JSON:
 {
-  "title": "Faire une étude de marché",
-  "description": "Analyser le marché"
-}
-
-✅ EXCELLENT:
-{
-  "title": "Réaliser une étude de marché approfondie et identifier votre niche",
-  "description": "1) Analysez les tendances du marché en utilisant Google Trends, rapports sectoriels et réseaux sociaux. 2) Identifiez 3-5 segments de clients cibles avec personas détaillés (âge, revenus, style de vie, comportements d'achat). 3) Étudiez 5-10 concurrents directs: analysez leurs prix, positionnement, forces/faiblesses, avis clients. 4) Déterminez votre proposition de valeur unique (USP) qui vous différencie. 5) Validez la demande via sondages (min 50 réponses) et interviews clients potentiels (10-15 personnes). LIVRABLE: Document de 10-15 pages avec analyse SWOT, personas clients, positionnement stratégique.",
-  "effort": "large",
-  "tips": "Utilisez des outils gratuits comme Google Forms pour les sondages, Reddit et Facebook Groups pour trouver votre audience cible. Ne sautez PAS cette étape - 42% des startups échouent par manque d'étude de marché. Passez minimum 2-3 semaines sur cette phase."
-}
-
-4. FORMATAGE JSON STRICT:
-{
-  "overview": "Paragraphe stratégique de 4-6 phrases expliquant la vision globale, les étapes clés et l'approche recommandée pour ce projet spécifique",
+  "overview": "Vue d'ensemble (3-4 phrases courtes)",
   "phases": [
     {
-      "name": "Phase 1: Nom de la phase",
-      "description": "Description de 2-3 phrases expliquant les objectifs de cette phase et son importance dans le projet global",
+      "name": "Phase X: Nom",
+      "description": "Objectifs (1-2 phrases)",
       "tasks": [
         {
-          "title": "Titre actionnable et spécifique (8-12 mots)",
-          "description": "Description TRÈS détaillée de 150-300 mots minimum avec: 1) Étapes précises numérotées, 2) Outils/ressources spécifiques, 3) Livrables attendus, 4) Métriques de succès si applicable",
+          "title": "Titre actionnable",
+          "description": "Étapes clés, outils. 40-50 mots max.",
           "effort": "small|medium|large",
           "order": 1,
           "dependencies": [],
-          "tips": "Conseils d'expert concrets, pièges courants à éviter, statistiques pertinentes, ressources recommandées"
+          "tips": "Conseil pratique principal"
         }
       ]
     }
   ],
-  "bestPractices": [
-    "8-12 conseils stratégiques ultra-spécifiques pour ce type de projet avec exemples concrets"
-  ],
-  "estimatedDuration": "Estimation réaliste basée sur les meilleures pratiques du secteur"
+  "bestPractices": ["6-8 conseils"],
+  "estimatedDuration": "Estimation"
 }
 
-5. ADAPTEZ LE PLAN AU PROJET SPÉCIFIQUE:
-   - Pour une marque de vêtements: phases de design, sourcing, production, branding, e-commerce
-   - Pour une app mobile: phases de conception UX, développement, tests, marketing, lancement
-   - Pour un restaurant: phases de concept, local, permis, menu, staff, marketing
-
-CRÉEZ UN PLAN TELLEMENT DÉTAILLÉ qu'un entrepreneur débutant pourrait le suivre étape par étape sans aide externe. Soyez l'expert consultant que vous embaucheriez pour 5000€.`
+3 phases, 4-5 tâches/phase. Descriptions COURTES. JSON uniquement.`
     :
-    `You are a senior business strategy consultant and project manager with 20 years of experience. Create a COMPLETE, DETAILED, and PROFESSIONAL action plan for this real entrepreneurial project.
+    `Create project plan in English for: ${title}
+${description ? `Description: ${description}` : ''}
+${targetEndDate ? `Date: ${targetEndDate}` : ''}
 
-PROJECT:
-Title: ${title}
-Description: ${description || 'No additional description provided'}
-${targetEndDate ? `Target Completion Date: ${targetEndDate}` : ''}
-
-CRITICAL INSTRUCTIONS - READ CAREFULLY:
-
-1. MANDATORY STRUCTURE:
-   - Divide the project into 4-6 MAJOR PHASES (e.g., Conceptualization, Design & Production, Legal Aspects, Launch, Growth)
-   - Each phase must contain 4-8 detailed tasks
-   - MINIMUM TOTAL: 20-30 actionable tasks
-
-2. REQUIRED LEVEL OF DETAIL:
-   - Each task must explain WHAT to do, HOW to do it, and WHY it's important
-   - Include concrete examples, specific tools, resources
-   - Mention expected deliverables for each task
-   - Add expert advice and pitfalls to avoid
-
-3. QUALITY EXAMPLES EXPECTED:
-
-❌ UNACCEPTABLE:
+JSON format:
 {
-  "title": "Do market research",
-  "description": "Analyze the market"
-}
-
-✅ EXCELLENT:
-{
-  "title": "Conduct comprehensive market research and identify your niche",
-  "description": "1) Analyze market trends using Google Trends, industry reports, and social media. 2) Identify 3-5 target customer segments with detailed personas (age, income, lifestyle, buying behaviors). 3) Study 5-10 direct competitors: analyze their pricing, positioning, strengths/weaknesses, customer reviews. 4) Determine your unique value proposition (USP) that differentiates you. 5) Validate demand via surveys (min 50 responses) and interviews with potential customers (10-15 people). DELIVERABLE: 10-15 page document with SWOT analysis, customer personas, strategic positioning.",
-  "effort": "large",
-  "tips": "Use free tools like Google Forms for surveys, Reddit and Facebook Groups to find your target audience. Do NOT skip this step - 42% of startups fail due to lack of market research. Spend minimum 2-3 weeks on this phase."
-}
-
-4. STRICT JSON FORMAT:
-{
-  "overview": "Strategic paragraph of 4-6 sentences explaining the overall vision, key milestones, and recommended approach for this specific project",
+  "overview": "Overview (3-4 short sentences)",
   "phases": [
     {
-      "name": "Phase 1: Phase name",
-      "description": "2-3 sentence description explaining the objectives of this phase and its importance in the overall project",
+      "name": "Phase X: Name",
+      "description": "Objectives (1-2 sentences)",
       "tasks": [
         {
-          "title": "Actionable and specific title (8-12 words)",
-          "description": "VERY detailed description of 150-300 words minimum with: 1) Numbered precise steps, 2) Specific tools/resources, 3) Expected deliverables, 4) Success metrics if applicable",
+          "title": "Actionable title",
+          "description": "Key steps, tools. 40-50 words max.",
           "effort": "small|medium|large",
           "order": 1,
           "dependencies": [],
-          "tips": "Concrete expert advice, common pitfalls to avoid, relevant statistics, recommended resources"
+          "tips": "Main practical tip"
         }
       ]
     }
   ],
-  "bestPractices": [
-    "8-12 ultra-specific strategic tips for this type of project with concrete examples"
-  ],
-  "estimatedDuration": "Realistic estimate based on industry best practices"
+  "bestPractices": ["6-8 tips"],
+  "estimatedDuration": "Estimate"
 }
 
-5. ADAPT THE PLAN TO THE SPECIFIC PROJECT:
-   - For a clothing brand: phases of design, sourcing, production, branding, e-commerce
-   - For a mobile app: phases of UX design, development, testing, marketing, launch
-   - For a restaurant: phases of concept, location, permits, menu, staff, marketing
-
-CREATE A PLAN SO DETAILED that a beginner entrepreneur could follow it step-by-step without external help. Be the expert consultant you would hire for $5000.`;
+3 phases, 4-5 tasks/phase. SHORT descriptions. JSON only.`;
 
     // Call Gemini API
     const response = await fetch(
@@ -183,10 +107,11 @@ CREATE A PLAN SO DETAILED that a beginner entrepreneur could follow it step-by-s
             },
           ],
           generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
+            temperature: 0.5,
+            topK: 30,
+            topP: 0.9,
             maxOutputTokens: 8192,
+            responseMimeType: "application/json",
           },
         }),
       }
@@ -244,8 +169,28 @@ CREATE A PLAN SO DETAILED that a beginner entrepreneur could follow it step-by-s
       console.error('Error parsing AI response:', parseError);
       console.error('Response text:', responseText);
 
-      // Return a basic plan structure instead of error
-      plan = {
+      // Return a basic plan structure instead of error (bilingual)
+      plan = language === 'fr' ? {
+        overview: `Plan de projet pour : ${title}`,
+        phases: [
+          {
+            name: 'Planification Initiale',
+            description: description || 'Définir la portée et les objectifs du projet',
+            tasks: [
+              {
+                title: 'Définir les exigences du projet',
+                description: 'Recueillir et documenter toutes les exigences du projet',
+                effort: 'medium',
+                order: 1,
+                dependencies: [],
+                tips: 'Engager les parties prenantes dès le début'
+              }
+            ]
+          }
+        ],
+        bestPractices: ['Communication régulière', 'Développement itératif', 'Assurance qualité'],
+        estimatedDuration: 'À déterminer en fonction de la portée'
+      } : {
         overview: `Project plan for: ${title}`,
         phases: [
           {

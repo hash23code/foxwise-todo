@@ -36,7 +36,9 @@
       "Bash(copy:*)",
       "Read(//h/Ai_Projects/app/claude/**)",
       "Bash(git push origin main --force)",
-      "Bash(git push origin main)"
+      "Bash(git push origin main)",
+      "Bash(curl -X POST http://localhost:3002/api/ai-project-planner -H \"Content-Type: application/json\" -d \"{\"\"title\"\":\"\"Test Projet\"\",\"\"description\"\":\"\"Test description\"\",\"\"language\"\":\"\"fr\"\"}\")",
+      "Bash(curl -s http://localhost:3002/sign-in)"
     ],
     "deny": [],
     "ask": []
