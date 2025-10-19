@@ -14,7 +14,8 @@ import {
   Clock,
   Folder,
   Menu,
-  X
+  X,
+  BarChart3
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -78,6 +79,12 @@ export default function Sidebar() {
       href: "/calendar",
       icon: CalendarDays,
       gradient: "from-yellow-500 to-orange-500"
+    },
+    {
+      name: language === 'fr' ? "Rapports" : "Reports",
+      href: "/reports",
+      icon: BarChart3,
+      gradient: "from-orange-500 to-red-500"
     },
     {
       name: t.nav?.settings || "Settings",
