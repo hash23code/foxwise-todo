@@ -130,16 +130,32 @@ export default function CalendarPage() {
       if (!t.due_date) return false;
 
       try {
-        // Parse the date directly (it already includes time and timezone)
-        const taskDate = new Date(t.due_date);
+        // Parse the date - handle both date-only and datetime formats
+        let taskDate: Date;
+
+        if (t.due_date.includes('T')) {
+          // Full datetime format (e.g., "2025-01-15T12:00:00Z")
+          taskDate = new Date(t.due_date);
+        } else {
+          // Date-only format (e.g., "2025-01-15")
+          // Add T00:00:00 to force local timezone interpretation
+          taskDate = new Date(t.due_date + 'T00:00:00');
+        }
 
         // Check if the date is valid
         if (isNaN(taskDate.getTime())) {
+          console.warn('Invalid task date:', t.due_date, 'for task:', t.title);
           return false;
         }
 
-        return isSameDay(taskDate, date);
+        // Compare just the date parts (year, month, day)
+        return (
+          taskDate.getFullYear() === date.getFullYear() &&
+          taskDate.getMonth() === date.getMonth() &&
+          taskDate.getDate() === date.getDate()
+        );
       } catch (error) {
+        console.error('Error parsing task date:', t.due_date, error);
         return false;
       }
     });

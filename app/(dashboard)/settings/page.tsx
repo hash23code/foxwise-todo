@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Bell, Lock, Palette, Globe, Save } from "lucide-react";
+import { User, Bell, Lock, Palette, Globe, Save, FileText } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { getUserSettings, updateUserSettings, CURRENCIES } from "@/lib/api/userSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -18,6 +18,12 @@ export default function SettingsPage() {
       push: false,
       budgetAlerts: true,
       transactionAlerts: true,
+    },
+    reports: {
+      dailyReport: true,
+      monthlyReport: true,
+      dailyReportEmail: false,
+      monthlyReportEmail: false,
     },
     theme: "dark",
   });
@@ -316,6 +322,154 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
+          </div>
+        </motion.div>
+
+        {/* Reports */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">
+              {language === 'fr' ? 'Rapports' : 'Reports'}
+            </h2>
+          </div>
+          <div className="space-y-4">
+            {/* Daily Report */}
+            <div className="p-4 bg-gray-800/50 rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium">
+                    {language === 'fr' ? 'Rapport Quotidien' : 'Daily Report'}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {language === 'fr'
+                      ? 'Reçois un résumé de ta journée à 23h'
+                      : 'Receive a summary of your day at 11 PM'}
+                  </p>
+                </div>
+                <button
+                  onClick={() =>
+                    setSettings({
+                      ...settings,
+                      reports: {
+                        ...settings.reports,
+                        dailyReport: !settings.reports.dailyReport,
+                      },
+                    })
+                  }
+                  className={`relative w-14 h-7 rounded-full transition-colors ${
+                    settings.reports.dailyReport ? "bg-teal-500" : "bg-gray-600"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                      settings.reports.dailyReport ? "translate-x-7" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Email option for daily report */}
+              {settings.reports.dailyReport && (
+                <div className="flex items-center gap-3 pl-4 pt-2 border-t border-gray-700">
+                  <input
+                    type="checkbox"
+                    id="dailyReportEmail"
+                    checked={settings.reports.dailyReportEmail}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        reports: {
+                          ...settings.reports,
+                          dailyReportEmail: e.target.checked,
+                        },
+                      })
+                    }
+                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-teal-500"
+                  />
+                  <label htmlFor="dailyReportEmail" className="text-sm text-gray-300 cursor-pointer">
+                    {language === 'fr'
+                      ? 'Envoyer aussi par email'
+                      : 'Also send via email'}
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Monthly Report */}
+            <div className="p-4 bg-gray-800/50 rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium">
+                    {language === 'fr' ? 'Rapport Mensuel' : 'Monthly Report'}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {language === 'fr'
+                      ? 'Reçois un résumé complet à la fin de chaque mois'
+                      : 'Receive a complete summary at the end of each month'}
+                  </p>
+                </div>
+                <button
+                  onClick={() =>
+                    setSettings({
+                      ...settings,
+                      reports: {
+                        ...settings.reports,
+                        monthlyReport: !settings.reports.monthlyReport,
+                      },
+                    })
+                  }
+                  className={`relative w-14 h-7 rounded-full transition-colors ${
+                    settings.reports.monthlyReport ? "bg-teal-500" : "bg-gray-600"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                      settings.reports.monthlyReport ? "translate-x-7" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Email option for monthly report */}
+              {settings.reports.monthlyReport && (
+                <div className="flex items-center gap-3 pl-4 pt-2 border-t border-gray-700">
+                  <input
+                    type="checkbox"
+                    id="monthlyReportEmail"
+                    checked={settings.reports.monthlyReportEmail}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        reports: {
+                          ...settings.reports,
+                          monthlyReportEmail: e.target.checked,
+                        },
+                      })
+                    }
+                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-teal-500"
+                  />
+                  <label htmlFor="monthlyReportEmail" className="text-sm text-gray-300 cursor-pointer">
+                    {language === 'fr'
+                      ? 'Envoyer aussi par email'
+                      : 'Also send via email'}
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-gray-400 italic">
+              {language === 'fr'
+                ? '💡 Les rapports incluent : tâches complétées, temps passé par catégorie, progression des projets, et statistiques de productivité.'
+                : '💡 Reports include: completed tasks, time spent by category, project progress, and productivity statistics.'}
+            </p>
           </div>
         </motion.div>
 
