@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:cron": "node test-cron-reports.js all",
+    "test:cron:daily": "node test-cron-reports.js daily",
+    "test:cron:monthly": "node test-cron-reports.js monthly"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.3",
