@@ -162,131 +162,134 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 print:text-black print:bg-none">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 print:text-black print:bg-none">
               My Tasks
             </h1>
-            <p className="text-gray-400 mt-2 print:text-gray-700 print:mb-4">
+            <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base print:text-gray-700 print:mb-4">
               {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg p-1 border border-gray-700">
+            <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg p-1 border border-gray-700 w-fit">
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-all ${
+                className={`p-1.5 sm:p-2 rounded-md transition-all ${
                   viewMode === 'list'
                     ? 'bg-purple-500 text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
                 title="List View"
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-2 rounded-md transition-all ${
+                className={`p-1.5 sm:p-2 rounded-md transition-all ${
                   viewMode === 'table'
                     ? 'bg-purple-500 text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
                 title="Table View"
               >
-                <TableIcon className="w-5 h-5" />
+                <TableIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
-            {/* Export PDF Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handlePrintPDF}
-              className="px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white font-medium flex items-center gap-2 hover:bg-gray-700/50 transition-all no-print"
-            >
-              <FileDown className="w-5 h-5" />
-              Export PDF
-            </motion.button>
+            <div className="flex gap-2 sm:gap-3 flex-1 sm:flex-initial">
+              {/* Export PDF Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePrintPDF}
+                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white font-medium flex items-center justify-center gap-2 hover:bg-gray-700/50 transition-all no-print text-sm sm:text-base"
+              >
+                <FileDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Export PDF</span>
+                <span className="sm:hidden">PDF</span>
+              </motion.button>
 
-            {/* Add Task Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium flex items-center gap-2 shadow-lg no-print"
-            >
-              <Plus className="w-5 h-5" />
-              Add Task
-            </motion.button>
+              {/* Add Task Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowAddModal(true)}
+                className="flex-1 sm:flex-initial px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium flex items-center justify-center gap-2 shadow-lg no-print text-sm sm:text-base"
+              >
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Add Task</span>
+              </motion.button>
+            </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 no-print">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 no-print">
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Tasks</p>
-                <p className="text-3xl font-bold text-white mt-1">{taskStats.total}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Total Tasks</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-0.5 sm:mt-1">{taskStats.total}</p>
               </div>
-              <CheckSquare className="w-8 h-8 text-blue-500" />
+              <CheckSquare className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500" />
             </div>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Completed</p>
-                <p className="text-3xl font-bold text-green-500 mt-1">{taskStats.completed}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Completed</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500 mt-0.5 sm:mt-1">{taskStats.completed}</p>
               </div>
-              <CheckSquare className="w-8 h-8 text-green-500" />
+              <CheckSquare className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-500" />
             </div>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">In Progress</p>
-                <p className="text-3xl font-bold text-yellow-500 mt-1">{taskStats.inProgress}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">In Progress</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-yellow-500 mt-0.5 sm:mt-1">{taskStats.inProgress}</p>
               </div>
-              <Clock className="w-8 h-8 text-yellow-500" />
+              <Clock className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-yellow-500" />
             </div>
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Pending</p>
-                <p className="text-3xl font-bold text-purple-500 mt-1">{taskStats.pending}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Pending</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-500 mt-0.5 sm:mt-1">{taskStats.pending}</p>
               </div>
-              <Square className="w-8 h-8 text-purple-500" />
+              <Square className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500" />
             </div>
           </motion.div>
         </div>
 
         {/* Filters */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 mb-8 no-print">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-gray-700 mb-6 sm:mb-8 no-print">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />

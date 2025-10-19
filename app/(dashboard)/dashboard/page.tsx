@@ -194,45 +194,45 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
               Welcome back, {user?.firstName || 'there'}!
             </h1>
-            <p className="text-gray-400 mt-2">Here&apos;s your productivity overview</p>
+            <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">Here&apos;s your productivity overview</p>
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAddModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium flex items-center gap-2 shadow-lg"
+            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white font-medium flex items-center justify-center gap-2 shadow-lg w-full sm:w-auto"
           >
-            <Plus className="w-5 h-5" />
-            Quick Add Task
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Quick Add Task</span>
           </motion.button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Tasks</p>
-                <p className="text-3xl font-bold text-white mt-1">{totalTasks}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Total Tasks</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-0.5 sm:mt-1">{totalTasks}</p>
               </div>
-              <ListTodo className="w-8 h-8 text-blue-500" />
+              <ListTodo className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-500" />
             </div>
           </motion.div>
 
@@ -240,15 +240,15 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Completed</p>
-                <p className="text-3xl font-bold text-green-500 mt-1">{completedTasks}</p>
-                <p className="text-xs text-gray-500 mt-1">{completionRate.toFixed(0)}% complete</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Completed</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500 mt-0.5 sm:mt-1">{completedTasks}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1">{completionRate.toFixed(0)}% complete</p>
               </div>
-              <CheckSquare className="w-8 h-8 text-green-500" />
+              <CheckSquare className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-500" />
             </div>
           </motion.div>
 
@@ -256,14 +256,14 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">In Progress</p>
-                <p className="text-3xl font-bold text-yellow-500 mt-1">{inProgressTasks}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">In Progress</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-yellow-500 mt-0.5 sm:mt-1">{inProgressTasks}</p>
               </div>
-              <Clock className="w-8 h-8 text-yellow-500" />
+              <Clock className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-yellow-500" />
             </div>
           </motion.div>
 
@@ -271,14 +271,14 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Pending</p>
-                <p className="text-3xl font-bold text-purple-500 mt-1">{pendingTasks}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Pending</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-500 mt-0.5 sm:mt-1">{pendingTasks}</p>
               </div>
-              <Square className="w-8 h-8 text-purple-500" />
+              <Square className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-500" />
             </div>
           </motion.div>
 
@@ -286,26 +286,26 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Overdue</p>
-                <p className="text-3xl font-bold text-red-500 mt-1">{overdueTasks}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Overdue</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-500 mt-0.5 sm:mt-1">{overdueTasks}</p>
               </div>
-              <AlertCircle className="w-8 h-8 text-red-500" />
+              <AlertCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-500" />
             </div>
           </motion.div>
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <TaskCompletionChart data={last7Days} />
           {tasksByCategory.length > 0 && <TasksByCategoryChart data={tasksByCategory} />}
         </div>
 
         {/* Projects and Priority Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <ProjectsProgressChart data={projectsProgress} />
           <TasksByPriorityChart data={tasksByPriority} />
         </div>
@@ -315,10 +315,10 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
+          className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-gray-700"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-white">Recent Tasks</h3>
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-white">Recent Tasks</h3>
             <Link
               href="/tasks"
               className="text-purple-400 hover:text-purple-300 text-sm font-medium"
@@ -326,9 +326,9 @@ export default function DashboardPage() {
               View All →
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {recentTasks.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No tasks yet. Create your first task!</p>
+              <p className="text-gray-500 text-center py-6 sm:py-8 text-sm sm:text-base">No tasks yet. Create your first task!</p>
             ) : (
               recentTasks.map((task, index) => (
                 <motion.div
@@ -336,38 +336,38 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.55 + index * 0.05 }}
-                  className="flex items-center gap-4 p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-all"
+                  className="flex items-center gap-2 sm:gap-3 lg:gap-4 p-3 sm:p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-all"
                 >
                   <button
                     onClick={() => toggleTaskStatus(task.id, task.status)}
                     className="flex-shrink-0 hover:scale-110 transition-transform"
                   >
                     {task.status === 'completed' ? (
-                      <CheckSquare className="w-5 h-5 text-green-500" />
+                      <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                     ) : (
-                      <Square className="w-5 h-5 text-gray-400 hover:text-green-400" />
+                      <Square className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 hover:text-green-400" />
                     )}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-white font-medium truncate ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+                    <p className={`text-sm sm:text-base text-white font-medium truncate ${task.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
                       {task.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1 flex-wrap">
                       <span
-                        className="px-2 py-0.5 rounded-full text-xs font-medium"
+                        className="px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium"
                         style={{ backgroundColor: `${task.todo_lists.color}20`, color: task.todo_lists.color }}
                       >
                         {task.todo_lists.name}
                       </span>
                       {task.due_date && (
-                        <span className="text-gray-400 text-xs flex items-center gap-1">
-                          <CalendarIcon className="w-3 h-3" />
+                        <span className="text-gray-400 text-[10px] sm:text-xs flex items-center gap-0.5 sm:gap-1">
+                          <CalendarIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                           {format(new Date(task.due_date), 'MMM d')}
                         </span>
                       )}
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium flex-shrink-0 ${
                     task.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
                     task.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
                     task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :

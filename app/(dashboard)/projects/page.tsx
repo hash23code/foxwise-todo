@@ -101,14 +101,14 @@ export default function ProjectsPage() {
   return (
     <div className="h-full flex flex-col bg-gray-900">
       {/* Header */}
-      <div className="p-6 border-b border-gray-800">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-4 sm:p-6 border-b border-gray-800">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Folder className="w-8 h-8 text-teal-500" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+              <Folder className="w-6 h-6 sm:w-8 sm:h-8 text-teal-500" />
               {language === 'fr' ? 'Projets' : 'Projects'}
             </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">
               {language === 'fr'
                 ? 'Gérez vos projets complexes avec l\'aide de l\'IA'
                 : 'Manage your complex projects with AI assistance'}
@@ -116,9 +116,9 @@ export default function ProjectsPage() {
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-lg text-white font-medium transition-all shadow-lg flex items-center gap-2"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-lg text-white font-medium transition-all shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             {language === 'fr' ? 'Nouveau Projet' : 'New Project'}
           </button>
         </div>
@@ -129,7 +129,7 @@ export default function ProjectsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base ${
                 filter === f
                   ? 'bg-teal-500 text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -144,11 +144,11 @@ export default function ProjectsPage() {
       </div>
 
       {/* Projects Grid */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {filteredProjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <Folder className="w-16 h-16 text-gray-600 mb-4" />
-            <p className="text-gray-400 text-lg">
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <Folder className="w-12 h-12 sm:w-16 sm:h-16 text-gray-600 mb-4" />
+            <p className="text-gray-400 text-base sm:text-lg">
               {language === 'fr'
                 ? 'Aucun projet pour le moment'
                 : 'No projects yet'}
@@ -160,7 +160,7 @@ export default function ProjectsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {filteredProjects.map((project) => {
               const progress = getProgress(project);
               const totalSteps = project.project_steps?.length || 0;

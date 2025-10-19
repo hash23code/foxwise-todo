@@ -234,73 +234,77 @@ export default function DayPlannerPage() {
   const isToday = selectedDate.toDateString() === new Date().toDateString();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
               {t.dayPlanner.title}
             </h1>
-            <p className="text-gray-400 mt-2">{t.dayPlanner.subtitle}</p>
+            <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">{t.dayPlanner.subtitle}</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <button
               onClick={() => setShowAIPlanner(true)}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg text-white font-medium transition-all shadow-lg flex items-center gap-2"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg text-white font-medium transition-all shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
             >
               <Sparkles className="w-4 h-4" />
               {t.dayPlanner.aiAssistant}
             </button>
 
-            <button
-              onClick={handleExportPrint}
-              className="px-5 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg text-blue-400 font-medium transition-all flex items-center gap-2"
-            >
-              <Printer className="w-4 h-4" />
-              {t.dayPlanner.exportPrint}
-            </button>
+            <div className="flex gap-2 sm:gap-3">
+              <button
+                onClick={handleExportPrint}
+                className="flex-1 sm:flex-initial px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg text-blue-400 font-medium transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline">{t.dayPlanner.exportPrint}</span>
+                <span className="sm:hidden">Print</span>
+              </button>
 
-            <button
-              onClick={clearDay}
-              className="px-5 py-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-400 font-medium transition-all flex items-center gap-2"
-              disabled={plannedTasks.length === 0}
-            >
-              <Trash2 className="w-4 h-4" />
-              {t.dayPlanner.clearDay}
-            </button>
+              <button
+                onClick={clearDay}
+                className="flex-1 sm:flex-initial px-3 sm:px-5 py-2 sm:py-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-400 font-medium transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+                disabled={plannedTasks.length === 0}
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline">{t.dayPlanner.clearDay}</span>
+                <span className="sm:hidden">Clear</span>
+              </button>
 
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2.5 border border-gray-700">
-              <div className="flex items-center gap-2 text-sm text-gray-300">
-                <Clock className="w-4 h-4" />
-                <span className="font-medium">{getTotalPlannedHours()}h</span>
-                <span className="text-gray-500">{t.dayPlanner.planned}</span>
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-700">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-300">
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="font-medium">{getTotalPlannedHours()}h</span>
+                  <span className="text-gray-500 hidden sm:inline">{t.dayPlanner.planned}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Date Navigation */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 mb-8">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-gray-700 mb-6 sm:mb-8">
           <div className="flex items-center justify-between">
             <button
               onClick={() => changeDate(-1)}
-              className="p-2 text-gray-400 hover:text-white transition-colors"
+              className="p-1.5 sm:p-2 text-gray-400 hover:text-white transition-colors"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-white">
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                   {selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
                 </p>
-                <p className="text-gray-400 mt-1">
+                <p className="text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm lg:text-base">
                   {selectedDate.toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',
@@ -321,61 +325,61 @@ export default function DayPlannerPage() {
 
             <button
               onClick={() => changeDate(1)}
-              className="p-2 text-gray-400 hover:text-white transition-colors"
+              className="p-1.5 sm:p-2 text-gray-400 hover:text-white transition-colors"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
         {/* Timeline */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
-          <div className="space-y-2">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 border border-gray-700">
+          <div className="space-y-1.5 sm:space-y-2">
             {hours.map((hour) => {
               const tasksAtHour = getTasksForHour(hour);
               const hourStr = `${hour.toString().padStart(2, '0')}:00`;
 
               return (
-                <div key={hour} className="flex gap-4">
+                <div key={hour} className="flex gap-2 sm:gap-3 lg:gap-4">
                   {/* Time Label */}
-                  <div className="w-24 flex-shrink-0 text-right pr-4 border-r border-gray-700">
-                    <span className="text-gray-400 font-medium">{formatHour(hour)}</span>
+                  <div className="w-14 sm:w-20 lg:w-24 flex-shrink-0 text-right pr-2 sm:pr-3 lg:pr-4 border-r border-gray-700">
+                    <span className="text-gray-400 font-medium text-xs sm:text-sm lg:text-base">{formatHour(hour)}</span>
                   </div>
 
                   {/* Time Slot */}
-                  <div className="flex-1 min-h-[80px] relative">
+                  <div className="flex-1 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] relative">
                     {tasksAtHour.length === 0 ? (
                       <button
                         onClick={() => {
                           setSelectedTimeSlot(hourStr);
                           setShowTaskSelector(true);
                         }}
-                        className="w-full h-full border-2 border-dashed border-gray-700 rounded-lg hover:border-blue-500/50 hover:bg-blue-500/5 transition-all flex items-center justify-center group"
+                        className="w-full h-full border-2 border-dashed border-gray-700 rounded-md sm:rounded-lg hover:border-blue-500/50 hover:bg-blue-500/5 transition-all flex items-center justify-center group"
                       >
-                        <Plus className="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition-colors" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-blue-500 transition-colors" />
                       </button>
                     ) : (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1.5 sm:gap-2">
                         {tasksAtHour.map((plannedTask) => {
                           return (
                             <motion.div
                               key={plannedTask.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className={`p-4 rounded-lg border-2 ${getPriorityColor(plannedTask.task.priority)} flex items-start justify-between gap-3 relative z-10`}
+                              className={`p-2 sm:p-3 lg:p-4 rounded-md sm:rounded-lg border-2 ${getPriorityColor(plannedTask.task.priority)} flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 relative z-10`}
                             >
                               {/* Task Content */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <CheckSquare className="w-4 h-4 flex-shrink-0" />
-                                  <h4 className="font-semibold truncate">{plannedTask.task.title}</h4>
+                              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                  <CheckSquare className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <h4 className="font-semibold truncate text-sm sm:text-base">{plannedTask.task.title}</h4>
                                 </div>
                                 {plannedTask.task.description && (
-                                  <p className="text-sm opacity-80 mb-2 line-clamp-2">{plannedTask.task.description}</p>
+                                  <p className="text-xs sm:text-sm opacity-80 mb-1 sm:mb-2 line-clamp-2">{plannedTask.task.description}</p>
                                 )}
-                                <div className="flex items-center gap-3 text-xs flex-wrap">
+                                <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs flex-wrap">
                                   <span
-                                    className="px-2 py-1 rounded-full"
+                                    className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full"
                                     style={{
                                       backgroundColor: `${plannedTask.task.todo_lists.color}20`,
                                       color: plannedTask.task.todo_lists.color
@@ -383,55 +387,55 @@ export default function DayPlannerPage() {
                                   >
                                     {plannedTask.task.todo_lists.name}
                                   </span>
-                                  <span className="flex items-center gap-1 opacity-80">
-                                    <Clock className="w-3 h-3" />
+                                  <span className="flex items-center gap-0.5 sm:gap-1 opacity-80">
+                                    <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                     {plannedTask.duration_hours}h
                                   </span>
                                 </div>
                               </div>
 
                               {/* Action Buttons */}
-                              <div className="flex flex-col gap-2 flex-shrink-0">
+                              <div className="flex sm:flex-col gap-1.5 sm:gap-2 flex-shrink-0 w-full sm:w-auto">
                                 {/* Complete Button */}
                                 <button
                                   onClick={() => updateTaskStatus(plannedTask.task.id, 'completed')}
-                                  className={`px-3 py-2 border rounded-lg text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap ${
+                                  className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
                                     plannedTask.task.status === 'completed'
                                       ? 'bg-green-500/30 border-green-500 text-green-400'
                                       : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
                                   }`}
                                   title={t.dayPlanner.markAsCompleted}
                                 >
-                                  <CheckSquare className="w-3 h-3" />
-                                  {t.dayPlanner.complete}
+                                  <CheckSquare className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                  <span className="hidden xs:inline">{t.dayPlanner.complete}</span>
                                 </button>
 
                                 {/* In Progress Button */}
                                 <button
                                   onClick={() => updateTaskStatus(plannedTask.task.id, 'in_progress')}
-                                  className={`px-3 py-2 border rounded-lg text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap ${
+                                  className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
                                     plannedTask.task.status === 'in_progress'
                                       ? 'bg-yellow-500/30 border-yellow-500 text-yellow-400'
                                       : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
                                   }`}
                                   title={t.dayPlanner.needMoreTime}
                                 >
-                                  <Clock className="w-3 h-3" />
-                                  {t.dayPlanner.moreTime}
+                                  <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                  <span className="hidden xs:inline">{t.dayPlanner.moreTime}</span>
                                 </button>
 
                                 {/* Postpone Button */}
                                 <button
                                   onClick={() => updateTaskStatus(plannedTask.task.id, 'pending')}
-                                  className={`px-3 py-2 border rounded-lg text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap ${
+                                  className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
                                     plannedTask.task.status === 'pending'
                                       ? 'bg-red-500/30 border-red-500 text-red-400'
                                       : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
                                   }`}
                                   title={t.dayPlanner.postponeTask}
                                 >
-                                  <X className="w-3 h-3" />
-                                  {t.dayPlanner.postpone}
+                                  <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                  <span className="hidden xs:inline">{t.dayPlanner.postpone}</span>
                                 </button>
                               </div>
                             </motion.div>
