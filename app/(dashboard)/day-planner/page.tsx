@@ -43,7 +43,7 @@ interface PlannedTask {
 }
 
 export default function DayPlannerPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tasks, setTasks] = useState<Task[]>([]);
   const [plannedTasks, setPlannedTasks] = useState<PlannedTask[]>([]);
