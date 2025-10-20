@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+
+// Force dynamic rendering since we use searchParams
+export const dynamic = 'force-dynamic';
 import {
   Plus,
   Search,
