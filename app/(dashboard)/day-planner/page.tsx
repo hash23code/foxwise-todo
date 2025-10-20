@@ -175,6 +175,24 @@ export default function DayPlannerPage() {
     }
   };
 
+  const removePlannedTask = async (plannedTaskId: string) => {
+    if (!confirm(language === 'fr' ? 'Retirer cette tâche du planning ?' : 'Remove this task from day planner?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/day-planner?id=${plannedTaskId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchPlannedTasks();
+      }
+    } catch (error) {
+      console.error('Error removing planned task:', error);
+    }
+  };
+
   const formatHour = (hour: number) => {
     if (hour === 0) return '12 AM';
     if (hour === 12) return '12 PM';
@@ -446,6 +464,16 @@ export default function DayPlannerPage() {
                                 >
                                   <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                   <span className="hidden xs:inline">{t.dayPlanner.postpone}</span>
+                                </button>
+
+                                {/* Remove from Planner Button */}
+                                <button
+                                  onClick={() => removePlannedTask(plannedTask.id)}
+                                  className="flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 hover:border-red-500"
+                                  title={language === 'fr' ? 'Retirer du planning' : 'Remove from planner'}
+                                >
+                                  <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                  <span className="hidden xs:inline">{language === 'fr' ? 'Retirer' : 'Remove'}</span>
                                 </button>
                               </div>
                             </motion.div>

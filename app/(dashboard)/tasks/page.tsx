@@ -56,12 +56,26 @@ export default function TasksPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
-  const [hideCompleted, setHideCompleted] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(() => {
+    // Load from localStorage on initialization
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('hideCompletedTasks');
+      return saved === 'true';
+    }
+    return false;
+  });
 
   useEffect(() => {
     fetchLists();
     fetchTasks();
   }, [selectedList, filterStatus, filterPriority]);
+
+  // Save hideCompleted preference to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hideCompletedTasks', hideCompleted.toString());
+    }
+  }, [hideCompleted]);
 
   const fetchLists = async () => {
     try {
