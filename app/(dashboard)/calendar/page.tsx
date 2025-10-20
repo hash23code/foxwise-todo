@@ -357,12 +357,12 @@ export default function CalendarPage() {
   const selectedDateNotes = selectedDate ? getNotesForDate(selectedDate) : [];
   const selectedDateTasks = selectedDate ? getTasksForDate(selectedDate) : [];
 
-  const updateTaskStatus = async (taskId: string, status: 'completed' | 'in_progress') => {
+  const updateTaskStatus = async (taskId: string, newStatus: 'completed' | 'in_progress' | 'pending') => {
     try {
       const response = await fetch('/api/tasks', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: taskId, status }),
+        body: JSON.stringify({ id: taskId, status: newStatus }),
       });
 
       if (response.ok) {
@@ -371,6 +371,11 @@ export default function CalendarPage() {
     } catch (error) {
       console.error('Error updating task status:', error);
     }
+  };
+
+  const toggleTaskCompletion = async (task: Task) => {
+    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+    await updateTaskStatus(task.id, newStatus);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -597,8 +602,9 @@ export default function CalendarPage() {
                     style={{ borderLeftColor: getPriorityColor(task.priority) }}
                   >
                     <button
-                      onClick={() => updateTaskStatus(task.id, 'completed')}
+                      onClick={() => toggleTaskCompletion(task)}
                       className="mt-0.5 flex-shrink-0"
+                      title={task.status === 'completed' ? 'Mark as pending' : 'Mark as completed'}
                     >
                       {task.status === 'completed' ? (
                         <CheckCircle className="w-5 h-5 text-green-400" />
