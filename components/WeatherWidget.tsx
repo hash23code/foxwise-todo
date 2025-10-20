@@ -126,6 +126,11 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
           const data = await response.json();
           console.log('Weather data received:', data);
           setWeather(data);
+          // Call onWeatherLoad only once after successful fetch
+          // Not added to dependencies to avoid infinite loops
+          if (onWeatherLoad) {
+            onWeatherLoad(data);
+          }
         }
       } catch (error) {
         console.error("Error fetching weather:", error);
@@ -136,13 +141,6 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
 
     fetchWeather();
   }, [date, coords, useGeolocation]);
-
-  // Separate effect for onWeatherLoad to avoid re-render loops
-  useEffect(() => {
-    if (weather && onWeatherLoad) {
-      onWeatherLoad(weather);
-    }
-  }, [weather]);
 
   const getWeatherIcon = (main: string, size: number = 24) => {
     switch (main) {
