@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import AIPlannerModal from "@/components/AIPlannerModal";
 import WeatherWidget from "@/components/WeatherWidget";
+import BadgeDisplay from "@/components/BadgeDisplay";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Badge } from "@/lib/badges";
 
 interface Task {
   id: string;
@@ -52,6 +54,7 @@ export default function DayPlannerPage() {
   const [loading, setLoading] = useState(true);
   const [showAIPlanner, setShowAIPlanner] = useState(false);
   const [weatherData, setWeatherData] = useState<any>(null);
+  const [badges, setBadges] = useState<Badge[]>([]);
 
   // Generate hours from 6 AM to 5 AM (next day)
   // 6,7,8...23 (18 hours), then 0,1,2,3,4,5 (6 hours) = 24 hours total
@@ -63,6 +66,7 @@ export default function DayPlannerPage() {
   useEffect(() => {
     fetchTasks();
     fetchPlannedTasks();
+    fetchBadges();
   }, [selectedDate]);
 
   const fetchTasks = async () => {
@@ -94,6 +98,19 @@ export default function DayPlannerPage() {
       }
     } catch (error) {
       console.error('Error fetching planned tasks:', error);
+    }
+  };
+
+  const fetchBadges = async () => {
+    try {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const response = await fetch(`/api/badges?date=${dateStr}`);
+      if (response.ok) {
+        const data = await response.json();
+        setBadges(data);
+      }
+    } catch (error) {
+      console.error('Error fetching badges:', error);
     }
   };
 
@@ -305,28 +322,45 @@ export default function DayPlannerPage() {
               <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-                  {selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
-                </p>
-                <p className="text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm lg:text-base">
-                  {selectedDate.toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 relative w-full">
+              {/* Contenu centré */}
+              <div className="flex-1 flex flex-col items-center">
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
+                    {selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
+                  </p>
+                  <p className="text-gray-400 mt-0.5 sm:mt-1 text-xs sm:text-sm lg:text-base">
+                    {selectedDate.toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </p>
+
+                  {/* Badges en dessous sur mobile/tablette */}
+                  {badges.length > 0 && (
+                    <div className="lg:hidden mt-2 flex justify-center">
+                      <BadgeDisplay badges={badges} compact={true} />
+                    </div>
+                  )}
+                </div>
+
+                {!isToday && (
+                  <button
+                    onClick={goToToday}
+                    className="mt-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm font-medium"
+                  >
+                    {t.dayPlanner.today}
+                  </button>
+                )}
               </div>
 
-              {!isToday && (
-                <button
-                  onClick={goToToday}
-                  className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm font-medium"
-                >
-                  {t.dayPlanner.today}
-                </button>
-              )}
+              {/* Badges à droite (cachés sur mobile pour garder centré) */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block">
+                {badges.length > 0 && (
+                  <BadgeDisplay badges={badges} compact={true} />
+                )}
+              </div>
             </div>
 
             <button
