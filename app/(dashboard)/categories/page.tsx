@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Edit, Trash2, FolderKanban, Home, Briefcase, Users, Heart } from "lucide-react";
 
@@ -33,6 +34,7 @@ const COLOR_OPTIONS = [
 ];
 
 export default function CategoriesPage() {
+  const router = useRouter();
   const [lists, setLists] = useState<TodoList[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -163,7 +165,8 @@ export default function CategoriesPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all"
+                  onClick={() => router.push(`/tasks?list=${list.id}`)}
+                  className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all cursor-pointer"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
@@ -183,13 +186,19 @@ export default function CategoriesPage() {
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleEdit(list)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(list);
+                        }}
                         className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
                       >
                         <Edit className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(list.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(list.id);
+                        }}
                         className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />

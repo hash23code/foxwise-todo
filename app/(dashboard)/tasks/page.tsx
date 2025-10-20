@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -41,6 +42,7 @@ interface Task {
 }
 
 export default function TasksPage() {
+  const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TodoList[]>([]);
   const [selectedList, setSelectedList] = useState<string | null>(null);
@@ -52,6 +54,14 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
   const [hideCompleted, setHideCompleted] = useState(false);
+
+  // Apply filter from URL query parameter (when redirected from Categories)
+  useEffect(() => {
+    const listParam = searchParams.get('list');
+    if (listParam) {
+      setSelectedList(listParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchLists();
