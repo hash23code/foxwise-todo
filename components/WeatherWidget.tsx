@@ -149,6 +149,10 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
   };
 
   const getCurrentTemp = () => {
+    if (!weather || !weather.daily) {
+      return 0;
+    }
+
     // Determine current temperature based on time of day
     const now = new Date();
     const selectedDateObj = new Date(date);
