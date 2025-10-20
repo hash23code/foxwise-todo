@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get unique user IDs
-    const uniqueUserIds = [...new Set(users?.map((u: any) => u.user_id) || [])];
+    const uniqueUserIds = Array.from(new Set(users?.map((u: any) => u.user_id) || []));
 
     if (uniqueUserIds.length === 0) {
       return NextResponse.json({ message: 'No users with tasks today', sent: 0 });

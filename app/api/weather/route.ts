@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // GET weather forecast for a specific date and location
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date');
-    const lat = searchParams.get('lat') || '45.5017'; // Montreal by default
-    const lon = searchParams.get('lon') || '-73.5673';
+  const { searchParams } = new URL(request.url);
+  const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+  const lat = searchParams.get('lat') || '45.5017'; // Montreal by default
+  const lon = searchParams.get('lon') || '-73.5673';
 
+  try {
     if (!date) {
       return NextResponse.json({ error: 'Date parameter is required (YYYY-MM-DD)' }, { status: 400 });
     }
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error in GET /api/weather:', error);
     // Return mock data on error
-    return NextResponse.json(getMockWeatherData(searchParams.get('date') || new Date().toISOString().split('T')[0]));
+    return NextResponse.json(getMockWeatherData(date));
   }
 }
 
