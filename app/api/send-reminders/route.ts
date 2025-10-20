@@ -4,6 +4,9 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'dummy-key-for-build');
 
+// Force dynamic rendering (required for cron)
+export const dynamic = 'force-dynamic';
+
 // This endpoint will be called by a cron job to send pending reminders
 export async function POST(request: NextRequest) {
   try {

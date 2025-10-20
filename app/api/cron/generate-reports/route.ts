@@ -4,6 +4,9 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'dummy-key-for-build');
 
+// Force dynamic rendering (required for cron)
+export const dynamic = 'force-dynamic';
+
 // Combined endpoint - generates daily reports (and monthly on 1st of month)
 // This runs daily at 23:00 via Vercel Cron
 export async function GET(request: NextRequest) {

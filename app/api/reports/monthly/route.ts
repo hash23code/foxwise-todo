@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 
+// Force dynamic rendering (required for auth)
+export const dynamic = 'force-dynamic';
+
 // GET monthly report for a specific month
 export async function GET(request: NextRequest) {
   try {
