@@ -12,15 +12,20 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with a function to avoid issues during SSR
-  const [language, setLanguageState] = useState<Language>(() => {
-    // During SSR, always return 'en'
-    if (typeof window === 'undefined') return 'en';
+  // Always initialize with 'en' to match SSR
+  const [language, setLanguageState] = useState<Language>('en');
+  const [mounted, setMounted] = useState(false);
 
-    // On client, try to get from localStorage
-    const saved = localStorage.getItem('appLanguage') as Language;
-    return (saved === 'en' || saved === 'fr') ? saved : 'en';
-  });
+  // Load language from localStorage only after component mounts (client-side only)
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('appLanguage') as Language;
+      if (saved === 'en' || saved === 'fr') {
+        setLanguageState(saved);
+      }
+    }
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
