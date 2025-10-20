@@ -454,8 +454,13 @@ export default function DayPlannerPage() {
 
                                 {/* Remove from Planner Button */}
                                 <button
-                                  onClick={() => removePlannedTask(plannedTask.id)}
-                                  className="flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 hover:border-red-500"
+                                  onClick={() => {
+                                    if (plannedTask.id) {
+                                      removePlannedTask(plannedTask.id);
+                                    }
+                                  }}
+                                  disabled={!plannedTask.id}
+                                  className="flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                   title={language === 'fr' ? 'Retirer du planning' : 'Remove from planner'}
                                 >
                                   <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
