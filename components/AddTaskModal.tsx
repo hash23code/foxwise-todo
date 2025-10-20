@@ -168,12 +168,31 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
       if (response.ok) {
         const parsedTask = await response.json();
 
+        // Extract date and time from due_date if present
+        let dateValue = '';
+        let timeValue = '';
+
+        if (parsedTask.due_date) {
+          const dueDate = new Date(parsedTask.due_date);
+          dateValue = dueDate.toISOString().split('T')[0];
+
+          // Extract time if it exists in the ISO string
+          if (parsedTask.due_date.includes('T')) {
+            const timePart = parsedTask.due_date.split('T')[1];
+            if (timePart) {
+              timeValue = timePart.substring(0, 5); // Get HH:MM
+            }
+          }
+        }
+
         setFormData(prev => ({
           ...prev,
           title: parsedTask.title || '',
           description: parsedTask.description || '',
           priority: parsedTask.priority || 'medium',
-          due_date: parsedTask.due_date ? new Date(parsedTask.due_date).toISOString().split('T')[0] : '',
+          list_id: parsedTask.list_id || prev.list_id, // Use AI suggested list_id or keep current
+          due_date: dateValue,
+          due_time: parsedTask.due_time || timeValue,
           tags: parsedTask.tags || [],
         }));
       } else {

@@ -45,7 +45,10 @@ export default function TasksPage() {
   const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TodoList[]>([]);
-  const [selectedList, setSelectedList] = useState<string | null>(null);
+  const [selectedList, setSelectedList] = useState<string | null>(() => {
+    // Initialize selectedList from query parameter immediately
+    return searchParams.get('list') || null;
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
@@ -54,14 +57,6 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
   const [hideCompleted, setHideCompleted] = useState(false);
-
-  // Apply filter from URL query parameter (when redirected from Categories)
-  useEffect(() => {
-    const listParam = searchParams.get('list');
-    if (listParam) {
-      setSelectedList(listParam);
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     fetchLists();
