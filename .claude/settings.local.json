@@ -42,7 +42,8 @@
       "Bash(if [ -f .env.local ])",
       "Bash(then)",
       "Bash(else)",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(wc -l \"H:\\Ai_Projects\\app\\claude\\FoxWise_ToDo\\app\\(dashboard)\\tasks\\page.tsx\")"
     ],
     "deny": [],
     "ask": []

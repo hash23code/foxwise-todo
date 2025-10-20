@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -20,9 +20,6 @@ import {
   FileDown
 } from "lucide-react";
 import AddTaskModal from "@/components/AddTaskModal";
-
-// Force dynamic rendering since we use searchParams
-export const dynamic = 'force-dynamic';
 
 interface TodoList {
   id: string;
@@ -44,7 +41,7 @@ interface Task {
   todo_lists: TodoList;
 }
 
-export default function TasksPage() {
+function TasksPageContent() {
   const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<TodoList[]>([]);
@@ -682,5 +679,23 @@ export default function TasksPage() {
         />
       </motion.div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export default function TasksPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-700 rounded w-1/4 mb-6"></div>
+            <div className="h-64 bg-gray-800 rounded"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <TasksPageContent />
+    </Suspense>
   );
 }
