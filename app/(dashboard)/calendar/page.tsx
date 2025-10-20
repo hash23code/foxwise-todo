@@ -77,13 +77,13 @@ export default function CalendarPage() {
       if (tasksResponse.ok) {
         const tasksData = await tasksResponse.json();
 
-        // Filter tasks that have due dates and are not completed/cancelled
+        // Filter tasks that have due dates (keep completed visible, exclude cancelled)
         const activeTasks = tasksData.filter((task: Task) => {
           // Check if task has due date
           if (!task.due_date) return false;
 
-          // Check if task is not completed/cancelled
-          if (task.status === 'completed' || task.status === 'cancelled') return false;
+          // Check if task is not cancelled (keep completed tasks visible but crossed out)
+          if (task.status === 'cancelled') return false;
 
           // Validate the date format
           try {
