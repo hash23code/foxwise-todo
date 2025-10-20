@@ -124,20 +124,6 @@ export default function DayPlannerPage() {
     }
   };
 
-  const removePlannedTask = async (plannedTaskId: string) => {
-    try {
-      const response = await fetch(`/api/day-planner?id=${plannedTaskId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        fetchPlannedTasks();
-      }
-    } catch (error) {
-      console.error('Error removing planned task:', error);
-    }
-  };
-
   const getTasksForHour = (hour: number) => {
     // Return all tasks that START within this hour (e.g., for hour 17, include 17:00, 17:15, 17:30, 17:45)
     return plannedTasks.filter(pt => {
