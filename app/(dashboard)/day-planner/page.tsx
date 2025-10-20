@@ -357,7 +357,7 @@ export default function DayPlannerPage() {
                   </div>
 
                   {/* Time Slot */}
-                  <div className="flex-1 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] relative">
+                  <div className="flex-1 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] relative overflow-hidden">
                     {tasksAtHour.length === 0 ? (
                       <button
                         onClick={() => {
@@ -376,13 +376,13 @@ export default function DayPlannerPage() {
                               key={plannedTask.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className={`p-2 sm:p-3 lg:p-4 rounded-md sm:rounded-lg border-2 ${getPriorityColor(plannedTask.task.priority)} flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 relative z-10`}
+                              className={`w-full max-w-full p-2 sm:p-3 lg:p-4 rounded-md sm:rounded-lg border-2 ${getPriorityColor(plannedTask.task.priority)} flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 relative z-10`}
                             >
                               {/* Task Content */}
                               <div className="flex-1 min-w-0 w-full sm:w-auto">
-                                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                                  <CheckSquare className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                                  <h4 className="font-semibold truncate text-sm sm:text-base">{plannedTask.task.title}</h4>
+                                <div className="flex items-start gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                  <CheckSquare className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
+                                  <h4 className="font-semibold line-clamp-2 text-sm sm:text-base break-words">{plannedTask.task.title}</h4>
                                 </div>
                                 {plannedTask.task.description && (
                                   <p className="text-xs sm:text-sm opacity-80 mb-1 sm:mb-2 line-clamp-2">{plannedTask.task.description}</p>
