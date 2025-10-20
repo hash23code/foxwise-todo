@@ -4,8 +4,8 @@
  * Script de test pour les endpoints de rapports automatisés
  *
  * Usage:
- *   node test-cron-reports.js daily
- *   node test-cron-reports.js monthly
+ *   node test-cron-reports.js reports
+ *   node test-cron-reports.js reminders
  *   node test-cron-reports.js all
  */
 
@@ -68,23 +68,15 @@ const main = async () => {
 
   const results = [];
 
-  if (command === 'daily' || command === 'all') {
+  if (command === 'reports' || command === 'all') {
     const success = await testEndpoint(
-      'Daily Reports',
-      '/api/cron/generate-daily-reports'
+      'Generate Reports (Daily + Monthly)',
+      '/api/cron/generate-reports'
     );
-    results.push({ name: 'Daily Reports', success });
+    results.push({ name: 'Generate Reports', success });
   }
 
-  if (command === 'monthly' || command === 'all') {
-    const success = await testEndpoint(
-      'Monthly Reports',
-      '/api/cron/generate-monthly-reports'
-    );
-    results.push({ name: 'Monthly Reports', success });
-  }
-
-  if (command === 'reminders') {
+  if (command === 'reminders' || command === 'all') {
     const success = await testEndpoint(
       'Send Reminders',
       '/api/send-reminders'
@@ -92,12 +84,11 @@ const main = async () => {
     results.push({ name: 'Send Reminders', success });
   }
 
-  if (!['daily', 'monthly', 'all', 'reminders'].includes(command)) {
+  if (!['reports', 'all', 'reminders'].includes(command)) {
     console.log(`\n❌ Invalid command: ${command}`);
     console.log('\nUsage:');
-    console.log('  node test-cron-reports.js daily      - Test daily reports only');
-    console.log('  node test-cron-reports.js monthly    - Test monthly reports only');
-    console.log('  node test-cron-reports.js reminders  - Test reminders only');
+    console.log('  node test-cron-reports.js reports    - Test generate-reports endpoint');
+    console.log('  node test-cron-reports.js reminders  - Test send-reminders endpoint');
     console.log('  node test-cron-reports.js all        - Test all endpoints');
     process.exit(1);
   }

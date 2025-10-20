@@ -5,12 +5,8 @@
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/cron/generate-daily-reports",
+      "path": "/api/cron/generate-reports",
       "schedule": "0 23 * * *"
-    },
-    {
-      "path": "/api/cron/generate-monthly-reports",
-      "schedule": "0 23 1 * *"
     }
   ]
 }
