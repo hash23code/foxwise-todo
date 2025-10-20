@@ -148,6 +148,32 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
     }
   };
 
+  const getCurrentTemp = () => {
+    // Determine current temperature based on time of day
+    const now = new Date();
+    const selectedDateObj = new Date(date);
+    const isToday = now.toDateString() === selectedDateObj.toDateString();
+
+    if (isToday) {
+      const hour = now.getHours();
+      if (hour >= 6 && hour < 12 && weather.periods.morning) {
+        return weather.periods.morning.temp;
+      } else if (hour >= 12 && hour < 18 && weather.periods.afternoon) {
+        return weather.periods.afternoon.temp;
+      } else if (hour >= 18 && weather.periods.evening) {
+        return weather.periods.evening.temp;
+      }
+    }
+
+    // For other days or if period not available, use afternoon temp or average
+    if (weather.periods.afternoon) {
+      return weather.periods.afternoon.temp;
+    }
+
+    // Fallback to average of min/max
+    return Math.round((weather.daily.temp.min + weather.daily.temp.max) / 2);
+  };
+
   const t = language === 'fr' ? {
     morning: 'Matin',
     afternoon: 'Après-midi',
@@ -196,13 +222,20 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
         {/* Left: Weather icon + temp + description */}
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {getWeatherIcon(weather.daily.main, 20)}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-white font-semibold text-sm whitespace-nowrap">
-              {weather.daily.temp.min}°/{weather.daily.temp.max}°
+          <div className="flex flex-col min-w-0">
+            {/* Current temperature - larger */}
+            <span className="text-white font-bold text-2xl leading-none">
+              {getCurrentTemp()}°
             </span>
-            <span className="text-gray-400 text-xs capitalize truncate">
-              {weather.daily.description}
-            </span>
+            {/* Min/Max temperatures - smaller */}
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-gray-400 text-xs whitespace-nowrap">
+                {weather.daily.temp.min}°/{weather.daily.temp.max}°
+              </span>
+              <span className="text-gray-400 text-xs capitalize truncate">
+                {weather.daily.description}
+              </span>
+            </div>
           </div>
         </div>
 
