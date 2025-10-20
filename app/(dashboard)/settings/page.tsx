@@ -20,6 +20,7 @@ export default function SettingsPage() {
       transactionAlerts: true,
     },
     reports: {
+      reportType: "ai-automated" as "standard" | "ai-automated",
       dailyReport: true,
       monthlyReport: true,
       dailyReportEmail: false,
@@ -341,6 +342,93 @@ export default function SettingsPage() {
             </h2>
           </div>
           <div className="space-y-4">
+            {/* Report Type Selection */}
+            <div className="p-4 bg-gray-800/50 rounded-lg border-2 border-teal-500/30">
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                {language === 'fr' ? 'Type de rapport' : 'Report Type'}
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button
+                  onClick={() =>
+                    setSettings({
+                      ...settings,
+                      reports: {
+                        ...settings.reports,
+                        reportType: 'standard',
+                      },
+                    })
+                  }
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    settings.reports.reportType === 'standard'
+                      ? 'border-teal-500 bg-teal-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      settings.reports.reportType === 'standard'
+                        ? 'border-teal-500'
+                        : 'border-gray-600'
+                    }`}>
+                      {settings.reports.reportType === 'standard' && (
+                        <div className="w-3 h-3 rounded-full bg-teal-500" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-medium">
+                        {language === 'fr' ? 'Rapport Standard' : 'Standard Report'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {language === 'fr'
+                          ? 'Format simple avec statistiques de base'
+                          : 'Simple format with basic statistics'}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() =>
+                    setSettings({
+                      ...settings,
+                      reports: {
+                        ...settings.reports,
+                        reportType: 'ai-automated',
+                      },
+                    })
+                  }
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    settings.reports.reportType === 'ai-automated'
+                      ? 'border-teal-500 bg-teal-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      settings.reports.reportType === 'ai-automated'
+                        ? 'border-teal-500'
+                        : 'border-gray-600'
+                    }`}>
+                      {settings.reports.reportType === 'ai-automated' && (
+                        <div className="w-3 h-3 rounded-full bg-teal-500" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-medium flex items-center gap-2">
+                        {language === 'fr' ? 'Rapport IA Automatisé' : 'AI Automated Report'}
+                        <span className="text-[10px] bg-yellow-400 text-teal-900 px-1.5 py-0.5 rounded-full font-bold">AI</span>
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {language === 'fr'
+                          ? 'Analyses intelligentes et recommandations personnalisées'
+                          : 'Smart insights and personalized recommendations'}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Daily Report */}
             <div className="p-4 bg-gray-800/50 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
