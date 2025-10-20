@@ -11,9 +11,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, targetEndDate, language = 'en' } = body;
+    const { title, description, targetEndDate, language = 'en', complexity = 'auto' } = body;
 
-    console.log('[AI Planner] Language received:', language, 'Title:', title);
+    console.log('[AI Planner] Language received:', language, 'Title:', title, 'Complexity:', complexity);
 
     if (!title) {
       return NextResponse.json({ error: 'Project title is required' }, { status: 400 });
@@ -27,6 +27,25 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Generate complexity constraint
+    const getComplexityConstraint = (lang: string) => {
+      if (complexity === 'auto') {
+        return lang === 'fr'
+          ? 'Déterminez le nombre d\'étapes approprié selon la complexité du projet.'
+          : 'Determine the appropriate number of steps based on project complexity.';
+      }
+
+      const stepRanges = {
+        low: lang === 'fr' ? '3 à 5 étapes' : '3 to 5 steps',
+        medium: lang === 'fr' ? 'environ 10 étapes' : 'around 10 steps',
+        high: lang === 'fr' ? 'environ 20 étapes détaillées' : 'around 20 detailed steps'
+      };
+
+      return lang === 'fr'
+        ? `IMPORTANT: Créez un plan avec ${stepRanges[complexity as 'low' | 'medium' | 'high']}.`
+        : `IMPORTANT: Create a plan with ${stepRanges[complexity as 'low' | 'medium' | 'high']}.`;
+    };
 
     // Construct the prompt for Gemini (bilingual support) - OPTIMIZED for speed
     const prompt = language === 'fr' ?
@@ -57,7 +76,7 @@ Format JSON:
   "estimatedDuration": "Estimation"
 }
 
-3 phases, 4-5 tâches/phase. Descriptions COURTES. JSON uniquement.`
+${getComplexityConstraint('fr')} Descriptions COURTES. JSON uniquement.`
     :
     `Create project plan in English for: ${title}
 ${description ? `Description: ${description}` : ''}
@@ -86,7 +105,7 @@ JSON format:
   "estimatedDuration": "Estimate"
 }
 
-3 phases, 4-5 tasks/phase. SHORT descriptions. JSON only.`;
+${getComplexityConstraint('en')} SHORT descriptions. JSON only.`;
 
     // Call Gemini API
     const response = await fetch(

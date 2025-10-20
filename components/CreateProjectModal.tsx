@@ -66,6 +66,8 @@ export default function CreateProjectModal({
   const [description, setDescription] = useState("");
   const [targetEndDate, setTargetEndDate] = useState("");
   const [color, setColor] = useState("#667eea");
+  const [complexity, setComplexity] = useState<'low' | 'medium' | 'high'>('medium');
+  const [autoComplexity, setAutoComplexity] = useState(true);
 
   // Voice recognition states
   const [isRecording, setIsRecording] = useState(false);
@@ -214,6 +216,7 @@ export default function CreateProjectModal({
           description,
           targetEndDate,
           language: language === 'fr' ? 'fr' : 'en',
+          complexity: autoComplexity ? 'auto' : complexity,
         }),
       });
 
@@ -365,6 +368,8 @@ export default function CreateProjectModal({
     setDescription("");
     setTargetEndDate("");
     setColor("#667eea");
+    setComplexity('medium');
+    setAutoComplexity(true);
     setAiPlan(null);
     setChatMessages([]);
     setChatInput("");
@@ -600,6 +605,45 @@ export default function CreateProjectModal({
                     />
                   ))}
                 </div>
+              </div>
+
+              {/* Project Complexity */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  {language === 'fr' ? 'Complexité du projet' : 'Project Complexity'}
+                </label>
+
+                {/* Auto-detect checkbox */}
+                <div className="flex items-center gap-2 mb-3">
+                  <input
+                    type="checkbox"
+                    id="autoComplexity"
+                    checked={autoComplexity}
+                    onChange={(e) => setAutoComplexity(e.target.checked)}
+                    className="w-4 h-4 text-teal-600 bg-gray-700 border-gray-600 rounded focus:ring-teal-500 focus:ring-2"
+                  />
+                  <label htmlFor="autoComplexity" className="text-sm text-gray-300 cursor-pointer">
+                    {language === 'fr' ? 'Laisser l\'IA décider de la complexité' : 'Let AI decide complexity'}
+                  </label>
+                </div>
+
+                {/* Complexity selector */}
+                <select
+                  value={complexity}
+                  onChange={(e) => setComplexity(e.target.value as 'low' | 'medium' | 'high')}
+                  disabled={autoComplexity}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="low">
+                    {language === 'fr' ? 'Faible (3-5 étapes)' : 'Low (3-5 steps)'}
+                  </option>
+                  <option value="medium">
+                    {language === 'fr' ? 'Moyenne (~10 étapes)' : 'Medium (~10 steps)'}
+                  </option>
+                  <option value="high">
+                    {language === 'fr' ? 'Élevée (~20 étapes)' : 'High (~20 steps)'}
+                  </option>
+                </select>
               </div>
             </div>
           )}
