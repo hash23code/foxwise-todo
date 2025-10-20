@@ -38,7 +38,11 @@
       "Bash(git push origin main --force)",
       "Bash(git push origin main)",
       "Bash(curl -X POST http://localhost:3002/api/ai-project-planner -H \"Content-Type: application/json\" -d \"{\"\"title\"\":\"\"Test Projet\"\",\"\"description\"\":\"\"Test description\"\",\"\"language\"\":\"\"fr\"\"}\")",
-      "Bash(curl -s http://localhost:3002/sign-in)"
+      "Bash(curl -s http://localhost:3002/sign-in)",
+      "Bash(if [ -f .env.local ])",
+      "Bash(then)",
+      "Bash(else)",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

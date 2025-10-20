@@ -51,6 +51,7 @@ export default function TasksPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
+  const [hideCompleted, setHideCompleted] = useState(false);
 
   useEffect(() => {
     fetchLists();
@@ -142,10 +143,16 @@ export default function TasksPage() {
     }
   };
 
-  const filteredTasks = tasks.filter(task =>
-    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    task.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTasks = tasks.filter(task => {
+    // Search filter
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Hide completed filter
+    const shouldShow = !hideCompleted || task.status !== 'completed';
+
+    return matchesSearch && shouldShow;
+  });
 
   const taskStats = {
     total: tasks.length,
@@ -338,6 +345,23 @@ export default function TasksPage() {
               <option value="high">High</option>
               <option value="urgent">Urgent</option>
             </select>
+          </div>
+
+          {/* Hide Completed Checkbox */}
+          <div className="flex items-center gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="hideCompleted"
+              checked={hideCompleted}
+              onChange={(e) => setHideCompleted(e.target.checked)}
+              className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+            />
+            <label
+              htmlFor="hideCompleted"
+              className="text-sm text-gray-300 cursor-pointer select-none"
+            >
+              Hide completed tasks
+            </label>
           </div>
         </div>
 
