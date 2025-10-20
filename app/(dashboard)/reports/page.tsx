@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, TrendingUp, Clock, CheckSquare, Target, BarChart3, Loader2, Download } from "lucide-react";
+import { FileText, Calendar, TrendingUp, Clock, CheckSquare, Target, BarChart3, Loader2, Download, Sparkles } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
+import AIReportsSection from "@/components/AIReportsSection";
 
 interface DailyReport {
   date: string;
@@ -37,7 +38,7 @@ export default function ReportsPage() {
   const { user } = useUser();
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
-  const [reportType, setReportType] = useState<'daily' | 'monthly'>('daily');
+  const [reportType, setReportType] = useState<'daily' | 'monthly' | 'ai'>('daily');
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
   const [monthlyReport, setMonthlyReport] = useState<MonthlyReport | null>(null);
@@ -48,6 +49,7 @@ export default function ReportsPage() {
       subtitle: "Detailed insights into your productivity",
       daily: "Daily Report",
       monthly: "Monthly Report",
+      aiReports: "AI Reports",
       selectDate: "Select Date",
       generate: "Generate Report",
       generating: "Generating...",
@@ -74,6 +76,7 @@ export default function ReportsPage() {
       subtitle: "Aperçu détaillé de votre productivité",
       daily: "Rapport Quotidien",
       monthly: "Rapport Mensuel",
+      aiReports: "Rapports IA",
       selectDate: "Sélectionner la Date",
       generate: "Générer le Rapport",
       generating: "Génération...",
@@ -185,16 +188,33 @@ export default function ReportsPage() {
             <BarChart3 className="w-4 h-4 inline mr-2" />
             {content.monthly}
           </button>
+          <button
+            onClick={() => setReportType('ai')}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-md transition-all text-sm sm:text-base ${
+              reportType === 'ai'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 inline mr-2" />
+            {content.aiReports}
+          </button>
         </div>
       </motion.div>
 
-      {/* Date Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700"
-      >
+      {/* AI Reports Section */}
+      {reportType === 'ai' && (
+        <AIReportsSection language={language} />
+      )}
+
+      {/* Date Selector - Only for Daily/Monthly */}
+      {reportType !== 'ai' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700"
+        >
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           <label className="text-sm font-medium text-gray-300">
             {content.selectDate}:
@@ -224,9 +244,10 @@ export default function ReportsPage() {
           </button>
         </div>
       </motion.div>
+      )}
 
       {/* Daily Report */}
-      {!loading && dailyReport && (
+      {reportType !== 'ai' && !loading && dailyReport && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -365,7 +386,7 @@ export default function ReportsPage() {
       )}
 
       {/* Monthly Report */}
-      {!loading && monthlyReport && (
+      {reportType !== 'ai' && !loading && monthlyReport && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -523,7 +544,7 @@ export default function ReportsPage() {
       )}
 
       {/* No Data */}
-      {!loading && !dailyReport && !monthlyReport && (
+      {reportType !== 'ai' && !loading && !dailyReport && !monthlyReport && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
