@@ -59,10 +59,11 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
     description: "",
     priority: "medium" as "low" | "medium" | "high" | "urgent",
     due_date: "",
+    due_time: "",
     estimated_hours: "1",
     tags: [] as string[],
-    email_reminder: false,
-    reminder_days_before: 1,
+    email_reminder_day: false,
+    email_reminder_hour: false,
   });
 
   const [tagInput, setTagInput] = useState("");
@@ -74,16 +75,18 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
 
       // Populate form if editing
       if (editTask) {
+        const dueDate = editTask.due_date ? new Date(editTask.due_date) : null;
         setFormData({
           list_id: editTask.list_id,
           title: editTask.title,
           description: editTask.description || '',
           priority: editTask.priority,
-          due_date: editTask.due_date ? new Date(editTask.due_date).toISOString().split('T')[0] : '',
+          due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
+          due_time: dueDate ? dueDate.toTimeString().slice(0, 5) : '',
           estimated_hours: editTask.estimated_hours?.toString() || '1',
           tags: editTask.tags || [],
-          email_reminder: false,
-          reminder_days_before: 1,
+          email_reminder_day: false,
+          email_reminder_hour: false,
         });
       }
 
@@ -194,11 +197,17 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
 
     try {
       const method = editTask ? 'PATCH' : 'POST';
-      const { email_reminder, reminder_days_before, ...taskData } = formData;
+      const { email_reminder_day, email_reminder_hour, due_time, ...taskData } = formData;
+
+      // Combine date and time if both are provided
+      let combinedDueDate = formData.due_date || null;
+      if (formData.due_date && due_time) {
+        combinedDueDate = `${formData.due_date}T${due_time}:00`;
+      }
 
       const body = editTask
-        ? { id: editTask.id, ...taskData, due_date: formData.due_date || null }
-        : { ...taskData, due_date: formData.due_date || null };
+        ? { id: editTask.id, ...taskData, due_date: combinedDueDate }
+        : { ...taskData, due_date: combinedDueDate };
 
       const response = await fetch('/api/tasks', {
         method,
@@ -209,22 +218,42 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
       if (response.ok) {
         const task = await response.json();
 
-        // Create reminder if email_reminder is enabled and due_date is set
-        if (email_reminder && formData.due_date) {
-          const dueDate = new Date(formData.due_date);
-          const reminderDate = new Date(dueDate);
-          reminderDate.setDate(reminderDate.getDate() - reminder_days_before);
-          reminderDate.setHours(9, 0, 0, 0); // Set reminder time to 9 AM
+        // Create reminders if enabled and due_date is set
+        if ((email_reminder_day || email_reminder_hour) && formData.due_date) {
+          const dueDate = new Date(combinedDueDate || formData.due_date);
 
-          await fetch('/api/task-reminders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              task_id: task.id,
-              reminder_type: 'email',
-              reminder_time: reminderDate.toISOString(),
-            }),
-          });
+          // Create 1 day before reminder
+          if (email_reminder_day) {
+            const reminderDate = new Date(dueDate);
+            reminderDate.setDate(reminderDate.getDate() - 1);
+            reminderDate.setHours(9, 0, 0, 0); // 9 AM the day before
+
+            await fetch('/api/task-reminders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                task_id: task.id,
+                reminder_type: 'email',
+                reminder_time: reminderDate.toISOString(),
+              }),
+            });
+          }
+
+          // Create 1 hour before reminder
+          if (email_reminder_hour) {
+            const reminderDate = new Date(dueDate);
+            reminderDate.setHours(reminderDate.getHours() - 1);
+
+            await fetch('/api/task-reminders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                task_id: task.id,
+                reminder_type: 'email',
+                reminder_time: reminderDate.toISOString(),
+              }),
+            });
+          }
         }
 
         onTaskAdded();
@@ -245,10 +274,11 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
       description: "",
       priority: "medium",
       due_date: "",
+      due_time: "",
       estimated_hours: "1",
       tags: [],
-      email_reminder: false,
-      reminder_days_before: 1,
+      email_reminder_day: false,
+      email_reminder_hour: false,
     });
     setRecordingText("");
     setTagInput("");
@@ -435,8 +465,8 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
               />
             </div>
 
-            {/* Priority & Due Date & Estimated Hours */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* Priority & Due Date/Time & Estimated Hours */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-2">
                   Priority
@@ -451,19 +481,6 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
                   <option value="high">High</option>
                   <option value="urgent">Urgent</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-gray-300 text-sm font-medium mb-2">
-                  <Calendar className="w-4 h-4" />
-                  Due Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.due_date}
-                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
               </div>
 
               <div>
@@ -484,46 +501,83 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
               </div>
             </div>
 
-            {/* Email Reminder */}
+            {/* Due Date & Time */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="flex items-center gap-2 text-gray-300 text-sm font-medium mb-2">
+                  <Calendar className="w-4 h-4" />
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.due_date}
+                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-gray-300 text-sm font-medium mb-2">
+                  <Clock className="w-4 h-4" />
+                  Due Time
+                </label>
+                <input
+                  type="time"
+                  value={formData.due_time}
+                  onChange={(e) => setFormData({ ...formData, due_time: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="HH:MM"
+                />
+              </div>
+            </div>
+
+            {/* Email Reminders */}
             {formData.due_date && (
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="email_reminder"
-                    checked={formData.email_reminder}
-                    onChange={(e) => setFormData({ ...formData, email_reminder: e.target.checked })}
-                    className="w-5 h-5 rounded border-gray-600 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 mt-0.5"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="email_reminder" className="cursor-pointer">
-                      <div className="flex items-center gap-2 text-white font-medium">
-                        <Bell className="w-4 h-4 text-blue-400" />
-                        Send email reminder
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Receive an email reminder before the due date
-                      </p>
+                <div className="flex items-center gap-2 text-white font-medium mb-3">
+                  <Bell className="w-5 h-5 text-blue-400" />
+                  <span>Email Reminders</span>
+                </div>
+                <p className="text-xs text-gray-400 mb-4">
+                  Receive email notifications before the task is due
+                </p>
+
+                <div className="space-y-3">
+                  {/* 1 Day Before */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="email_reminder_day"
+                      checked={formData.email_reminder_day}
+                      onChange={(e) => setFormData({ ...formData, email_reminder_day: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+                    />
+                    <label htmlFor="email_reminder_day" className="text-sm text-gray-300 cursor-pointer">
+                      1 day before (9:00 AM)
                     </label>
-                    {formData.email_reminder && (
-                      <div className="mt-3">
-                        <label className="block text-sm text-gray-300 mb-2">
-                          Remind me:
-                        </label>
-                        <select
-                          value={formData.reminder_days_before}
-                          onChange={(e) => setFormData({ ...formData, reminder_days_before: parseInt(e.target.value) })}
-                          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value={0}>On the day (9:00 AM)</option>
-                          <option value={1}>1 day before (9:00 AM)</option>
-                          <option value={2}>2 days before (9:00 AM)</option>
-                          <option value={3}>3 days before (9:00 AM)</option>
-                          <option value={7}>1 week before (9:00 AM)</option>
-                        </select>
-                      </div>
-                    )}
                   </div>
+
+                  {/* 1 Hour Before */}
+                  {formData.due_time && (
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="email_reminder_hour"
+                        checked={formData.email_reminder_hour}
+                        onChange={(e) => setFormData({ ...formData, email_reminder_hour: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+                      />
+                      <label htmlFor="email_reminder_hour" className="text-sm text-gray-300 cursor-pointer">
+                        1 hour before
+                      </label>
+                    </div>
+                  )}
+
+                  {!formData.due_time && (
+                    <p className="text-xs text-gray-500 italic pl-7">
+                      Add a due time to enable 1 hour before reminder
+                    </p>
+                  )}
                 </div>
               </div>
             )}
