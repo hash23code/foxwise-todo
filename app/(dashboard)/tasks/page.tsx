@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-
-// Force dynamic rendering since we use searchParams
-export const dynamic = 'force-dynamic';
 import {
   Plus,
   Search,
@@ -23,6 +20,9 @@ import {
   FileDown
 } from "lucide-react";
 import AddTaskModal from "@/components/AddTaskModal";
+
+// Force dynamic rendering since we use searchParams
+export const dynamic = 'force-dynamic';
 
 interface TodoList {
   id: string;
