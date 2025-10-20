@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Force dynamic rendering to ensure fresh data
+export const dynamic = 'force-dynamic';
+
 // GET weather forecast for a specific date and location
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -23,7 +26,7 @@ export async function GET(request: NextRequest) {
     const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&units=metric&lang=fr&appid=${apiKey}`;
 
     const response = await fetch(url, {
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 300 } // Cache for 5 minutes (reduced from 1 hour)
     });
 
     if (!response.ok) {

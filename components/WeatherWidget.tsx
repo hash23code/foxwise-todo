@@ -114,9 +114,17 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
           url += `&lat=${coords.lat}&lon=${coords.lon}`;
         }
 
-        const response = await fetch(url);
+        // Add timestamp to bypass cache
+        url += `&t=${Date.now()}`;
+
+        console.log('Fetching weather for date:', date);
+
+        const response = await fetch(url, {
+          cache: 'no-store', // Disable caching to ensure fresh data
+        });
         if (response.ok) {
           const data = await response.json();
+          console.log('Weather data received:', data);
           setWeather(data);
           if (onWeatherLoad) {
             onWeatherLoad(data);
@@ -130,7 +138,7 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
     };
 
     fetchWeather();
-  }, [date, coords]);
+  }, [date, coords, useGeolocation]);
 
   const getWeatherIcon = (main: string, size: number = 24) => {
     switch (main) {
