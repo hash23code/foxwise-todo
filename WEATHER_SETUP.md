@@ -41,13 +41,36 @@ C'est tout! La vraie météo est maintenant active! 🎉
 
 ---
 
-## 🌍 Personnaliser la Localisation
+## 🌍 Géolocalisation Automatique
 
-Par défaut, la météo est pour **Montréal (45.5017, -73.5673)**.
+### Utiliser ta position actuelle (NOUVEAU! 📍)
 
-### Changer la localisation
+Le widget météo dispose maintenant d'un **bouton de géolocalisation** automatique!
 
-Modifie `app/api/weather/route.ts` ligne 11-12:
+**Comment l'utiliser:**
+1. Dans le Day Planner, regarde le widget météo
+2. Clique sur l'icône **📍** (MapPin) en haut à droite du widget
+3. Le navigateur te demandera la permission d'accéder à ta position
+4. Accepte → La météo s'affichera pour ta position actuelle!
+
+**Caractéristiques:**
+- ✅ Détection automatique de ta position GPS
+- ✅ Se souvient de ton choix (localStorage)
+- ✅ Mise à jour automatique quand tu changes de date
+- ✅ Clique à nouveau pour désactiver et revenir à Montréal
+
+**Icône bleue = Géolocalisation active** 🔵
+**Icône grise = Position par défaut (Montréal)** ⚫
+
+---
+
+## 📍 Changer la Position par Défaut
+
+Par défaut (si géolocalisation désactivée), la météo est pour **Montréal (45.5017, -73.5673)**.
+
+### Modifier la position par défaut
+
+Si tu veux changer la ville par défaut, modifie `app/api/weather/route.ts` ligne 7-8:
 
 ```typescript
 const lat = searchParams.get('lat') || '45.5017'; // Ta latitude

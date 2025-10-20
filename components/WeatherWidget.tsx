@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets } from "lucide-react";
+import { Cloud, CloudRain, Sun, CloudSnow, Wind, Droplets, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WeatherData {
@@ -59,12 +59,62 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
   const { language } = useLanguage();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [useGeolocation, setUseGeolocation] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  // Request geolocation on mount
+  useEffect(() => {
+    // Check if user previously enabled geolocation
+    const savedGeoPreference = localStorage.getItem('weather_use_geolocation');
+    if (savedGeoPreference === 'true') {
+      setUseGeolocation(true);
+      requestGeolocation();
+    }
+  }, []);
+
+  const requestGeolocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCoords({ lat: latitude, lon: longitude });
+          localStorage.setItem('weather_coords', JSON.stringify({ lat: latitude, lon: longitude }));
+          localStorage.setItem('weather_use_geolocation', 'true');
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          // Fallback to default location if denied
+          setUseGeolocation(false);
+          localStorage.setItem('weather_use_geolocation', 'false');
+        }
+      );
+    }
+  };
+
+  const toggleGeolocation = () => {
+    if (!useGeolocation) {
+      requestGeolocation();
+      setUseGeolocation(true);
+    } else {
+      setUseGeolocation(false);
+      setCoords(null);
+      localStorage.setItem('weather_use_geolocation', 'false');
+      localStorage.removeItem('weather_coords');
+    }
+  };
 
   useEffect(() => {
     const fetchWeather = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/weather?date=${date}`);
+        let url = `/api/weather?date=${date}`;
+
+        // Use geolocation coords if enabled
+        if (useGeolocation && coords) {
+          url += `&lat=${coords.lat}&lon=${coords.lon}`;
+        }
+
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           setWeather(data);
@@ -80,7 +130,7 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
     };
 
     fetchWeather();
-  }, [date]);
+  }, [date, coords]);
 
   const getWeatherIcon = (main: string, size: number = 24) => {
     switch (main) {
@@ -120,10 +170,10 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 border border-gray-700">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-3 border border-gray-700">
         <div className="flex items-center justify-center gap-2">
-          <Cloud className="w-5 h-5 text-gray-400 animate-pulse" />
-          <span className="text-gray-400 text-sm">{t.loading}</span>
+          <Cloud className="w-4 h-4 text-gray-400 animate-pulse" />
+          <span className="text-gray-400 text-xs">{t.loading}</span>
         </div>
       </div>
     );
@@ -140,32 +190,52 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
   ];
 
   return (
-    <div className="bg-gradient-to-br from-blue-900/30 via-gray-900/50 to-gray-800/30 rounded-xl p-4 sm:p-6 border border-blue-800/30 backdrop-blur-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          {getWeatherIcon(weather.daily.main, 32)}
-          <div>
-            <h3 className="text-white font-semibold text-lg">
-              {weather.daily.temp.min}° / {weather.daily.temp.max}°
-            </h3>
-            <p className="text-gray-400 text-sm capitalize">{weather.daily.description}</p>
+    <div className="bg-gradient-to-br from-blue-900/20 via-gray-900/40 to-gray-800/20 rounded-lg p-3 border border-blue-800/20 backdrop-blur-sm">
+      {/* Compact Header - Single line on desktop */}
+      <div className="flex items-center justify-between gap-3 mb-2">
+        {/* Left: Weather icon + temp + description */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {getWeatherIcon(weather.daily.main, 20)}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-white font-semibold text-sm whitespace-nowrap">
+              {weather.daily.temp.min}°/{weather.daily.temp.max}°
+            </span>
+            <span className="text-gray-400 text-xs capitalize truncate">
+              {weather.daily.description}
+            </span>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Droplets className="w-3 h-3" />
-            <span>{Math.round(weather.daily.precipitation)}%</span>
+
+        {/* Right: Stats + Geolocation button */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-1">
+              <Droplets className="w-3 h-3" />
+              <span>{Math.round(weather.daily.precipitation)}%</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Wind className="w-3 h-3" />
+              <span>{Math.round(weather.daily.windSpeed)}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Wind className="w-3 h-3" />
-            <span>{Math.round(weather.daily.windSpeed)} km/h</span>
-          </div>
+
+          {/* Geolocation toggle */}
+          <button
+            onClick={toggleGeolocation}
+            className={`p-1.5 rounded-md transition-colors ${
+              useGeolocation
+                ? 'bg-blue-600/30 text-blue-400 border border-blue-500/30'
+                : 'bg-gray-700/30 text-gray-500 border border-gray-600/30 hover:bg-gray-700/50'
+            }`}
+            title={useGeolocation ? (language === 'fr' ? 'Géolocalisation activée' : 'Geolocation enabled') : (language === 'fr' ? 'Activer la géolocalisation' : 'Enable geolocation')}
+          >
+            <MapPin className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Periods */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      {/* Compact Periods - Reduced padding and size */}
+      <div className="grid grid-cols-3 gap-1.5">
         {periods.map(({ key, label, data }) => {
           if (!data) return null;
 
@@ -175,63 +245,35 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
           return (
             <div
               key={key}
-              className={`relative overflow-hidden rounded-lg p-3 transition-all ${
+              className={`relative overflow-hidden rounded-md p-2 transition-all ${
                 isSuitable
-                  ? 'bg-green-900/20 border border-green-700/30'
-                  : 'bg-orange-900/20 border border-orange-700/30'
+                  ? 'bg-green-900/15 border border-green-700/25'
+                  : 'bg-orange-900/15 border border-orange-700/25'
               }`}
             >
-              {/* Suitable indicator */}
-              <div className={`absolute top-0 right-0 w-2 h-2 rounded-bl-lg ${
+              {/* Suitable indicator - smaller */}
+              <div className={`absolute top-0 right-0 w-1.5 h-1.5 rounded-bl ${
                 isSuitable ? 'bg-green-500' : 'bg-orange-500'
               }`} />
 
               <div className="text-center">
-                <p className="text-gray-400 text-xs mb-2">{label}</p>
-                <div className="flex justify-center mb-2">
-                  {getWeatherIcon(data.main, 20)}
+                <p className="text-gray-400 text-[10px] mb-1">{label}</p>
+                <div className="flex justify-center mb-1">
+                  {getWeatherIcon(data.main, 16)}
                 </div>
-                <p className="text-white font-semibold text-lg mb-1">{data.temp}°</p>
-                <p className="text-gray-400 text-xs capitalize mb-2 line-clamp-1">{data.description}</p>
+                <p className="text-white font-semibold text-sm mb-0.5">{data.temp}°</p>
 
-                {/* Precipitation */}
-                <div className="flex items-center justify-center gap-1">
-                  <Droplets className={`w-3 h-3 ${data.precipitation > 60 ? 'text-blue-400' : 'text-gray-500'}`} />
-                  <span className={`text-xs ${data.precipitation > 60 ? 'text-blue-400' : 'text-gray-500'}`}>
+                {/* Precipitation - compact */}
+                <div className="flex items-center justify-center gap-0.5">
+                  <Droplets className={`w-2.5 h-2.5 ${data.precipitation > 60 ? 'text-blue-400' : 'text-gray-500'}`} />
+                  <span className={`text-[10px] ${data.precipitation > 60 ? 'text-blue-400' : 'text-gray-500'}`}>
                     {Math.round(data.precipitation)}%
                   </span>
-                </div>
-              </div>
-
-              {/* Tooltip on hover */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                <div className="bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg border border-gray-700">
-                  {suitability?.reason}
                 </div>
               </div>
             </div>
           );
         })}
-      </div>
-
-      {/* Summary indicator */}
-      <div className="mt-4 pt-3 border-t border-gray-700/50">
-        <div className="flex items-start gap-2">
-          <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
-            weather.suitable.morning.suitable || weather.suitable.afternoon.suitable
-              ? 'bg-green-500'
-              : 'bg-orange-500'
-          }`} />
-          <p className="text-xs text-gray-400 leading-relaxed">
-            {weather.suitable.morning.suitable || weather.suitable.afternoon.suitable
-              ? language === 'fr'
-                ? 'Bonnes conditions pour activités extérieures durant au moins une partie de la journée'
-                : 'Good conditions for outdoor activities during at least part of the day'
-              : language === 'fr'
-                ? 'Privilégier les activités intérieures aujourd\'hui. Tâches urgentes peuvent être planifiées.'
-                : 'Favor indoor activities today. Urgent tasks can still be scheduled.'}
-          </p>
-        </div>
       </div>
     </div>
   );
