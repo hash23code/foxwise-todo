@@ -459,7 +459,17 @@ export default function TasksPage() {
                             {task.due_date && (
                               <span className="flex items-center gap-1 text-gray-400 text-sm">
                                 <Calendar className="w-4 h-4" />
-                                {new Date(task.due_date).toLocaleDateString()}
+                                {(() => {
+                                  const dateStr = task.due_date.split('T')[0];
+                                  const date = new Date(dateStr + 'T00:00:00');
+                                  const hasTime = task.due_date.includes('T') && task.due_date.split('T')[1] !== '00:00:00';
+
+                                  if (hasTime) {
+                                    const timePart = task.due_date.split('T')[1].substring(0, 5);
+                                    return `${date.toLocaleDateString()} à ${timePart}`;
+                                  }
+                                  return date.toLocaleDateString();
+                                })()}
                               </span>
                             )}
 
@@ -603,7 +613,17 @@ export default function TasksPage() {
                           {task.estimated_hours ? `${task.estimated_hours}h` : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-300">
-                          {task.due_date ? new Date(task.due_date).toLocaleDateString() : '-'}
+                          {task.due_date ? (() => {
+                            const dateStr = task.due_date.split('T')[0];
+                            const date = new Date(dateStr + 'T00:00:00');
+                            const hasTime = task.due_date.includes('T') && task.due_date.split('T')[1] !== '00:00:00';
+
+                            if (hasTime) {
+                              const timePart = task.due_date.split('T')[1].substring(0, 5);
+                              return `${date.toLocaleDateString()} à ${timePart}`;
+                            }
+                            return date.toLocaleDateString();
+                          })() : '-'}
                         </td>
                         <td className="px-4 py-3 no-print">
                           <div className="flex items-center gap-2">

@@ -75,14 +75,30 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
 
       // Populate form if editing
       if (editTask) {
-        const dueDate = editTask.due_date ? new Date(editTask.due_date) : null;
+        // Extract date and time directly from ISO string to avoid timezone issues
+        let dateValue = '';
+        let timeValue = '';
+
+        if (editTask.due_date) {
+          const isoString = editTask.due_date;
+          dateValue = isoString.split('T')[0]; // Get YYYY-MM-DD
+
+          // Extract time if present in ISO string
+          if (isoString.includes('T')) {
+            const timePart = isoString.split('T')[1];
+            if (timePart) {
+              timeValue = timePart.substring(0, 5); // Get HH:MM
+            }
+          }
+        }
+
         setFormData({
           list_id: editTask.list_id,
           title: editTask.title,
           description: editTask.description || '',
           priority: editTask.priority,
-          due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
-          due_time: dueDate ? dueDate.toTimeString().slice(0, 5) : '',
+          due_date: dateValue,
+          due_time: timeValue,
           estimated_hours: editTask.estimated_hours?.toString() || '1',
           tags: editTask.tags || [],
           email_reminder_day: false,

@@ -130,29 +130,15 @@ export default function CalendarPage() {
       if (!t.due_date) return false;
 
       try {
-        // Parse the date - handle both date-only and datetime formats
-        let taskDate: Date;
-
-        if (t.due_date.includes('T')) {
-          // Full datetime format (e.g., "2025-01-15T12:00:00Z")
-          taskDate = new Date(t.due_date);
-        } else {
-          // Date-only format (e.g., "2025-01-15")
-          // Add T00:00:00 to force local timezone interpretation
-          taskDate = new Date(t.due_date + 'T00:00:00');
-        }
-
-        // Check if the date is valid
-        if (isNaN(taskDate.getTime())) {
-          console.warn('Invalid task date:', t.due_date, 'for task:', t.title);
-          return false;
-        }
+        // Extract just the date part (YYYY-MM-DD) from the ISO string to avoid timezone issues
+        const dateStr = t.due_date.split('T')[0];
+        const [taskYear, taskMonth, taskDay] = dateStr.split('-').map(Number);
 
         // Compare just the date parts (year, month, day)
         return (
-          taskDate.getFullYear() === date.getFullYear() &&
-          taskDate.getMonth() === date.getMonth() &&
-          taskDate.getDate() === date.getDate()
+          taskYear === date.getFullYear() &&
+          taskMonth === (date.getMonth() + 1) && // getMonth() is 0-indexed
+          taskDay === date.getDate()
         );
       } catch (error) {
         console.error('Error parsing task date:', t.due_date, error);
@@ -548,17 +534,20 @@ export default function CalendarPage() {
                     {dayTasks.map((task, idx) => (
                       <div
                         key={`t-${idx}`}
-                        className="flex items-center gap-1 px-1 py-0.5 rounded text-[9px] leading-tight truncate"
+                        className="flex items-center gap-1 px-1 py-0.5 rounded text-[9px] leading-tight"
                         style={{
                           backgroundColor: getPriorityColor(task.priority) + '20',
                           borderLeft: `2px solid ${getPriorityColor(task.priority)}`
                         }}
-                        title={task.title}
+                        title={`${task.title}${task.due_date && task.due_date.includes('T') && task.due_date.split('T')[1] !== '00:00:00' ? ` - ${task.due_date.split('T')[1].substring(0, 5)}` : ''}`}
                       >
                         <CheckSquare
                           className="w-2 h-2 flex-shrink-0"
                           style={{ color: getPriorityColor(task.priority) }}
                         />
+                        {task.due_date && task.due_date.includes('T') && task.due_date.split('T')[1] !== '00:00:00' && (
+                          <span className="text-blue-400 flex-shrink-0">{task.due_date.split('T')[1].substring(0, 5)}</span>
+                        )}
                         <span className="text-white truncate">{task.title}</span>
                       </div>
                     ))}
@@ -642,6 +631,13 @@ export default function CalendarPage() {
                             >
                               {task.priority.toUpperCase()}
                             </span>
+                            {/* Show time if task has one */}
+                            {task.due_date && task.due_date.includes('T') && task.due_date.split('T')[1] !== '00:00:00' && (
+                              <span className="flex items-center gap-1 text-xs text-blue-400">
+                                <Clock className="w-3 h-3" />
+                                {task.due_date.split('T')[1].substring(0, 5)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
