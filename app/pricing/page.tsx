@@ -1,283 +1,350 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Check, Smartphone, Sparkles, TrendingUp } from "lucide-react";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+interface PricingTier {
+  name: string;
+  nameEn: string;
+  price: number;
+  period: string;
+  periodEn: string;
+  description: string;
+  descriptionEn: string;
+  features: string[];
+  featuresEn: string[];
+  highlighted?: boolean;
+  cta: string;
+  ctaEn: string;
+  plan: 'free' | 'pro' | 'premium';
+  trial?: string;
+  trialEn?: string;
+}
+
+const pricingTiers: PricingTier[] = [
+  {
+    name: 'Gratuit',
+    nameEn: 'Free',
+    price: 0,
+    period: 'gratuit',
+    periodEn: 'free',
+    description: 'Pour débuter avec les bases',
+    descriptionEn: 'Get started with the basics',
+    features: [
+      '✅ Tâches illimitées',
+      '✅ Day Planner basique',
+      '✅ Badges de récompense',
+      '✅ Multi-listes',
+      '✅ Synchronisation cloud',
+    ],
+    featuresEn: [
+      '✅ Unlimited tasks',
+      '✅ Basic Day Planner',
+      '✅ Achievement badges',
+      '✅ Multiple lists',
+      '✅ Cloud sync',
+    ],
+    cta: 'Commencer gratuitement',
+    ctaEn: 'Start Free',
+    plan: 'free',
+  },
+  {
+    name: 'Pro',
+    nameEn: 'Pro',
+    price: 4.99,
+    period: '/ mois',
+    periodEn: '/ month',
+    description: 'Pour les productifs sérieux',
+    descriptionEn: 'For serious productivity',
+    trial: '14 jours gratuits',
+    trialEn: '14 days free trial',
+    features: [
+      '✨ Tout de Gratuit +',
+      '🤖 Suggestions AI pour planification',
+      '⚡ Auto-priorisation intelligente',
+      '🏆 Tous les badges débloqués',
+      '📊 Analytics avancés',
+      '📈 Rapports de productivité',
+    ],
+    featuresEn: [
+      '✨ Everything in Free +',
+      '🤖 AI planning suggestions',
+      '⚡ Smart auto-prioritization',
+      '🏆 All badges unlocked',
+      '📊 Advanced analytics',
+      '📈 Productivity reports',
+    ],
+    highlighted: true,
+    cta: 'Essayer Pro gratuitement',
+    ctaEn: 'Try Pro Free',
+    plan: 'pro',
+  },
+  {
+    name: 'Premium',
+    nameEn: 'Premium',
+    price: 14.99,
+    period: '/ mois',
+    periodEn: '/ month',
+    description: 'Le summum de la productivité',
+    descriptionEn: 'The ultimate productivity',
+    features: [
+      '👑 Tout de Pro +',
+      '🤖 Agent conversationnel AI',
+      '🎙️ Assistant vocal (Vapi)',
+      '⚙️ Workflows n8n (emails, intégrations)',
+      '📧 Automatisations avancées',
+      '📊 Rapports personnalisés',
+      '🎯 Support prioritaire',
+      '🎁 Bonus après 3 mois de Pro',
+    ],
+    featuresEn: [
+      '👑 Everything in Pro +',
+      '🤖 AI Conversational Agent',
+      '🎙️ Voice Assistant (Vapi)',
+      '⚙️ n8n Workflows (emails, integrations)',
+      '📧 Advanced automations',
+      '📊 Custom reports',
+      '🎯 Priority support',
+      '🎁 Bonus after 3 months of Pro',
+    ],
+    cta: 'Passer à Premium',
+    ctaEn: 'Upgrade to Premium',
+    plan: 'premium',
+  },
+];
 
 export default function PricingPage() {
   const router = useRouter();
+  const { isSignedIn } = useUser();
+  const { language } = useLanguage();
+  const [loading, setLoading] = useState<string | null>(null);
 
-  const plans = [
-    {
-      name: "Basic",
-      price: "Free",
-      period: "forever",
-      description: "Perfect for getting started with personal finance",
-      icon: TrendingUp,
-      features: [
-        "Unlimited transactions",
-        "5 transaction types",
-        "Budget tracking",
-        "Basic analytics & charts",
-        "Multi-currency support (10+)",
-        "Web access",
-        "Community support"
-      ],
-      gradient: "from-gray-600 to-gray-800",
-      buttonText: "Get Started Free",
-      popular: false
-    },
-    {
-      name: "Medium",
-      price: "$1.99",
-      period: "per month",
-      description: "Best for individuals who want mobile access",
-      icon: Smartphone,
-      features: [
-        "Everything in Basic",
-        "📱 Mobile app (iOS & Android)",
-        "Real-time sync across devices",
-        "Advanced charts & insights",
-        "Export data (CSV, PDF)",
-        "Priority email support",
-        "Custom categories",
-        "Recurring transactions"
-      ],
-      gradient: "from-purple-600 to-pink-600",
-      buttonText: "Start 14-Day Free Trial",
-      popular: true
-    },
-    {
-      name: "Expert",
-      price: "$4.99",
-      period: "per month",
-      description: "For power users who want AI-powered insights",
-      icon: Sparkles,
-      features: [
-        "Everything in Medium",
-        "🤖 AI-powered insights & predictions",
-        "AI spending analysis",
-        "Smart budget recommendations",
-        "Investment tracking with AI",
-        "Automated categorization",
-        "Custom reports",
-        "24/7 priority support",
-        "API access"
-      ],
-      gradient: "from-indigo-600 to-purple-600",
-      buttonText: "Start 14-Day Free Trial",
-      popular: false
+  const handleSelectPlan = async (plan: 'free' | 'pro' | 'premium') => {
+    if (!isSignedIn) {
+      router.push('/sign-in');
+      return;
     }
-  ];
+
+    if (plan === 'free') {
+      router.push('/dashboard');
+      return;
+    }
+
+    setLoading(plan);
+
+    try {
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      alert('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="relative z-10 container mx-auto px-6 py-6 flex items-center justify-between"
-      >
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="cursor-pointer"
-          onClick={() => router.push("/")}
-        >
-          <Image
-            src="/logo.png"
-            alt="FoxWise Finance"
-            width={180}
-            height={60}
-            className="object-contain"
-            priority
-          />
-        </motion.div>
-        <div className="flex gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/sign-in")}
-            className="px-6 py-2 rounded-lg border border-purple-500/50 text-purple-300 hover:bg-purple-500/10 transition-colors"
-          >
-            Sign In
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/sign-up")}
-            className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium shadow-lg shadow-purple-500/50"
-          >
-            Get Started
-          </motion.button>
-        </div>
-      </motion.nav>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-            Simple, Transparent Pricing
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            {language === 'fr' ? 'Choisissez votre plan' : 'Choose Your Plan'}
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
-            Choose the perfect plan for your financial journey. All plans include a 14-day free trial.
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            {language === 'fr'
+              ? 'Déverrouillez tout le potentiel de votre productivité avec FoxWise'
+              : 'Unlock your full productivity potential with FoxWise'}
           </p>
         </motion.div>
-      </section>
 
-      {/* Pricing Cards */}
-      <section className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {plans.map((plan, index) => (
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {pricingTiers.map((tier, index) => (
             <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
+              key={tier.plan}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -10 }}
-              className={`relative p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border ${
-                plan.popular ? 'border-purple-500 shadow-2xl shadow-purple-500/50' : 'border-gray-700'
-              }`}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className={`
+                relative rounded-2xl p-8
+                ${tier.highlighted
+                  ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-2 border-purple-500 shadow-2xl shadow-purple-500/20 scale-105'
+                  : 'bg-gray-800/50 border border-gray-700'
+                }
+                backdrop-blur-sm
+              `}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                    Most Popular
-                  </span>
+              {/* Badge "Most Popular" */}
+              {tier.highlighted && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  {language === 'fr' ? '⭐ Plus populaire' : '⭐ Most Popular'}
                 </div>
               )}
 
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${plan.gradient} p-3 mb-6`}>
-                <plan.icon className="w-full h-full text-white" />
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {language === 'fr' ? tier.name : tier.nameEn}
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  {language === 'fr' ? tier.description : tier.descriptionEn}
+                </p>
               </div>
 
-              <h3 className="text-3xl font-bold mb-2">{plan.name}</h3>
-              <p className="text-gray-400 mb-6">{plan.description}</p>
-
-              <div className="mb-6">
-                <span className="text-5xl font-bold">{plan.price}</span>
-                <span className="text-gray-400 ml-2">{plan.period}</span>
+              {/* Prix */}
+              <div className="text-center mb-6">
+                <div className="flex items-baseline justify-center gap-2">
+                  <span className="text-5xl font-bold text-white">
+                    ${tier.price}
+                  </span>
+                  <span className="text-gray-400">
+                    {language === 'fr' ? tier.period : tier.periodEn}
+                  </span>
+                </div>
+                {tier.trial && (
+                  <p className="text-green-400 text-sm mt-2 font-semibold">
+                    🎁 {language === 'fr' ? tier.trial : tier.trialEn}
+                  </p>
+                )}
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push("/sign-up")}
-                className={`w-full px-6 py-3 rounded-lg font-semibold mb-8 ${
-                  plan.popular
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
-                    : 'bg-gray-800 text-white hover:bg-gray-700'
-                }`}
-              >
-                {plan.buttonText}
-              </motion.button>
-
-              <div className="space-y-3">
-                {plan.features.map((feature, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-300">{feature}</span>
-                  </div>
+              {/* Features */}
+              <ul className="space-y-3 mb-8">
+                {(language === 'fr' ? tier.features : tier.featuresEn).map((feature, i) => (
+                  <li key={i} className="text-gray-300 text-sm flex items-start">
+                    <span className="mr-2 flex-shrink-0">{feature}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
+
+              {/* CTA Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSelectPlan(tier.plan)}
+                disabled={loading === tier.plan}
+                className={`
+                  w-full py-3 px-6 rounded-lg font-semibold text-white
+                  transition-all duration-200
+                  ${tier.highlighted
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-500/50'
+                    : 'bg-gray-700 hover:bg-gray-600'
+                  }
+                  ${loading === tier.plan ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+              >
+                {loading === tier.plan ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    {language === 'fr' ? 'Chargement...' : 'Loading...'}
+                  </span>
+                ) : (
+                  language === 'fr' ? tier.cta : tier.ctaEn
+                )}
+              </motion.button>
             </motion.div>
           ))}
         </div>
-      </section>
 
-      {/* FAQ Section */}
-      <section className="container mx-auto px-6 py-20">
+        {/* FAQ Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-24 max-w-4xl mx-auto"
+        >
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            {language === 'fr' ? 'Questions fréquentes' : 'Frequently Asked Questions'}
+          </h2>
+
+          <div className="space-y-6">
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
+              <h3 className="text-xl font-semibold text-white mb-2">
+                {language === 'fr' ? 'Puis-je changer de plan à tout moment?' : 'Can I change plans anytime?'}
+              </h3>
+              <p className="text-gray-400">
+                {language === 'fr'
+                  ? 'Oui! Vous pouvez upgrader, downgrader ou annuler votre abonnement à tout moment depuis votre tableau de bord.'
+                  : 'Yes! You can upgrade, downgrade, or cancel your subscription anytime from your dashboard.'}
+              </p>
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
+              <h3 className="text-xl font-semibold text-white mb-2">
+                {language === 'fr' ? "Qu'arrive-t-il après l'essai gratuit?" : 'What happens after the free trial?'}
+              </h3>
+              <p className="text-gray-400">
+                {language === 'fr'
+                  ? 'Après 14 jours, votre carte sera facturée automatiquement. Vous recevrez un rappel 3 jours avant la fin de votre essai.'
+                  : 'After 14 days, your card will be charged automatically. You\'ll receive a reminder 3 days before your trial ends.'}
+              </p>
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
+              <h3 className="text-xl font-semibold text-white mb-2">
+                {language === 'fr' ? 'Comment obtenir le bonus Premium gratuit?' : 'How do I get the free Premium bonus?'}
+              </h3>
+              <p className="text-gray-400">
+                {language === 'fr'
+                  ? "Restez abonné au plan Pro pendant 3 mois consécutifs et vous recevrez 1 mois gratuit de Premium! C'est notre façon de vous remercier pour votre fidélité. 🎁"
+                  : 'Stay subscribed to the Pro plan for 3 consecutive months and you\'ll receive 1 month of Premium free! It\'s our way of thanking you for your loyalty. 🎁'}
+              </p>
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
+              <h3 className="text-xl font-semibold text-white mb-2">
+                {language === 'fr' ? 'Mes données sont-elles sécurisées?' : 'Is my data secure?'}
+              </h3>
+              <p className="text-gray-400">
+                {language === 'fr'
+                  ? 'Absolument! Toutes vos données sont chiffrées et stockées de manière sécurisée. Nous utilisons les mêmes standards de sécurité que les banques.'
+                  : 'Absolutely! All your data is encrypted and securely stored. We use the same security standards as banks.'}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Final CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-3xl mx-auto"
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="text-center mt-16"
         >
-          <h2 className="text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            {[
-              {
-                q: "Can I switch plans anytime?",
-                a: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately."
-              },
-              {
-                q: "What payment methods do you accept?",
-                a: "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal."
-              },
-              {
-                q: "Is there a free trial?",
-                a: "Yes! All paid plans come with a 14-day free trial. No credit card required to start."
-              },
-              {
-                q: "Can I cancel anytime?",
-                a: "Absolutely. You can cancel your subscription at any time. No questions asked."
-              }
-            ].map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-xl bg-gray-900/50 border border-gray-700"
-              >
-                <h3 className="text-xl font-bold mb-2">{faq.q}</h3>
-                <p className="text-gray-400">{faq.a}</p>
-              </motion.div>
-            ))}
-          </div>
+          <p className="text-gray-400 mb-4">
+            {language === 'fr'
+              ? 'Besoin d\'aide pour choisir? Contactez-nous!'
+              : 'Need help choosing? Contact us!'}
+          </p>
+          <a
+            href="mailto:support@foxwise.app"
+            className="text-purple-400 hover:text-purple-300 underline"
+          >
+            support@foxwise.app
+          </a>
         </motion.div>
-      </section>
-
-      {/* CTA */}
-      <section className="container mx-auto px-6 py-20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 p-12 text-center"
-        >
-          <div className="absolute inset-0 bg-black/20" />
-          <div className="relative z-10">
-            <h2 className="text-5xl font-bold mb-6 text-white">
-              Ready to Start?
-            </h2>
-            <p className="text-xl mb-8 text-purple-100 max-w-2xl mx-auto">
-              Join FoxWise Finance today and take control of your financial future
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push("/sign-up")}
-              className="px-12 py-4 rounded-xl bg-white text-purple-600 font-bold text-lg shadow-2xl hover:shadow-white/50 transition-shadow"
-            >
-              Start Free Trial
-            </motion.button>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Footer */}
-      <footer className="container mx-auto px-6 py-12 border-t border-gray-800">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <motion.div whileHover={{ scale: 1.05 }} className="cursor-pointer" onClick={() => router.push("/")}>
-            <Image src="/logo.png" alt="FoxWise Finance" width={150} height={50} className="object-contain" />
-          </motion.div>
-          <div className="flex gap-8 text-gray-400">
-            <motion.button onClick={() => router.push("/features")} whileHover={{ scale: 1.1, color: "#a855f7" }} className="hover:text-purple-400 transition-colors">Features</motion.button>
-            <motion.button onClick={() => router.push("/pricing")} whileHover={{ scale: 1.1, color: "#a855f7" }} className="hover:text-purple-400 transition-colors">Pricing</motion.button>
-            <motion.button onClick={() => router.push("/about")} whileHover={{ scale: 1.1, color: "#a855f7" }} className="hover:text-purple-400 transition-colors">About</motion.button>
-            <motion.button onClick={() => router.push("/contact")} whileHover={{ scale: 1.1, color: "#a855f7" }} className="hover:text-purple-400 transition-colors">Contact</motion.button>
-          </div>
-          <div className="text-gray-500 text-sm">© 2025 FoxWise Finance. All rights reserved.</div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
