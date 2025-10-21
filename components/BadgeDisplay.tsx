@@ -116,13 +116,13 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
             {/* Badge Trophée - Style médaille avec ruban */}
             <div className="flex flex-col items-center cursor-help">
               {/* Ruban supérieur */}
-              <div className={`w-8 h-3 ${colors.ribbon} rounded-t-sm shadow-md`}></div>
+              <div className={`w-6 h-2.5 ${colors.ribbon} rounded-t-sm shadow-md`}></div>
 
               {/* Médaille principale */}
               <motion.div
                 className={`
                   relative flex items-center justify-center
-                  w-14 h-14 rounded-full
+                  w-11 h-11 rounded-full
                   bg-gradient-to-br ${colors.bg}
                   border-2 ${colors.border}
                   shadow-xl
@@ -145,7 +145,7 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
                 <div className="absolute inset-1 rounded-full bg-white/20"></div>
 
                 {/* Icône du badge */}
-                <span className="text-3xl relative z-10 filter drop-shadow-lg">
+                <span className="text-2xl relative z-10 filter drop-shadow-lg">
                   {metadata.icon}
                 </span>
               </motion.div>
