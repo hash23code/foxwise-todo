@@ -62,7 +62,13 @@
       "Bash(tasklist)",
       "Bash(cmd //c \"taskkill /IM node.exe /F\")",
       "Bash(curl:*)",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(then grep -i \"OPENWEATHER\" .env.local)",
+      "Bash(else echo \".env.local n''existe pas\")",
+      "Bash(cmd /c \"taskkill /IM node.exe /F\")",
+      "Bash(cmd /c \"copy H:\\Ai_Projects\\app\\claude\\FoxWise_ToDo\\logo\\icon.png H:\\Ai_Projects\\app\\claude\\FoxWise_ToDo\\public\\fox-icon.png\")",
+      "Bash(cmd /c \"del /F nul\")",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
