@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
     const completedAfterHours = isAfterHours(actual_completion);
 
     // Enregistrer le temps de complétion
-    const { data: completion, error: completionError } = await supabase
-      .from('task_completion_times')
+    const { data: completion, error: completionError } = await (supabase
+      .from('task_completion_times') as any)
       .insert({
         task_id,
         user_id: userId,
@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
 
     // Badge SPEED_TASK: au moins 15 min économisées
     if (timeSavedMinutes && timeSavedMinutes >= BADGE_CONFIG.speed_task.minimum_minutes_saved) {
-      const { data: speedBadge, error: speedError } = await supabase
-        .from('user_badges')
+      const { data: speedBadge, error: speedError } = await (supabase
+        .from('user_badges') as any)
         .insert({
           user_id: userId,
           date: dateStr,
@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
     // Badge FLEXIBLE: tâche complétée qui n'était ni dans le planner ni dans le calendrier
     if (!wasInPlanner && !wasInCalendar) {
       // Vérifier si le badge n'existe pas déjà pour cette date
-      const { data: existingFlexible } = await supabase
-        .from('user_badges')
+      const { data: existingFlexible } = await (supabase
+        .from('user_badges') as any)
         .select('id')
         .eq('user_id', userId)
         .eq('date', dateStr)
@@ -126,8 +126,8 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!existingFlexible) {
-        const { data: flexibleBadge, error: flexibleError } = await supabase
-          .from('user_badges')
+        const { data: flexibleBadge, error: flexibleError } = await (supabase
+          .from('user_badges') as any)
           .insert({
             user_id: userId,
             date: dateStr,
@@ -148,8 +148,8 @@ export async function POST(request: NextRequest) {
     // Badge AFTER_HOURS: tâche complétée après 20h
     if (completedAfterHours) {
       // Vérifier si le badge n'existe pas déjà pour cette date
-      const { data: existingAfterHours } = await supabase
-        .from('user_badges')
+      const { data: existingAfterHours } = await (supabase
+        .from('user_badges') as any)
         .select('id')
         .eq('user_id', userId)
         .eq('date', dateStr)
@@ -157,8 +157,8 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!existingAfterHours) {
-        const { data: afterHoursBadge, error: afterHoursError } = await supabase
-          .from('user_badges')
+        const { data: afterHoursBadge, error: afterHoursError } = await (supabase
+          .from('user_badges') as any)
           .insert({
             user_id: userId,
             date: dateStr,
@@ -205,8 +205,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('task_completion_times')
+    const { data, error } = await (supabase
+      .from('task_completion_times') as any)
       .select('*')
       .eq('user_id', userId)
       .eq('date', date)

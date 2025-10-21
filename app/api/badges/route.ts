@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    let query = supabase
-      .from('user_badges')
+    let query = (supabase
+      .from('user_badges') as any)
       .select('*')
       .eq('user_id', userId)
       .order('earned_at', { ascending: false });
@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Vérifier si ce badge existe déjà pour cette date
-    const { data: existing } = await supabase
-      .from('user_badges')
+    const { data: existing } = await (supabase
+      .from('user_badges') as any)
       .select('id')
       .eq('user_id', userId)
       .eq('date', date)
@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Créer le badge
-    const { data: badge, error } = await supabase
-      .from('user_badges')
+    const { data: badge, error } = await (supabase
+      .from('user_badges') as any)
       .insert({
         user_id: userId,
         date,
@@ -122,8 +122,8 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from('user_badges')
+    const { error } = await (supabase
+      .from('user_badges') as any)
       .delete()
       .eq('id', badgeId)
       .eq('user_id', userId);

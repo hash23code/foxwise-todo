@@ -216,8 +216,8 @@ export async function PATCH(request: NextRequest) {
         const completedAfterHours = isAfterHours(actual_completion);
 
         // Enregistrer le temps de complétion
-        await supabase
-          .from('task_completion_times')
+        await (supabase
+          .from('task_completion_times') as any)
           .insert({
             task_id: id,
             user_id: userId,
@@ -234,8 +234,8 @@ export async function PATCH(request: NextRequest) {
         // Créer les badges
         // Badge SPEED_TASK: au moins 15 min économisées
         if (timeSavedMinutes && timeSavedMinutes >= BADGE_CONFIG.speed_task.minimum_minutes_saved) {
-          await supabase
-            .from('user_badges')
+          await (supabase
+            .from('user_badges') as any)
             .insert({
               user_id: userId,
               date: dateStr,
@@ -249,8 +249,8 @@ export async function PATCH(request: NextRequest) {
 
         // Badge FLEXIBLE: tâche complétée qui n'était ni dans le planner ni dans le calendrier
         if (!wasInPlanner && !wasInCalendar) {
-          const { data: existingFlexible } = await supabase
-            .from('user_badges')
+          const { data: existingFlexible } = await (supabase
+            .from('user_badges') as any)
             .select('id')
             .eq('user_id', userId)
             .eq('date', dateStr)
@@ -258,8 +258,8 @@ export async function PATCH(request: NextRequest) {
             .maybeSingle();
 
           if (!existingFlexible) {
-            await supabase
-              .from('user_badges')
+            await (supabase
+              .from('user_badges') as any)
               .insert({
                 user_id: userId,
                 date: dateStr,
@@ -271,8 +271,8 @@ export async function PATCH(request: NextRequest) {
 
         // Badge AFTER_HOURS: tâche complétée après 20h
         if (completedAfterHours) {
-          const { data: existingAfterHours } = await supabase
-            .from('user_badges')
+          const { data: existingAfterHours } = await (supabase
+            .from('user_badges') as any)
             .select('id')
             .eq('user_id', userId)
             .eq('date', dateStr)
@@ -280,8 +280,8 @@ export async function PATCH(request: NextRequest) {
             .maybeSingle();
 
           if (!existingAfterHours) {
-            await supabase
-              .from('user_badges')
+            await (supabase
+              .from('user_badges') as any)
               .insert({
                 user_id: userId,
                 date: dateStr,
