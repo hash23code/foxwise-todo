@@ -11,58 +11,40 @@ interface BadgeDisplayProps {
 }
 
 // Helper functions pour les couleurs et gradients des badges
-function getBadgeGradient(badgeType: string): string {
-  const gradients: Record<string, string> = {
-    perfect_day: 'from-yellow-400 via-yellow-500 to-amber-600',
-    flexible: 'from-blue-400 via-blue-500 to-cyan-600',
-    speed_task: 'from-purple-400 via-purple-500 to-pink-600',
-    speed_day_bronze: 'from-orange-400 via-orange-500 to-orange-700',
-    speed_day_silver: 'from-gray-300 via-gray-400 to-gray-500',
-    speed_day_gold: 'from-yellow-300 via-yellow-400 to-yellow-600',
-    after_hours: 'from-indigo-400 via-purple-500 to-indigo-600',
-    exceptional_day_bronze: 'from-orange-400 via-orange-500 to-orange-700',
-    exceptional_day_silver: 'from-gray-300 via-gray-400 to-gray-500',
-    exceptional_day_gold: 'from-yellow-300 via-yellow-400 to-yellow-600',
-    exceptional_category: 'from-pink-400 via-pink-500 to-rose-600',
-    exceptional_global: 'from-amber-300 via-amber-400 to-yellow-500'
+function getBadgeColor(badgeType: string): string {
+  const colors: Record<string, string> = {
+    perfect_day: 'bg-amber-500/20 border-amber-500/40',
+    flexible: 'bg-blue-500/20 border-blue-500/40',
+    speed_task: 'bg-purple-500/20 border-purple-500/40',
+    speed_day_bronze: 'bg-orange-600/20 border-orange-600/40',
+    speed_day_silver: 'bg-slate-400/20 border-slate-400/40',
+    speed_day_gold: 'bg-yellow-500/20 border-yellow-500/40',
+    after_hours: 'bg-indigo-500/20 border-indigo-500/40',
+    exceptional_day_bronze: 'bg-orange-600/20 border-orange-600/40',
+    exceptional_day_silver: 'bg-slate-400/20 border-slate-400/40',
+    exceptional_day_gold: 'bg-yellow-500/20 border-yellow-500/40',
+    exceptional_category: 'bg-pink-500/20 border-pink-500/40',
+    exceptional_global: 'bg-amber-500/20 border-amber-500/40'
   };
-  return gradients[badgeType] || 'from-gray-400 to-gray-600';
+  return colors[badgeType] || 'bg-gray-500/20 border-gray-500/40';
 }
 
-function getBadgeBorder(badgeType: string): string {
-  const borders: Record<string, string> = {
-    perfect_day: 'border-yellow-300',
-    flexible: 'border-blue-300',
-    speed_task: 'border-purple-300',
-    speed_day_bronze: 'border-orange-300',
-    speed_day_silver: 'border-gray-200',
-    speed_day_gold: 'border-yellow-200',
-    after_hours: 'border-indigo-300',
-    exceptional_day_bronze: 'border-orange-300',
-    exceptional_day_silver: 'border-gray-200',
-    exceptional_day_gold: 'border-yellow-200',
-    exceptional_category: 'border-pink-300',
-    exceptional_global: 'border-amber-200'
-  };
-  return borders[badgeType] || 'border-gray-400';
-}
-
-function getGlowColor(badgeType: string): string {
+function getBadgeGlow(badgeType: string): string {
   const glows: Record<string, string> = {
-    perfect_day: '#fbbf24',
-    flexible: '#60a5fa',
-    speed_task: '#a78bfa',
-    speed_day_bronze: '#fb923c',
-    speed_day_silver: '#d1d5db',
-    speed_day_gold: '#fbbf24',
-    after_hours: '#818cf8',
-    exceptional_day_bronze: '#fb923c',
-    exceptional_day_silver: '#d1d5db',
-    exceptional_day_gold: '#fbbf24',
-    exceptional_category: '#f472b6',
-    exceptional_global: '#fbbf24'
+    perfect_day: 'shadow-amber-500/20',
+    flexible: 'shadow-blue-500/20',
+    speed_task: 'shadow-purple-500/20',
+    speed_day_bronze: 'shadow-orange-600/20',
+    speed_day_silver: 'shadow-slate-400/20',
+    speed_day_gold: 'shadow-yellow-500/20',
+    after_hours: 'shadow-indigo-500/20',
+    exceptional_day_bronze: 'shadow-orange-600/20',
+    exceptional_day_silver: 'shadow-slate-400/20',
+    exceptional_day_gold: 'shadow-yellow-500/20',
+    exceptional_category: 'shadow-pink-500/20',
+    exceptional_global: 'shadow-amber-500/20'
   };
-  return glows[badgeType] || '#9ca3af';
+  return glows[badgeType] || 'shadow-gray-500/20';
 }
 
 export default function BadgeDisplay({ badges, date, compact = false }: BadgeDisplayProps) {
@@ -85,76 +67,50 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
         return (
           <motion.div
             key={`${badge.badge_type}-${badge.badge_tier || ''}-${index}`}
-            initial={{ scale: 0, rotate: -180, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={{
               type: "spring",
-              stiffness: 300,
-              damping: 15,
-              delay: index * 0.15
+              stiffness: 260,
+              damping: 20,
+              delay: index * 0.1
             }}
             className="relative group"
           >
-            {/* Badge Container avec glow effect */}
-            <div className="relative">
-              {/* Glow background animé */}
-              <motion.div
-                className="absolute inset-0 rounded-full blur-md opacity-60"
-                style={{
-                  background: `radial-gradient(circle, ${getGlowColor(badge.badge_type)} 0%, transparent 70%)`
-                }}
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.4, 0.7, 0.4]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+            {/* Badge Container - Style moderne et sobre */}
+            <motion.div
+              className={`
+                relative flex items-center justify-center
+                w-12 h-12 rounded-full
+                ${getBadgeColor(badge.badge_type)}
+                border backdrop-blur-sm
+                shadow-lg ${getBadgeGlow(badge.badge_type)}
+                cursor-help
+              `}
+              animate={{
+                boxShadow: [
+                  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                ]
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <span className="text-2xl relative z-10 filter drop-shadow-sm">{metadata.icon}</span>
+            </motion.div>
 
-              {/* Badge principal */}
-              <div
-                className={`
-                  relative flex items-center justify-center
-                  w-14 h-14 rounded-full
-                  bg-gradient-to-br ${getBadgeGradient(badge.badge_type)}
-                  border-2 ${getBadgeBorder(badge.badge_type)}
-                  shadow-lg cursor-help
-                  transition-all duration-300
-                  group-hover:shadow-2xl group-hover:scale-110
-                `}
-              >
-                {/* Sparkle animation */}
-                <motion.div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, transparent 50%)'
-                  }}
-                  animate={{
-                    opacity: [0, 0.6, 0],
-                    scale: [0.8, 1.2, 0.8]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-
-                <span className="text-2xl relative z-10 drop-shadow-lg">{metadata.icon}</span>
+            {/* Tooltip simple avec le nom du badge */}
+            {!compact && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-gray-700/50">
+                {language === 'fr' ? metadata.name_fr : metadata.name_en}
+                {/* Triangle pointer */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/90"></div>
               </div>
-
-              {/* Tooltip simple avec le nom du badge */}
-              {!compact && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                  {language === 'fr' ? metadata.name_fr : metadata.name_en}
-                  {/* Triangle pointer */}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                </div>
-              )}
-            </div>
+            )}
           </motion.div>
         );
       })}
