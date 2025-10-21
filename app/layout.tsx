@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import ChatButtonWrapper from "@/components/ChatButtonWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
         <body className="antialiased" suppressHydrationWarning>
           <LanguageProvider>
             {children}
+            <ChatButtonWrapper />
           </LanguageProvider>
         </body>
       </html>
