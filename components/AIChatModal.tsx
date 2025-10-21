@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, User, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Message {
@@ -139,12 +139,12 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
           <div className="flex items-center justify-between p-4 border-b border-gray-700/50 bg-gradient-to-r from-purple-900/30 to-blue-900/30">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <Bot className="w-8 h-8 text-purple-400" />
+                <span className="text-4xl">🦊</span>
                 <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">{t.title}</h2>
-                <p className="text-xs text-gray-400">Powered by Gemini AI</p>
+                <p className="text-xs text-gray-400">Powered by AI</p>
               </div>
             </div>
             <button
@@ -173,7 +173,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
                   {message.role === 'user' ? (
                     <User className="w-5 h-5 text-white" />
                   ) : (
-                    <Bot className="w-5 h-5 text-white" />
+                    <span className="text-lg">🦊</span>
                   )}
                 </div>
 
@@ -204,7 +204,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
                 className="flex gap-3"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-white" />
+                  <span className="text-lg">🦊</span>
                 </div>
                 <div className="bg-gray-800 border border-gray-700 rounded-2xl px-4 py-2">
                   <div className="flex gap-1">
