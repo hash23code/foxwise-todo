@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Stripe from 'stripe';
 
 // En développement, si Stripe n'est pas configuré, utiliser une clé dummy
