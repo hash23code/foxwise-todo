@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(getMockWeatherData(date));
     }
 
-    // Use OpenWeatherMap One Call API 3.0 for hourly forecast
-    const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&units=metric&lang=fr&appid=${apiKey}`;
+    // Use OpenWeatherMap One Call API 2.5 for hourly forecast (free tier compatible)
+    const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&units=metric&lang=fr&appid=${apiKey}`;
 
     const response = await fetch(url, {
       cache: 'no-store' // Disable cache to always get fresh data
