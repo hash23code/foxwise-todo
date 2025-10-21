@@ -186,6 +186,14 @@ export async function PATCH(request: NextRequest) {
         const dateStr = `${year}-${month}-${day}`;
         const actual_completion = completionDate.toISOString();
 
+        console.log('🐛 DEBUG TIMEZONE - Completion Date:', {
+          now: completionDate.toString(),
+          year, month, day,
+          dateStr,
+          actual_completion,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        });
+
         // Vérifier si la tâche était dans le day planner
         const { data: plannedTask } = await (supabase
           .from('day_planner') as any)
@@ -299,21 +307,57 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Badge PERFECT_DAY: Toutes les tâches de la journée complétées
-        const { data: allTasks } = await (supabase
+        // Récupérer les tâches planifiées pour aujourd'hui
+        const { data: todayPlannedTasks } = await (supabase
+          .from('day_planner') as any)
+          .select('task_id')
+          .eq('date', dateStr);
+
+        const plannedTaskIds = todayPlannedTasks?.map((t: any) => t.task_id) || [];
+
+        // Récupérer toutes les tâches avec due_date aujourd'hui
+        const { data: tasksWithDueDate } = await (supabase
           .from('tasks') as any)
           .select('id, status')
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .eq('due_date', dateStr)
+          .neq('status', 'archived');
 
-        if (allTasks) {
-          const tasksWithDueDate = allTasks.filter((t: any) => {
-            // Filtrer les tâches qui sont soit dans le planner aujourd'hui, soit ont une due_date aujourd'hui
-            return t.status !== 'archived'; // On ignore les tâches archivées
+        // Récupérer les tâches planifiées (si différentes)
+        let plannedTasks: any[] = [];
+        if (plannedTaskIds.length > 0) {
+          const { data } = await (supabase
+            .from('tasks') as any)
+            .select('id, status')
+            .eq('user_id', userId)
+            .in('id', plannedTaskIds)
+            .neq('status', 'archived');
+          plannedTasks = data || [];
+        }
+
+        // Combiner et dédupliquer
+        const allTaskIds = new Set<string>();
+        const todayTasks: any[] = [];
+
+        [...(tasksWithDueDate || []), ...plannedTasks].forEach(task => {
+          if (!allTaskIds.has(task.id)) {
+            allTaskIds.add(task.id);
+            todayTasks.push(task);
+          }
+        });
+
+        if (todayTasks && todayTasks.length > 0) {
+          const completedTasks = todayTasks.filter((t: any) => t.status === 'completed');
+
+          console.log('🌟 Perfect Day Check:', {
+            dateStr,
+            todayTasksTotal: todayTasks.length,
+            completedCount: completedTasks.length,
+            allCompleted: completedTasks.length === todayTasks.length
           });
 
-          const completedTasks = tasksWithDueDate.filter((t: any) => t.status === 'completed');
-
-          // Si toutes les tâches actives sont complétées et qu'il y a au moins une tâche
-          if (tasksWithDueDate.length > 0 && completedTasks.length === tasksWithDueDate.length) {
+          // Si toutes les tâches d'aujourd'hui sont complétées
+          if (completedTasks.length === todayTasks.length) {
             const { data: existingPerfectDay } = await (supabase
               .from('user_badges') as any)
               .select('id')
@@ -331,9 +375,10 @@ export async function PATCH(request: NextRequest) {
                   badge_type: 'perfect_day',
                   metadata: {
                     tasks_completed: completedTasks.length,
-                    tasks_total: tasksWithDueDate.length,
+                    tasks_total: todayTasks.length,
                   },
                 });
+              console.log('✅ Perfect Day badge created!');
             }
           }
         }
