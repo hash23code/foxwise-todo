@@ -37,25 +37,34 @@ CREATE INDEX IF NOT EXISTS idx_user_badges_type ON user_badges(badge_type);
 -- RLS (Row Level Security) pour task_completion_times
 ALTER TABLE task_completion_times ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can view their own completion times"
+-- Supprimer les policies existantes si elles existent
+DROP POLICY IF EXISTS "Users can view their own completion times" ON task_completion_times;
+DROP POLICY IF EXISTS "Users can insert their own completion times" ON task_completion_times;
+
+CREATE POLICY "Users can view their own completion times"
   ON task_completion_times FOR SELECT
   USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own completion times"
+CREATE POLICY "Users can insert their own completion times"
   ON task_completion_times FOR INSERT
   WITH CHECK (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
 
 -- RLS (Row Level Security) pour user_badges
 ALTER TABLE user_badges ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can view their own badges"
+-- Supprimer les policies existantes si elles existent
+DROP POLICY IF EXISTS "Users can view their own badges" ON user_badges;
+DROP POLICY IF EXISTS "Users can insert their own badges" ON user_badges;
+DROP POLICY IF EXISTS "Users can delete their own badges" ON user_badges;
+
+CREATE POLICY "Users can view their own badges"
   ON user_badges FOR SELECT
   USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own badges"
+CREATE POLICY "Users can insert their own badges"
   ON user_badges FOR INSERT
   WITH CHECK (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own badges"
+CREATE POLICY "Users can delete their own badges"
   ON user_badges FOR DELETE
   USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub');
