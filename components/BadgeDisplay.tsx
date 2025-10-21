@@ -106,7 +106,7 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
               />
 
               {/* Badge principal */}
-              <motion.div
+              <div
                 className={`
                   relative flex items-center justify-center
                   w-14 h-14 rounded-full
@@ -114,13 +114,8 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
                   border-2 ${getBadgeBorder(badge.badge_type)}
                   shadow-lg cursor-help
                   transition-all duration-300
-                  group-hover:shadow-2xl
+                  group-hover:shadow-2xl group-hover:scale-110
                 `}
-                whileHover={{
-                  scale: 1.2,
-                  rotate: [0, -10, 10, -10, 0],
-                  transition: { duration: 0.5, ease: "easeInOut" }
-                }}
               >
                 {/* Sparkle animation */}
                 <motion.div
@@ -140,43 +135,15 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
                 />
 
                 <span className="text-2xl relative z-10 drop-shadow-lg">{metadata.icon}</span>
-              </motion.div>
+              </div>
 
-              {/* Tooltip on hover (mode non-compact amélioré) */}
+              {/* Tooltip simple avec le nom du badge */}
               {!compact && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileHover={{ opacity: 1, y: 0 }}
-                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-3 bg-gradient-to-br from-gray-900 to-gray-800 text-white text-sm rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-2xl border border-gray-600 backdrop-blur-sm"
-                >
-                  <div className="font-semibold">
-                    {language === 'fr' ? metadata.name_fr : metadata.name_en}
-                  </div>
-                  <div className="text-gray-300">
-                    {language === 'fr' ? metadata.description_fr : metadata.description_en}
-                  </div>
-
-                  {/* Détails supplémentaires selon le type de badge */}
-                  {badge.metadata && (
-                    <div className="text-gray-400 mt-1">
-                      {badge.metadata.time_saved_minutes && (
-                        <div>⏱️ {badge.metadata.time_saved_minutes} min économisées</div>
-                      )}
-                      {badge.metadata.tasks_completed && (
-                        <div>✅ {badge.metadata.tasks_completed}/{badge.metadata.tasks_total} tâches</div>
-                      )}
-                      {badge.metadata.percentage_improvement && (
-                        <div>📈 -{badge.metadata.percentage_improvement}%</div>
-                      )}
-                      {badge.metadata.category_name && (
-                        <div>📁 {badge.metadata.category_name}</div>
-                      )}
-                    </div>
-                  )}
-
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                  {language === 'fr' ? metadata.name_fr : metadata.name_en}
                   {/* Triangle pointer */}
                   <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                </motion.div>
+                </div>
               )}
             </div>
           </motion.div>
