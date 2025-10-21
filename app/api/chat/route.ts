@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
-import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -13,23 +13,23 @@ const tools = [
         name: 'create_task',
         description: 'Create a new task for the user',
         parameters: {
-          type: FunctionDeclarationSchemaType.OBJECT,
+          type: 'object',
           properties: {
             title: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'The title/name of the task',
             },
             description: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'Detailed description of the task (optional)',
             },
             priority: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'Priority level: low, medium, or high',
               enum: ['low', 'medium', 'high'],
             },
             due_date: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'Due date in YYYY-MM-DD format (optional)',
             },
           },
@@ -40,15 +40,15 @@ const tools = [
         name: 'list_tasks',
         description: 'List all tasks for the user, optionally filtered by status or date',
         parameters: {
-          type: FunctionDeclarationSchemaType.OBJECT,
+          type: 'object',
           properties: {
             status: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'Filter by status: pending, in_progress, completed, or all',
               enum: ['pending', 'in_progress', 'completed', 'all'],
             },
             date: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'Filter by specific date in YYYY-MM-DD format (optional)',
             },
           },
@@ -59,23 +59,23 @@ const tools = [
         name: 'update_task',
         description: 'Update an existing task (title, status, priority, etc.)',
         parameters: {
-          type: FunctionDeclarationSchemaType.OBJECT,
+          type: 'object',
           properties: {
             task_id: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'The UUID of the task to update',
             },
             title: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'New title for the task (optional)',
             },
             status: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'New status: pending, in_progress, or completed',
               enum: ['pending', 'in_progress', 'completed'],
             },
             priority: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'New priority: low, medium, or high',
               enum: ['low', 'medium', 'high'],
             },
@@ -87,10 +87,10 @@ const tools = [
         name: 'delete_task',
         description: 'Delete a task permanently',
         parameters: {
-          type: FunctionDeclarationSchemaType.OBJECT,
+          type: 'object',
           properties: {
             task_id: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'The UUID of the task to delete',
             },
           },
@@ -101,10 +101,10 @@ const tools = [
         name: 'get_today_schedule',
         description: 'Get the schedule/day planner for today or a specific date',
         parameters: {
-          type: FunctionDeclarationSchemaType.OBJECT,
+          type: 'object',
           properties: {
             date: {
-              type: FunctionDeclarationSchemaType.STRING,
+              type: 'string',
               description: 'Date in YYYY-MM-DD format (optional, defaults to today)',
             },
           },
