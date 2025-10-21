@@ -183,8 +183,8 @@ export async function PATCH(request: NextRequest) {
         const actual_completion = completionDate.toISOString();
 
         // Vérifier si la tâche était dans le day planner
-        const { data: plannedTask } = await supabase
-          .from('day_planner')
+        const { data: plannedTask } = await (supabase
+          .from('day_planner') as any)
           .select('start_time, duration_hours, date')
           .eq('task_id', id)
           .eq('date', dateStr)

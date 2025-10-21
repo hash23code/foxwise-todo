@@ -27,16 +27,16 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Vérifier si la tâche était dans le day planner
-    const { data: plannedTask } = await supabase
-      .from('day_planner')
+    const { data: plannedTask } = await (supabase
+      .from('day_planner') as any)
       .select('start_time, duration_hours, date')
       .eq('task_id', task_id)
       .eq('date', dateStr)
       .maybeSingle();
 
     // Vérifier si la tâche était dans le calendrier (avait une due_date)
-    const { data: task } = await supabase
-      .from('tasks')
+    const { data: task } = await (supabase
+      .from('tasks') as any)
       .select('due_date')
       .eq('id', task_id)
       .single();
