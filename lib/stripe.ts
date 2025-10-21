@@ -1,10 +1,14 @@
 import Stripe from 'stripe';
 
+// En développement, si Stripe n'est pas configuré, utiliser une clé dummy
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_dev_mode';
+
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+  console.warn('⚠️ STRIPE_SECRET_KEY is not set. Stripe features will not work until configured.');
+  console.warn('📚 See SETUP-STRIPE.md for configuration instructions.');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(stripeKey, {
   apiVersion: '2024-11-20.acacia',
   typescript: true,
 });
