@@ -90,7 +90,11 @@ export default function DayPlannerPage() {
 
   const fetchPlannedTasks = async () => {
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Utiliser la date locale au lieu de UTC pour éviter les problèmes de timezone
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       const response = await fetch(`/api/day-planner?date=${dateStr}`);
       if (response.ok) {
         const data = await response.json();
@@ -103,7 +107,11 @@ export default function DayPlannerPage() {
 
   const fetchBadges = async () => {
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Utiliser la date locale au lieu de UTC pour éviter les problèmes de timezone
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       const response = await fetch(`/api/badges?date=${dateStr}`);
       if (response.ok) {
         const data = await response.json();
@@ -116,7 +124,11 @@ export default function DayPlannerPage() {
 
   const addTaskToTimeSlot = async (taskId: string, duration: number) => {
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Utiliser la date locale au lieu de UTC pour éviter les problèmes de timezone
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       const response = await fetch('/api/day-planner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -234,7 +246,11 @@ export default function DayPlannerPage() {
 
     try {
       // Remove all planned tasks for the selected date
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Utiliser la date locale au lieu de UTC pour éviter les problèmes de timezone
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       const tasksToRemove = plannedTasks.filter(pt => pt.date === dateStr);
 
       for (const task of tasksToRemove) {
