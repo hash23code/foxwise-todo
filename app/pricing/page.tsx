@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -121,6 +121,15 @@ export default function PricingPage() {
   const { isSignedIn } = useUser();
   const { language } = useLanguage();
   const [loading, setLoading] = useState<string | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   const handleSelectPlan = async (plan: 'free' | 'pro' | 'premium') => {
     if (!isSignedIn) {
@@ -156,9 +165,17 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      {/* Mouse Spotlight Effect */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(168, 85, 247, 0.15), transparent 40%)`,
+        }}
+      />
+
       {/* Header */}
-      <div className="container mx-auto px-4 py-20">
+      <div className="relative z-10 container mx-auto px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -184,7 +201,7 @@ export default function PricingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className={`
-                relative rounded-2xl p-8
+                relative rounded-2xl p-8 flex flex-col
                 ${tier.highlighted
                   ? 'bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-2 border-purple-500 shadow-2xl shadow-purple-500/20 scale-105'
                   : 'bg-gray-800/50 border border-gray-700'
@@ -227,7 +244,7 @@ export default function PricingPage() {
               </div>
 
               {/* Features */}
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-grow">
                 {(language === 'fr' ? tier.features : tier.featuresEn).map((feature, i) => (
                   <li key={i} className="text-gray-300 text-sm flex items-start">
                     <span className="mr-2 flex-shrink-0">{feature}</span>

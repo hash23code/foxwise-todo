@@ -93,6 +93,19 @@ export default function LandingPage() {
       feature6Title: "Time-Based Analytics",
       feature6Desc: "Category charts now show estimated hours instead of task count. Better time management insights.",
 
+      // Coming Soon - AI Assistant
+      comingSoon: "COMING SOON",
+      assistantBadge: "Revolutionary Feature",
+      assistantTitle: "Your Personal AI Assistant",
+      assistantSubtitle: "Finally, Everyone Can Have Their Own AI Assistant!",
+      assistantDesc: "Imagine having a dedicated AI assistant that knows your tasks, understands your schedule, and helps you stay on top of everything. Chat with it via text or voice, ask it to manage your day, create tasks, send emails, adjust your calendar - all hands-free!",
+      assistantFeature1: "💬 Conversational AI - Chat naturally about your tasks and projects",
+      assistantFeature2: "🎙️ Voice Commands - Control everything with your voice (Vapi powered)",
+      assistantFeature3: "📧 Email Integration - Ask your assistant to send emails and updates",
+      assistantFeature4: "📅 Calendar Management - Automatically adjust your schedule",
+      assistantFeature5: "⚙️ Smart Workflows - n8n powered automations for advanced users",
+      assistantCTA: "Be the First to Know",
+
       // AI Features
       aiFeatures: "Artificial Intelligence",
       aiFeaturesTitle: "Revolutionary AI Features",
@@ -220,7 +233,7 @@ export default function LandingPage() {
       ctaTitle: "Ready to Supercharge Your Productivity?",
       ctaSubtitle: "Join thousands of users managing tasks smarter with AI planning, voice commands, 24-hour day planner, and beautiful analytics - all completely free",
       ctaButton: "Start Free with AI Today",
-      ctaNote: "No credit card required • Free forever • All AI features included",
+      ctaNote: "No credit card required • Start free • Upgrade anytime",
 
       // Footer
       features: "Features",
@@ -267,6 +280,19 @@ export default function LandingPage() {
 
       feature6Title: "Analyses Temporelles",
       feature6Desc: "Les graphiques par catégorie affichent maintenant les heures estimées au lieu du nombre de tâches. Meilleure gestion du temps.",
+
+      // Coming Soon - AI Assistant
+      comingSoon: "BIENTÔT DISPONIBLE",
+      assistantBadge: "Fonctionnalité Révolutionnaire",
+      assistantTitle: "Votre Assistant Personnel IA",
+      assistantSubtitle: "Enfin, Tout le Monde Peut Avoir Son Propre Assistant IA!",
+      assistantDesc: "Imaginez avoir un assistant IA dédié qui connaît vos tâches, comprend votre emploi du temps et vous aide à rester au top. Chattez avec lui par texte ou voix, demandez-lui de gérer votre journée, créer des tâches, envoyer des emails, ajuster votre calendrier - tout en mains libres!",
+      assistantFeature1: "💬 IA Conversationnelle - Discutez naturellement de vos tâches et projets",
+      assistantFeature2: "🎙️ Commandes Vocales - Contrôlez tout avec votre voix (propulsé par Vapi)",
+      assistantFeature3: "📧 Intégration Email - Demandez à votre assistant d'envoyer des emails",
+      assistantFeature4: "📅 Gestion Calendrier - Ajustement automatique de votre horaire",
+      assistantFeature5: "⚙️ Workflows Intelligents - Automatisations n8n pour utilisateurs avancés",
+      assistantCTA: "Soyez le Premier Informé",
 
       // AI Features
       aiFeatures: "Intelligence Artificielle",
@@ -395,7 +421,7 @@ export default function LandingPage() {
       ctaTitle: "Prêt à Booster Votre Productivité ?",
       ctaSubtitle: "Rejoignez des milliers d'utilisateurs gérant leurs tâches intelligemment avec planification IA, commandes vocales, planificateur 24h et analyses - complètement gratuit",
       ctaButton: "Commencer Gratuitement avec IA",
-      ctaNote: "Pas de carte de crédit requise • Gratuit pour toujours • Toutes les fonctionnalités IA incluses",
+      ctaNote: "Pas de carte de crédit requise • Commencez gratuitement • Passez à un plan supérieur quand vous voulez",
 
       // Footer
       features: "Fonctionnalités",
@@ -583,7 +609,7 @@ export default function LandingPage() {
           <motion.button
             whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(251, 146, 60, 0.6)" }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/sign-up")}
+            onClick={() => router.push("/pricing")}
             className="px-6 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium shadow-lg shadow-orange-500/50"
           >
             {content.getStarted}
@@ -651,7 +677,7 @@ export default function LandingPage() {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 50px rgba(147, 51, 234, 0.8)" }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => router.push("/sign-up")}
+              onClick={() => router.push("/pricing")}
               className="group px-10 py-5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-lg shadow-2xl shadow-purple-500/50 flex items-center gap-3"
             >
               <Brain className="w-6 h-6" />
@@ -681,6 +707,116 @@ export default function LandingPage() {
           >
             <ChevronDown className="w-10 h-10 mx-auto text-purple-400 animate-bounce" />
           </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Coming Soon - AI Assistant Announcement */}
+      <section className="relative z-10 container mx-auto px-6 py-32">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-pink-900/80 border-2 border-purple-500/30 p-12 md:p-16"
+        >
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_50%)]" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
+
+          <div className="relative z-10">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="flex justify-center mb-6"
+            >
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50">
+                <Sparkles className="w-5 h-5 text-yellow-400 animate-pulse" />
+                <span className="text-sm font-bold text-yellow-400 uppercase tracking-wider">
+                  {content.comingSoon}
+                </span>
+                <span className="px-3 py-1 bg-yellow-400 text-purple-900 text-xs font-bold rounded-full">
+                  {content.assistantBadge}
+                </span>
+              </div>
+            </motion.div>
+
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-center mb-8"
+            >
+              <h2 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                {content.assistantTitle}
+              </h2>
+              <p className="text-2xl md:text-3xl font-semibold text-purple-300 mb-6">
+                {content.assistantSubtitle}
+              </p>
+              <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+                {content.assistantDesc}
+              </p>
+            </motion.div>
+
+            {/* Features Grid */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="grid md:grid-cols-2 gap-4 mb-10 max-w-4xl mx-auto"
+            >
+              {[
+                content.assistantFeature1,
+                content.assistantFeature2,
+                content.assistantFeature3,
+                content.assistantFeature4,
+                content.assistantFeature5,
+              ].map((feature, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5 + i * 0.1 }}
+                  whileHover={{ scale: 1.02, x: 5 }}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-purple-500/20 backdrop-blur-sm"
+                >
+                  <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-white">{feature}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.8 }}
+              className="flex justify-center"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 60px rgba(168, 85, 247, 0.8)" }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push("/pricing")}
+                className="group px-12 py-5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-bold text-xl shadow-2xl shadow-purple-500/50 flex items-center gap-4"
+              >
+                <Mic className="w-6 h-6" />
+                {content.assistantCTA}
+                <motion.div
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <ArrowRight className="w-6 h-6" />
+                </motion.div>
+              </motion.button>
+            </motion.div>
+          </div>
         </motion.div>
       </section>
 
@@ -1276,7 +1412,7 @@ export default function LandingPage() {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 60px rgba(255, 255, 255, 0.6)" }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => router.push("/sign-up")}
+              onClick={() => router.push("/pricing")}
               className="px-16 py-6 rounded-2xl bg-white text-purple-600 font-bold text-2xl shadow-2xl hover:shadow-white/50 transition-shadow flex items-center gap-4 mx-auto"
             >
               <Brain className="w-8 h-8" />
@@ -1314,7 +1450,7 @@ export default function LandingPage() {
               {content.features}
             </motion.button>
             <motion.button
-              onClick={() => router.push("/sign-up")}
+              onClick={() => router.push("/pricing")}
               whileHover={{ scale: 1.1, color: "#a855f7" }}
               className="hover:text-purple-400 transition-colors"
             >
