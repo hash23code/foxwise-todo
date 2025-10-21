@@ -93,8 +93,8 @@ const pricingTiers: PricingTier[] = [
     features: [
       '👑 Tout de Pro +',
       '🤖 Agent conversationnel AI',
-      '🎙️ Assistant vocal (Vapi)',
-      '⚙️ Workflows n8n (emails, intégrations)',
+      '🎙️ Assistant vocal avancé',
+      '⚙️ Workflows automatisés (emails, intégrations)',
       '📧 Automatisations avancées',
       '📊 Rapports personnalisés',
       '🎯 Support prioritaire',
@@ -103,8 +103,8 @@ const pricingTiers: PricingTier[] = [
     featuresEn: [
       '👑 Everything in Pro +',
       '🤖 AI Conversational Agent',
-      '🎙️ Voice Assistant (Vapi)',
-      '⚙️ n8n Workflows (emails, integrations)',
+      '🎙️ Advanced Voice Assistant',
+      '⚙️ Automated Workflows (emails, integrations)',
       '📧 Advanced automations',
       '📊 Custom reports',
       '🎯 Priority support',

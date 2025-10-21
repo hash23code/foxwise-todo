@@ -100,10 +100,10 @@ export default function LandingPage() {
       assistantSubtitle: "Finally, Everyone Can Have Their Own AI Assistant!",
       assistantDesc: "Imagine having a dedicated AI assistant that knows your tasks, understands your schedule, and helps you stay on top of everything. Chat with it via text or voice, ask it to manage your day, create tasks, send emails, adjust your calendar - all hands-free!",
       assistantFeature1: "💬 Conversational AI - Chat naturally about your tasks and projects",
-      assistantFeature2: "🎙️ Voice Commands - Control everything with your voice (Vapi powered)",
+      assistantFeature2: "🎙️ Voice Commands - Control everything with your voice",
       assistantFeature3: "📧 Email Integration - Ask your assistant to send emails and updates",
       assistantFeature4: "📅 Calendar Management - Automatically adjust your schedule",
-      assistantFeature5: "⚙️ Smart Workflows - n8n powered automations for advanced users",
+      assistantFeature5: "⚙️ Smart Workflows - Advanced automations for power users",
       assistantCTA: "Be the First to Know",
 
       // AI Features
@@ -288,10 +288,10 @@ export default function LandingPage() {
       assistantSubtitle: "Enfin, Tout le Monde Peut Avoir Son Propre Assistant IA!",
       assistantDesc: "Imaginez avoir un assistant IA dédié qui connaît vos tâches, comprend votre emploi du temps et vous aide à rester au top. Chattez avec lui par texte ou voix, demandez-lui de gérer votre journée, créer des tâches, envoyer des emails, ajuster votre calendrier - tout en mains libres!",
       assistantFeature1: "💬 IA Conversationnelle - Discutez naturellement de vos tâches et projets",
-      assistantFeature2: "🎙️ Commandes Vocales - Contrôlez tout avec votre voix (propulsé par Vapi)",
+      assistantFeature2: "🎙️ Commandes Vocales - Contrôlez tout avec votre voix",
       assistantFeature3: "📧 Intégration Email - Demandez à votre assistant d'envoyer des emails",
       assistantFeature4: "📅 Gestion Calendrier - Ajustement automatique de votre horaire",
-      assistantFeature5: "⚙️ Workflows Intelligents - Automatisations n8n pour utilisateurs avancés",
+      assistantFeature5: "⚙️ Workflows Intelligents - Automatisations avancées pour utilisateurs expérimentés",
       assistantCTA: "Soyez le Premier Informé",
 
       // AI Features

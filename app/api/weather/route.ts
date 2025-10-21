@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&units=metric&lang=fr&appid=${apiKey}`;
 
     const response = await fetch(url, {
-      next: { revalidate: 300 } // Cache for 5 minutes (reduced from 1 hour)
+      cache: 'no-store' // Disable cache to always get fresh data
     });
 
     if (!response.ok) {
@@ -178,9 +178,50 @@ function getSuitabilityInfo(daily: any, morning: any, afternoon: any, evening: a
 }
 
 // Mock weather data for development/fallback
+// Generates variable weather based on date to simulate real conditions
 function getMockWeatherData(date: string) {
-  const now = new Date();
-  const hour = now.getHours();
+  // Use date as seed for pseudo-random but consistent data
+  const dateObj = new Date(date);
+  const dayOfYear = Math.floor((dateObj.getTime() - new Date(dateObj.getFullYear(), 0, 0).getTime()) / 86400000);
+  const seed = dayOfYear % 10; // 0-9 based on day of year
+
+  // Weather patterns based on seed
+  const patterns = [
+    { main: 'Clear', desc: 'ciel dégagé', icon: '01d', precip: 5, temp: 22 },
+    { main: 'Clouds', desc: 'partiellement nuageux', icon: '02d', precip: 15, temp: 18 },
+    { main: 'Clouds', desc: 'nuageux', icon: '03d', precip: 25, temp: 16 },
+    { main: 'Clouds', desc: 'très nuageux', icon: '04d', precip: 35, temp: 14 },
+    { main: 'Rain', desc: 'pluie légère', icon: '10d', precip: 65, temp: 12 },
+    { main: 'Rain', desc: 'pluie', icon: '09d', precip: 80, temp: 10 },
+    { main: 'Clear', desc: 'ensoleillé', icon: '01d', precip: 0, temp: 24 },
+    { main: 'Clouds', desc: 'quelques nuages', icon: '02d', precip: 10, temp: 20 },
+    { main: 'Drizzle', desc: 'bruine', icon: '09d', precip: 50, temp: 13 },
+    { main: 'Clear', desc: 'dégagé', icon: '01d', precip: 5, temp: 21 },
+  ];
+
+  const pattern = patterns[seed];
+  const tempVariation = (seed % 3) - 1; // -1, 0, or +1
+
+  const morningTemp = Math.round(pattern.temp - 4 + tempVariation);
+  const afternoonTemp = Math.round(pattern.temp + tempVariation);
+  const eveningTemp = Math.round(pattern.temp - 2 + tempVariation);
+
+  const morningPrecip = Math.max(0, pattern.precip - 10);
+  const afternoonPrecip = pattern.precip;
+  const eveningPrecip = Math.max(0, pattern.precip - 5);
+
+  // Suitable conditions logic
+  const getSuitability = (temp: number, precip: number, main: string) => {
+    if (main === 'Rain' && precip > 60) {
+      return { suitable: false, reason: 'Pluie prévue - privilégier intérieur' };
+    } else if (main === 'Drizzle' && precip > 40) {
+      return { suitable: false, reason: 'Bruine - privilégier intérieur' };
+    } else if (main === 'Clear') {
+      return { suitable: true, reason: 'Idéal pour activités extérieures' };
+    } else {
+      return { suitable: true, reason: 'Conditions acceptables pour extérieur' };
+    }
+  };
 
   return {
     date,
@@ -190,45 +231,45 @@ function getMockWeatherData(date: string) {
       name: 'Montreal',
     },
     daily: {
-      temp: { min: 5, max: 18 },
-      description: 'partiellement nuageux',
-      icon: '02d',
-      main: 'Clouds',
-      precipitation: 20,
-      humidity: 65,
-      windSpeed: 15,
-      clouds: 40,
+      temp: { min: morningTemp, max: afternoonTemp },
+      description: pattern.desc,
+      icon: pattern.icon,
+      main: pattern.main,
+      precipitation: afternoonPrecip,
+      humidity: 60 + seed * 2,
+      windSpeed: 10 + seed,
+      clouds: pattern.precip * 1.5,
     },
     periods: {
       morning: {
-        temp: 12,
-        description: 'quelques nuages',
-        icon: '02d',
-        main: 'Clouds',
-        precipitation: 10,
+        temp: morningTemp,
+        description: pattern.desc,
+        icon: pattern.icon,
+        main: pattern.main,
+        precipitation: morningPrecip,
         time: '6h-12h',
       },
       afternoon: {
-        temp: 18,
-        description: 'partiellement nuageux',
-        icon: '03d',
-        main: 'Clouds',
-        precipitation: 20,
+        temp: afternoonTemp,
+        description: pattern.desc,
+        icon: pattern.icon,
+        main: pattern.main,
+        precipitation: afternoonPrecip,
         time: '12h-18h',
       },
       evening: {
-        temp: 14,
-        description: 'ciel dégagé',
-        icon: '01n',
-        main: 'Clear',
-        precipitation: 5,
+        temp: eveningTemp,
+        description: pattern.desc,
+        icon: pattern.icon.replace('d', 'n'), // Night icon
+        main: pattern.main,
+        precipitation: eveningPrecip,
         time: '18h-23h',
       },
     },
     suitable: {
-      morning: { suitable: true, reason: 'Idéal pour activités extérieures', main: 'Clouds', precipitation: 10, temp: 12 },
-      afternoon: { suitable: true, reason: 'Conditions acceptables pour extérieur', main: 'Clouds', precipitation: 20, temp: 18 },
-      evening: { suitable: true, reason: 'Idéal pour activités extérieures', main: 'Clear', precipitation: 5, temp: 14 },
+      morning: { ...getSuitability(morningTemp, morningPrecip, pattern.main), main: pattern.main, precipitation: morningPrecip, temp: morningTemp },
+      afternoon: { ...getSuitability(afternoonTemp, afternoonPrecip, pattern.main), main: pattern.main, precipitation: afternoonPrecip, temp: afternoonTemp },
+      evening: { ...getSuitability(eveningTemp, eveningPrecip, pattern.main), main: pattern.main, precipitation: eveningPrecip, temp: eveningTemp },
     },
   };
 }
