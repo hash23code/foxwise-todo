@@ -10,41 +10,75 @@ interface BadgeDisplayProps {
   compact?: boolean;
 }
 
-// Helper functions pour les couleurs et gradients des badges
-function getBadgeColor(badgeType: string): string {
-  const colors: Record<string, string> = {
-    perfect_day: 'bg-amber-500/20 border-amber-500/40',
-    flexible: 'bg-blue-500/20 border-blue-500/40',
-    speed_task: 'bg-purple-500/20 border-purple-500/40',
-    speed_day_bronze: 'bg-orange-600/20 border-orange-600/40',
-    speed_day_silver: 'bg-slate-400/20 border-slate-400/40',
-    speed_day_gold: 'bg-yellow-500/20 border-yellow-500/40',
-    after_hours: 'bg-indigo-500/20 border-indigo-500/40',
-    exceptional_day_bronze: 'bg-orange-600/20 border-orange-600/40',
-    exceptional_day_silver: 'bg-slate-400/20 border-slate-400/40',
-    exceptional_day_gold: 'bg-yellow-500/20 border-yellow-500/40',
-    exceptional_category: 'bg-pink-500/20 border-pink-500/40',
-    exceptional_global: 'bg-amber-500/20 border-amber-500/40'
+// Helper functions pour les couleurs des badges trophées
+function getBadgeColors(badgeType: string): { bg: string; border: string; ribbon: string } {
+  const colors: Record<string, { bg: string; border: string; ribbon: string }> = {
+    perfect_day: {
+      bg: 'from-amber-400/80 to-yellow-500/80',
+      border: 'border-amber-300',
+      ribbon: 'bg-gradient-to-b from-amber-600 to-amber-700'
+    },
+    flexible: {
+      bg: 'from-blue-400/80 to-blue-500/80',
+      border: 'border-blue-300',
+      ribbon: 'bg-gradient-to-b from-blue-600 to-blue-700'
+    },
+    speed_task: {
+      bg: 'from-purple-400/80 to-purple-500/80',
+      border: 'border-purple-300',
+      ribbon: 'bg-gradient-to-b from-purple-600 to-purple-700'
+    },
+    speed_day_bronze: {
+      bg: 'from-orange-500/80 to-orange-600/80',
+      border: 'border-orange-400',
+      ribbon: 'bg-gradient-to-b from-orange-700 to-orange-800'
+    },
+    speed_day_silver: {
+      bg: 'from-slate-300/80 to-slate-400/80',
+      border: 'border-slate-200',
+      ribbon: 'bg-gradient-to-b from-slate-500 to-slate-600'
+    },
+    speed_day_gold: {
+      bg: 'from-yellow-400/80 to-yellow-500/80',
+      border: 'border-yellow-300',
+      ribbon: 'bg-gradient-to-b from-yellow-600 to-yellow-700'
+    },
+    after_hours: {
+      bg: 'from-indigo-400/80 to-indigo-500/80',
+      border: 'border-indigo-300',
+      ribbon: 'bg-gradient-to-b from-indigo-600 to-indigo-700'
+    },
+    exceptional_day_bronze: {
+      bg: 'from-orange-500/80 to-orange-600/80',
+      border: 'border-orange-400',
+      ribbon: 'bg-gradient-to-b from-orange-700 to-orange-800'
+    },
+    exceptional_day_silver: {
+      bg: 'from-slate-300/80 to-slate-400/80',
+      border: 'border-slate-200',
+      ribbon: 'bg-gradient-to-b from-slate-500 to-slate-600'
+    },
+    exceptional_day_gold: {
+      bg: 'from-yellow-400/80 to-yellow-500/80',
+      border: 'border-yellow-300',
+      ribbon: 'bg-gradient-to-b from-yellow-600 to-yellow-700'
+    },
+    exceptional_category: {
+      bg: 'from-pink-400/80 to-pink-500/80',
+      border: 'border-pink-300',
+      ribbon: 'bg-gradient-to-b from-pink-600 to-pink-700'
+    },
+    exceptional_global: {
+      bg: 'from-amber-400/80 to-amber-500/80',
+      border: 'border-amber-300',
+      ribbon: 'bg-gradient-to-b from-amber-600 to-amber-700'
+    }
   };
-  return colors[badgeType] || 'bg-gray-500/20 border-gray-500/40';
-}
-
-function getBadgeGlow(badgeType: string): string {
-  const glows: Record<string, string> = {
-    perfect_day: 'shadow-amber-500/20',
-    flexible: 'shadow-blue-500/20',
-    speed_task: 'shadow-purple-500/20',
-    speed_day_bronze: 'shadow-orange-600/20',
-    speed_day_silver: 'shadow-slate-400/20',
-    speed_day_gold: 'shadow-yellow-500/20',
-    after_hours: 'shadow-indigo-500/20',
-    exceptional_day_bronze: 'shadow-orange-600/20',
-    exceptional_day_silver: 'shadow-slate-400/20',
-    exceptional_day_gold: 'shadow-yellow-500/20',
-    exceptional_category: 'shadow-pink-500/20',
-    exceptional_global: 'shadow-amber-500/20'
+  return colors[badgeType] || {
+    bg: 'from-gray-400/80 to-gray-500/80',
+    border: 'border-gray-300',
+    ribbon: 'bg-gradient-to-b from-gray-600 to-gray-700'
   };
-  return glows[badgeType] || 'shadow-gray-500/20';
 }
 
 export default function BadgeDisplay({ badges, date, compact = false }: BadgeDisplayProps) {
@@ -64,11 +98,13 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
       {uniqueBadges.map((badge, index) => {
         const metadata = BADGE_METADATA[badge.badge_type];
 
+        const colors = getBadgeColors(badge.badge_type);
+
         return (
           <motion.div
             key={`${badge.badge_type}-${badge.badge_tier || ''}-${index}`}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ scale: 0, opacity: 0, y: -20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{
               type: "spring",
               stiffness: 260,
@@ -77,38 +113,50 @@ export default function BadgeDisplay({ badges, date, compact = false }: BadgeDis
             }}
             className="relative group"
           >
-            {/* Badge Container - Style moderne et sobre */}
-            <motion.div
-              className={`
-                relative flex items-center justify-center
-                w-12 h-12 rounded-full
-                ${getBadgeColor(badge.badge_type)}
-                border backdrop-blur-sm
-                shadow-lg ${getBadgeGlow(badge.badge_type)}
-                cursor-help
-              `}
-              animate={{
-                boxShadow: [
-                  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                  '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                ]
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <span className="text-2xl relative z-10 filter drop-shadow-sm">{metadata.icon}</span>
-            </motion.div>
+            {/* Badge Trophée - Style médaille avec ruban */}
+            <div className="flex flex-col items-center cursor-help">
+              {/* Ruban supérieur */}
+              <div className={`w-8 h-3 ${colors.ribbon} rounded-t-sm shadow-md`}></div>
 
-            {/* Tooltip simple avec le nom du badge */}
+              {/* Médaille principale */}
+              <motion.div
+                className={`
+                  relative flex items-center justify-center
+                  w-14 h-14 rounded-full
+                  bg-gradient-to-br ${colors.bg}
+                  border-2 ${colors.border}
+                  shadow-xl
+                `}
+                animate={{
+                  y: [0, -2, 0],
+                  boxShadow: [
+                    '0 10px 20px -5px rgba(0, 0, 0, 0.3)',
+                    '0 15px 25px -5px rgba(0, 0, 0, 0.4)',
+                    '0 10px 20px -5px rgba(0, 0, 0, 0.3)'
+                  ]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                {/* Cercle intérieur pour effet de profondeur */}
+                <div className="absolute inset-1 rounded-full bg-white/20"></div>
+
+                {/* Icône du badge */}
+                <span className="text-3xl relative z-10 filter drop-shadow-lg">
+                  {metadata.icon}
+                </span>
+              </motion.div>
+            </div>
+
+            {/* Tooltip avec nom du badge */}
             {!compact && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-gray-700/50">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-4 py-2 bg-gray-900/95 backdrop-blur-sm text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-700/50">
                 {language === 'fr' ? metadata.name_fr : metadata.name_en}
                 {/* Triangle pointer */}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/90"></div>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-gray-900/95"></div>
               </div>
             )}
           </motion.div>
