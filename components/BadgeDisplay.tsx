@@ -20,6 +20,9 @@ function getBadgeGradient(badgeType: string): string {
     speed_day_silver: 'from-gray-300 via-gray-400 to-gray-500',
     speed_day_gold: 'from-yellow-300 via-yellow-400 to-yellow-600',
     after_hours: 'from-indigo-400 via-purple-500 to-indigo-600',
+    exceptional_day_bronze: 'from-orange-400 via-orange-500 to-orange-700',
+    exceptional_day_silver: 'from-gray-300 via-gray-400 to-gray-500',
+    exceptional_day_gold: 'from-yellow-300 via-yellow-400 to-yellow-600',
     exceptional_category: 'from-pink-400 via-pink-500 to-rose-600',
     exceptional_global: 'from-amber-300 via-amber-400 to-yellow-500'
   };
@@ -35,6 +38,9 @@ function getBadgeBorder(badgeType: string): string {
     speed_day_silver: 'border-gray-200',
     speed_day_gold: 'border-yellow-200',
     after_hours: 'border-indigo-300',
+    exceptional_day_bronze: 'border-orange-300',
+    exceptional_day_silver: 'border-gray-200',
+    exceptional_day_gold: 'border-yellow-200',
     exceptional_category: 'border-pink-300',
     exceptional_global: 'border-amber-200'
   };
@@ -50,6 +56,9 @@ function getGlowColor(badgeType: string): string {
     speed_day_silver: '#d1d5db',
     speed_day_gold: '#fbbf24',
     after_hours: '#818cf8',
+    exceptional_day_bronze: '#fb923c',
+    exceptional_day_silver: '#d1d5db',
+    exceptional_day_gold: '#fbbf24',
     exceptional_category: '#f472b6',
     exceptional_global: '#fbbf24'
   };

@@ -22,7 +22,11 @@ export async function POST(request: NextRequest) {
     }
 
     const completionDate = new Date(actual_completion);
-    const dateStr = completionDate.toISOString().split('T')[0];
+    // Utiliser la date locale pour éviter le décalage UTC
+    const year = completionDate.getFullYear();
+    const month = String(completionDate.getMonth() + 1).padStart(2, '0');
+    const day = String(completionDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
 
     const supabase = await createClient();
 

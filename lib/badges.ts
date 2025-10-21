@@ -1,14 +1,17 @@
 // Types de badges disponibles
 export type BadgeType =
-  | 'perfect_day'           // Toutes les tâches de la journée terminées
-  | 'flexible'              // Au moins 1 tâche non schedulée complétée
-  | 'speed_task'            // Tâche terminée au moins 15min avant le temps alloué
-  | 'speed_day_bronze'      // Fin de journée: 30min-1h économisé
-  | 'speed_day_silver'      // Fin de journée: 1h-2h économisé
-  | 'speed_day_gold'        // Fin de journée: 2h+ économisé
-  | 'after_hours'           // Tâche complétée après 20h
-  | 'exceptional_category'  // Baisse de 20%+ dans une catégorie vs semaine dernière
-  | 'exceptional_global';   // Baisse de 20%+ globale vs semaine dernière
+  | 'perfect_day'              // Toutes les tâches de la journée terminées
+  | 'flexible'                 // Au moins 1 tâche non schedulée complétée
+  | 'speed_task'               // Tâche terminée au moins 15min avant le temps alloué
+  | 'speed_day_bronze'         // Fin de journée: 30min-1h économisé
+  | 'speed_day_silver'         // Fin de journée: 1h-2h économisé
+  | 'speed_day_gold'           // Fin de journée: 2h+ économisé
+  | 'after_hours'              // Tâche complétée après 20h
+  | 'exceptional_day_bronze'   // 10-20% plus de tâches que la moyenne 7j
+  | 'exceptional_day_silver'   // 20-35% plus de tâches que la moyenne 7j
+  | 'exceptional_day_gold'     // 35%+ plus de tâches que la moyenne 7j
+  | 'exceptional_category'     // Baisse de 20%+ dans une catégorie vs semaine dernière
+  | 'exceptional_global';      // Baisse de 20%+ globale vs semaine dernière
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | null;
 
@@ -54,6 +57,11 @@ export const BADGE_CONFIG = {
   },
   speed_task: {
     minimum_minutes_saved: 15  // Au moins 15 min économisées
+  },
+  exceptional_day: {
+    bronze: { min: 10, max: 20 },      // 10-20% au-dessus de la moyenne
+    silver: { min: 20, max: 35 },      // 20-35% au-dessus de la moyenne
+    gold: { min: 35, max: Infinity }   // 35%+ au-dessus de la moyenne
   },
   exceptional: {
     threshold_percentage: 20  // Baisse de 20%
@@ -131,6 +139,30 @@ export const BADGE_METADATA: Record<BadgeType, {
     description_fr: 'Tâche après 20h',
     description_en: 'Task after 8pm'
   },
+  exceptional_day_bronze: {
+    icon: '🥉',
+    color: 'text-orange-600',
+    name_fr: 'Productif Bronze',
+    name_en: 'Productive Bronze',
+    description_fr: '+10-20% de tâches vs moyenne',
+    description_en: '+10-20% tasks vs average'
+  },
+  exceptional_day_silver: {
+    icon: '🥈',
+    color: 'text-gray-400',
+    name_fr: 'Productif Argent',
+    name_en: 'Productive Silver',
+    description_fr: '+20-35% de tâches vs moyenne',
+    description_en: '+20-35% tasks vs average'
+  },
+  exceptional_day_gold: {
+    icon: '🥇',
+    color: 'text-yellow-500',
+    name_fr: 'Productif Or',
+    name_en: 'Productive Gold',
+    description_fr: '+35%+ de tâches vs moyenne',
+    description_en: '+35%+ tasks vs average'
+  },
   exceptional_category: {
     icon: '🏆',
     color: 'text-pink-400',
@@ -177,4 +209,12 @@ export function isAfterHours(timestamp: string): boolean {
   const date = new Date(timestamp);
   const hour = date.getHours();
   return hour >= BADGE_CONFIG.after_hours.start_hour;
+}
+
+// Fonction pour déterminer le tier du badge exceptional_day
+export function getExceptionalDayTier(percentageIncrease: number): BadgeType | null {
+  if (percentageIncrease >= BADGE_CONFIG.exceptional_day.gold.min) return 'exceptional_day_gold';
+  if (percentageIncrease >= BADGE_CONFIG.exceptional_day.silver.min) return 'exceptional_day_silver';
+  if (percentageIncrease >= BADGE_CONFIG.exceptional_day.bronze.min) return 'exceptional_day_bronze';
+  return null;
 }

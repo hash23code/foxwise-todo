@@ -179,7 +179,11 @@ export async function PATCH(request: NextRequest) {
         const { calculateTimeSaved, isAfterHours, BADGE_CONFIG } = await import('@/lib/badges');
 
         const completionDate = new Date();
-        const dateStr = completionDate.toISOString().split('T')[0];
+        // Utiliser la date locale pour éviter le décalage UTC
+        const year = completionDate.getFullYear();
+        const month = String(completionDate.getMonth() + 1).padStart(2, '0');
+        const day = String(completionDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
         const actual_completion = completionDate.toISOString();
 
         // Vérifier si la tâche était dans le day planner
@@ -291,6 +295,110 @@ export async function PATCH(request: NextRequest) {
                   completion_hour: completionDate.getHours(),
                 },
               });
+          }
+        }
+
+        // Badge PERFECT_DAY: Toutes les tâches de la journée complétées
+        const { data: allTasks } = await (supabase
+          .from('tasks') as any)
+          .select('id, status')
+          .eq('user_id', userId);
+
+        if (allTasks) {
+          const tasksWithDueDate = allTasks.filter((t: any) => {
+            // Filtrer les tâches qui sont soit dans le planner aujourd'hui, soit ont une due_date aujourd'hui
+            return t.status !== 'archived'; // On ignore les tâches archivées
+          });
+
+          const completedTasks = tasksWithDueDate.filter((t: any) => t.status === 'completed');
+
+          // Si toutes les tâches actives sont complétées et qu'il y a au moins une tâche
+          if (tasksWithDueDate.length > 0 && completedTasks.length === tasksWithDueDate.length) {
+            const { data: existingPerfectDay } = await (supabase
+              .from('user_badges') as any)
+              .select('id')
+              .eq('user_id', userId)
+              .eq('date', dateStr)
+              .eq('badge_type', 'perfect_day')
+              .maybeSingle();
+
+            if (!existingPerfectDay) {
+              await (supabase
+                .from('user_badges') as any)
+                .insert({
+                  user_id: userId,
+                  date: dateStr,
+                  badge_type: 'perfect_day',
+                  metadata: {
+                    tasks_completed: completedTasks.length,
+                    tasks_total: tasksWithDueDate.length,
+                  },
+                });
+            }
+          }
+        }
+
+        // Badge EXCEPTIONAL_DAY: Performance exceptionnelle vs moyenne 7 derniers jours
+        const sevenDaysAgo = new Date(completionDate);
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoStr = `${sevenDaysAgo.getFullYear()}-${String(sevenDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(sevenDaysAgo.getDate()).padStart(2, '0')}`;
+
+        const { data: recentCompletions } = await (supabase
+          .from('task_completion_times') as any)
+          .select('date')
+          .eq('user_id', userId)
+          .gte('date', sevenDaysAgoStr)
+          .lt('date', dateStr);
+
+        if (recentCompletions && recentCompletions.length > 0) {
+          // Grouper par date et compter
+          const completionsByDate: Record<string, number> = {};
+          recentCompletions.forEach((completion: any) => {
+            completionsByDate[completion.date] = (completionsByDate[completion.date] || 0) + 1;
+          });
+
+          const dailyCounts = Object.values(completionsByDate);
+          const average = dailyCounts.reduce((sum, count) => sum + count, 0) / dailyCounts.length;
+
+          // Compter les tâches complétées aujourd'hui
+          const { data: todayCompletions } = await (supabase
+            .from('task_completion_times') as any)
+            .select('id')
+            .eq('user_id', userId)
+            .eq('date', dateStr);
+
+          const todayCount = todayCompletions?.length || 0;
+
+          if (average > 0) {
+            const percentageIncrease = ((todayCount - average) / average) * 100;
+
+            const { getExceptionalDayTier } = await import('@/lib/badges');
+            const tier = getExceptionalDayTier(percentageIncrease);
+
+            if (tier) {
+              const { data: existingExceptional } = await (supabase
+                .from('user_badges') as any)
+                .select('id')
+                .eq('user_id', userId)
+                .eq('date', dateStr)
+                .eq('badge_type', tier)
+                .maybeSingle();
+
+              if (!existingExceptional) {
+                await (supabase
+                  .from('user_badges') as any)
+                  .insert({
+                    user_id: userId,
+                    date: dateStr,
+                    badge_type: tier,
+                    metadata: {
+                      tasks_today: todayCount,
+                      average_7days: Math.round(average * 10) / 10,
+                      percentage_improvement: Math.round(percentageIncrease),
+                    },
+                  });
+              }
+            }
           }
         }
 
