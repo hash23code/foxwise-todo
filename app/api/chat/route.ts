@@ -1,123 +1,207 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Define function tools that the AI can use
-const tools = [
+const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
-    functionDeclarations: [
-      {
-        name: 'create_task',
-        description: 'Create a new task for the user',
-        parameters: {
-          type: 'object',
-          properties: {
-            title: {
-              type: 'string',
-              description: 'The title/name of the task',
-            },
-            description: {
-              type: 'string',
-              description: 'Detailed description of the task (optional)',
-            },
-            priority: {
-              type: 'string',
-              description: 'Priority level: low, medium, or high',
-              enum: ['low', 'medium', 'high'],
-            },
-            due_date: {
-              type: 'string',
-              description: 'Due date in YYYY-MM-DD format (optional)',
-            },
+    type: 'function',
+    function: {
+      name: 'create_task',
+      description: 'Create a new task for the user. Can be called multiple times to create several tasks at once.',
+      parameters: {
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+            description: 'The title/name of the task',
           },
-          required: ['title'],
-        },
-      },
-      {
-        name: 'list_tasks',
-        description: 'List all tasks for the user, optionally filtered by status or date',
-        parameters: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              description: 'Filter by status: pending, in_progress, completed, or all',
-              enum: ['pending', 'in_progress', 'completed', 'all'],
-            },
-            date: {
-              type: 'string',
-              description: 'Filter by specific date in YYYY-MM-DD format (optional)',
-            },
+          description: {
+            type: 'string',
+            description: 'Detailed description of the task (optional)',
           },
-          required: [],
-        },
-      },
-      {
-        name: 'update_task',
-        description: 'Update an existing task (title, status, priority, etc.)',
-        parameters: {
-          type: 'object',
-          properties: {
-            task_id: {
-              type: 'string',
-              description: 'The UUID of the task to update',
-            },
-            title: {
-              type: 'string',
-              description: 'New title for the task (optional)',
-            },
-            status: {
-              type: 'string',
-              description: 'New status: pending, in_progress, or completed',
-              enum: ['pending', 'in_progress', 'completed'],
-            },
-            priority: {
-              type: 'string',
-              description: 'New priority: low, medium, or high',
-              enum: ['low', 'medium', 'high'],
-            },
+          priority: {
+            type: 'string',
+            description: 'Priority level: low, medium, or high',
+            enum: ['low', 'medium', 'high'],
           },
-          required: ['task_id'],
-        },
-      },
-      {
-        name: 'delete_task',
-        description: 'Delete a task permanently',
-        parameters: {
-          type: 'object',
-          properties: {
-            task_id: {
-              type: 'string',
-              description: 'The UUID of the task to delete',
-            },
+          due_date: {
+            type: 'string',
+            description: 'Due date in YYYY-MM-DD format (optional)',
           },
-          required: ['task_id'],
-        },
-      },
-      {
-        name: 'get_today_schedule',
-        description: 'Get the schedule/day planner for today or a specific date',
-        parameters: {
-          type: 'object',
-          properties: {
-            date: {
-              type: 'string',
-              description: 'Date in YYYY-MM-DD format (optional, defaults to today)',
-            },
+          category: {
+            type: 'string',
+            description: 'Category or list name for the task (optional)',
           },
-          required: [],
         },
+        required: ['title'],
       },
-    ],
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'list_tasks',
+      description: 'List all tasks for the user, optionally filtered by status or date',
+      parameters: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'string',
+            description: 'Filter by status: pending, in_progress, completed, or all',
+            enum: ['pending', 'in_progress', 'completed', 'all'],
+          },
+          date: {
+            type: 'string',
+            description: 'Filter by specific date in YYYY-MM-DD format (optional)',
+          },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_task',
+      description: 'Update an existing task (title, status, priority, etc.)',
+      parameters: {
+        type: 'object',
+        properties: {
+          task_id: {
+            type: 'string',
+            description: 'The UUID of the task to update',
+          },
+          title: {
+            type: 'string',
+            description: 'New title for the task (optional)',
+          },
+          status: {
+            type: 'string',
+            description: 'New status: pending, in_progress, or completed',
+            enum: ['pending', 'in_progress', 'completed'],
+          },
+          priority: {
+            type: 'string',
+            description: 'New priority: low, medium, or high',
+            enum: ['low', 'medium', 'high'],
+          },
+        },
+        required: ['task_id'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'delete_task',
+      description: 'Delete a task permanently',
+      parameters: {
+        type: 'object',
+        properties: {
+          task_id: {
+            type: 'string',
+            description: 'The UUID of the task to delete',
+          },
+        },
+        required: ['task_id'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_today_schedule',
+      description: 'Get the schedule/day planner for today or a specific date',
+      parameters: {
+        type: 'object',
+        properties: {
+          date: {
+            type: 'string',
+            description: 'Date in YYYY-MM-DD format (optional, defaults to today)',
+          },
+        },
+        required: [],
+      },
+    },
   },
 ];
+
+// System prompt with personality
+const SYSTEM_PROMPT = `Tu es FoxWise AI, l'assistant personnel dévoué de l'utilisateur. Tu es bien plus qu'un simple assistant - tu es un véritable partenaire de productivité, chaleureux, empathique et toujours à l'écoute.
+
+🦊 **Ta personnalité:**
+- **Chaleureux et humain**: Tu parles comme un ami proche qui veut vraiment aider, pas comme un robot
+- **Proactif**: Tu anticipes les besoins et proposes des solutions intelligentes
+- **Encourageant**: Tu célèbres les succès et motives lors des défis
+- **Francophone naturel**: Tu t'exprimes en français québécois naturel et fluide
+- **Organisé et efficace**: Tu adores structurer les tâches et optimiser les journées
+- **Empathique**: Tu comprends le stress et la charge de travail, et tu adaptes ton aide
+
+🎯 **Ton rôle:**
+Tu aides l'utilisateur à gérer ses tâches, organiser sa journée et rester productif. Tu as accès à plusieurs fonctions pour:
+- Créer des tâches (une ou plusieurs à la fois!)
+- Lister et filtrer les tâches
+- Modifier les tâches existantes
+- Supprimer des tâches
+- Consulter le planning journalier
+
+💬 **Ton style de communication:**
+- Utilise des émojis avec modération (1-2 par message max) pour ajouter de la chaleur
+- Sois concis mais amical - pas de longs pavés
+- Confirme toujours ce que tu as fait de manière claire
+- Propose des solutions ou des prochaines étapes quand pertinent
+- N'hésite pas à poser des questions de clarification si nécessaire
+- Utilise un ton québécois naturel: "icitte", "tsé", "faut", etc. quand approprié
+
+🌟 **Exemples de ton ton:**
+- ❌ "La tâche a été créée avec succès."
+- ✅ "Parfait! J'ai créé ta tâche 'Acheter du lait'. C'est noté! 📝"
+
+- ❌ "Voulez-vous que je crée cette tâche?"
+- ✅ "Hey! Je peux te créer ça tout de suite si tu veux. Ça te va? 😊"
+
+**Date actuelle:** ${new Date().toLocaleDateString('fr-CA')} (${new Date().toLocaleDateString('fr-FR', { weekday: 'long' })})
+
+Rappelle-toi: Tu es là pour rendre la vie de l'utilisateur plus facile et organisée. Sois son meilleur allié productivité!`;
 
 // Function implementations
 async function createTask(userId: string, params: any) {
   const supabase = await createClient();
+
+  // If category is provided, try to find or create the todo_list
+  let todoListId = null;
+  if (params.category) {
+    const { data: existingList } = await supabase
+      .from('todo_lists')
+      .select('id')
+      .eq('user_id', userId)
+      .ilike('name', params.category)
+      .single();
+
+    if (existingList) {
+      todoListId = existingList.id;
+    } else {
+      // Create new list
+      const { data: newList } = await supabase
+        .from('todo_lists')
+        .insert({
+          user_id: userId,
+          name: params.category,
+        })
+        .select('id')
+        .single();
+
+      if (newList) {
+        todoListId = newList.id;
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from('tasks')
@@ -128,6 +212,7 @@ async function createTask(userId: string, params: any) {
       priority: params.priority || 'medium',
       due_date: params.due_date || null,
       status: 'pending',
+      todo_list_id: todoListId,
     })
     .select()
     .single();
@@ -155,7 +240,7 @@ async function listTasks(userId: string, params: any) {
     query = query.eq('due_date', params.date);
   }
 
-  query = query.order('created_at', { ascending: false }).limit(20);
+  query = query.order('created_at', { ascending: false }).limit(50);
 
   const { data, error } = await query;
 
@@ -163,7 +248,7 @@ async function listTasks(userId: string, params: any) {
     return { success: false, error: error.message };
   }
 
-  return { success: true, tasks: data };
+  return { success: true, tasks: data, count: data.length };
 }
 
 async function updateTask(userId: string, params: any) {
@@ -239,88 +324,100 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Initialize the model with function calling
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+    // Build conversation history for OpenAI
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+      { role: 'system', content: SYSTEM_PROMPT },
+    ];
+
+    // Add history (excluding the welcome message)
+    history
+      .filter((msg: any) => msg.content !== history[0]?.content) // Skip welcome
+      .forEach((msg: any) => {
+        messages.push({
+          role: msg.role === 'assistant' ? 'assistant' : 'user',
+          content: msg.content,
+        });
+      });
+
+    // Add current user message
+    messages.push({ role: 'user', content: message });
+
+    // Call OpenAI with function calling
+    let response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages,
       tools,
+      tool_choice: 'auto',
+      temperature: 0.8, // More personality!
+      max_tokens: 500,
     });
 
-    // Build conversation history
-    const chatHistory = history.slice(0, -1).map((msg: any) => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }],
-    }));
-
-    const chat = model.startChat({
-      history: chatHistory,
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1024,
-      },
-    });
-
-    // Add system context
-    const contextMessage = `You are a helpful AI assistant for FoxWise ToDo, a task management application.
-You can help users create tasks, view their tasks, update them, delete them, and check their daily schedule.
-Be friendly, concise, and helpful. Always confirm when you've completed an action.
-Current date: ${new Date().toISOString().split('T')[0]}
-User ID: ${userId}`;
-
-    let result = await chat.sendMessage([{ text: contextMessage }, { text: message }]);
-    let response = result.response;
+    let functionCallCount = 0;
+    const maxFunctionCalls = 10; // Allow more for multiple task creation
 
     // Handle function calls
-    let functionCallCount = 0;
-    const maxFunctionCalls = 5; // Prevent infinite loops
+    while (response.choices[0].finish_reason === 'tool_calls' && functionCallCount < maxFunctionCalls) {
+      const toolCalls = response.choices[0].message.tool_calls;
+      if (!toolCalls) break;
 
-    while (response.functionCalls() && functionCallCount < maxFunctionCalls) {
       functionCallCount++;
-      const functionCalls = response.functionCalls();
-      const functionResponses = [];
 
-      for (const call of functionCalls) {
-        console.log(`[AI Chat] Function call: ${call.name}`, call.args);
+      // Add assistant's message with tool calls
+      messages.push(response.choices[0].message);
+
+      // Execute all function calls
+      for (const toolCall of toolCalls) {
+        const functionName = toolCall.function.name;
+        const functionArgs = JSON.parse(toolCall.function.arguments);
+
+        console.log(`[AI Chat] Function call: ${functionName}`, functionArgs);
 
         let functionResult;
 
-        switch (call.name) {
+        switch (functionName) {
           case 'create_task':
-            functionResult = await createTask(userId, call.args);
+            functionResult = await createTask(userId, functionArgs);
             break;
           case 'list_tasks':
-            functionResult = await listTasks(userId, call.args);
+            functionResult = await listTasks(userId, functionArgs);
             break;
           case 'update_task':
-            functionResult = await updateTask(userId, call.args);
+            functionResult = await updateTask(userId, functionArgs);
             break;
           case 'delete_task':
-            functionResult = await deleteTask(userId, call.args);
+            functionResult = await deleteTask(userId, functionArgs);
             break;
           case 'get_today_schedule':
-            functionResult = await getTodaySchedule(userId, call.args);
+            functionResult = await getTodaySchedule(userId, functionArgs);
             break;
           default:
             functionResult = { success: false, error: 'Unknown function' };
         }
 
-        functionResponses.push({
-          functionResponse: {
-            name: call.name,
-            response: functionResult,
-          },
+        // Add function result to messages
+        messages.push({
+          role: 'tool',
+          content: JSON.stringify(functionResult),
+          tool_call_id: toolCall.id,
         });
       }
 
-      // Send function results back to the model
-      result = await chat.sendMessage(functionResponses);
-      response = result.response;
+      // Get next response from OpenAI
+      response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages,
+        tools,
+        tool_choice: 'auto',
+        temperature: 0.8,
+        max_tokens: 500,
+      });
     }
 
     // Get the final text response
-    const text = response.text();
+    const finalMessage = response.choices[0].message.content || 'Désolé, je n\'ai pas compris. Peux-tu reformuler?';
 
     return NextResponse.json({
-      message: text,
+      message: finalMessage,
       success: true,
     });
 
@@ -329,7 +426,7 @@ User ID: ${userId}`;
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',
-        message: 'Sorry, I encountered an error. Please try again.',
+        message: 'Oups! J\'ai rencontré un petit problème. Peux-tu réessayer? 😅',
       },
       { status: 500 }
     );
