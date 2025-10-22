@@ -33,7 +33,7 @@ const COLOR_OPTIONS = [
   '#f97316', // orange
 ];
 
-export default function CategoriesPage() {
+export default function ListsPage() {
   const router = useRouter();
   const [lists, setLists] = useState<TodoList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,11 +87,11 @@ export default function CategoriesPage() {
       } else {
         const errorData = await response.json();
         console.error('Error response:', errorData);
-        alert(`Failed to save category: ${errorData.error || 'Unknown error'}.\n\nPlease make sure you have run the supabase_schema.sql file in your Supabase database!`);
+        alert(`Failed to save list: ${errorData.error || 'Unknown error'}.\n\nPlease make sure you have run the supabase_schema.sql file in your Supabase database!`);
       }
     } catch (error) {
       console.error('Error saving list:', error);
-      alert(`Failed to save category: ${error}\n\nPlease make sure you have run the supabase_schema.sql file in your Supabase database!`);
+      alert(`Failed to save list: ${error}\n\nPlease make sure you have run the supabase_schema.sql file in your Supabase database!`);
     }
   };
 
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = async (listId: string) => {
-    if (!confirm('Are you sure you want to delete this category? All tasks in this category will also be deleted.')) return;
+    if (!confirm('Are you sure you want to delete this list? All tasks in this list will also be deleted.')) return;
 
     try {
       const response = await fetch(`/api/todo-lists?id=${listId}`, {
@@ -132,7 +132,7 @@ export default function CategoriesPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-              Categories
+              Lists
             </h1>
             <p className="text-gray-400 mt-2">Organize your tasks into different lists</p>
           </div>
@@ -147,13 +147,13 @@ export default function CategoriesPage() {
             className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg text-white font-medium flex items-center gap-2 shadow-lg"
           >
             <Plus className="w-5 h-5" />
-            New Category
+            New List
           </motion.button>
         </div>
 
-        {/* Categories Grid */}
+        {/* Lists Grid */}
         {loading ? (
-          <div className="text-center text-gray-400 py-12">Loading categories...</div>
+          <div className="text-center text-gray-400 py-12">Loading lists...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {lists.map((list, index) => {
@@ -220,13 +220,13 @@ export default function CategoriesPage() {
               className="bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4 border border-gray-700"
             >
               <h2 className="text-2xl font-bold text-white mb-6">
-                {editingList ? 'Edit Category' : 'New Category'}
+                {editingList ? 'Edit List' : 'New List'}
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Category Name
+                    List Name
                   </label>
                   <input
                     type="text"

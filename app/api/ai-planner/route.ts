@@ -41,7 +41,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: tasksError.message }, { status: 500 });
     }
 
-    // 2. Get historical day planner data to analyze actual time spent
+    // 2. Get calendar events for the planning period
+    const { data: calendarEvents, error: calendarError } = await supabase
+      .from('calendar_notes')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate || startDate)
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
+
+    if (calendarError) {
+      console.error('Error fetching calendar events:', calendarError);
+    }
+
+    // 3. Get historical day planner data to analyze actual time spent
     const { data: historicalData, error: historyError } = await supabase
       .from('day_planner')
       .select('*, task:tasks(*)')
@@ -52,7 +66,7 @@ export async function POST(request: NextRequest) {
       console.error('Error fetching historical data:', historyError);
     }
 
-    // 3. Analyze time accuracy for tasks
+    // 4. Analyze time accuracy for tasks
     const timeAnalysis: any = {};
     if (historicalData) {
       historicalData.forEach((entry: any) => {
@@ -68,7 +82,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 4. Prepare data for AI
+    // 5. Prepare data for AI
     const tasksWithAnalysis = tasks.map((task: any) => {
       const analysis = timeAnalysis[task.id];
       const avgHistoricalTime = analysis
@@ -89,8 +103,24 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // 5. Use Gemini AI to generate plan - Using 2.5 Flash model for fast, accurate planning
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    // 6. Prepare calendar events context
+    const calendarContext = calendarEvents && calendarEvents.length > 0 ? `
+**Calendar Events (BLOCKED TIME - DO NOT SCHEDULE TASKS DURING THESE TIMES):**
+${calendarEvents.map((event: any) =>
+  `- ${event.date}: ${event.time ? event.time.substring(0, 5) : 'All day'} - ${event.title}${event.description ? ` (${event.description})` : ''}`
+).join('\n')}
+
+**CRITICAL: You MUST avoid scheduling any tasks during calendar event times. These are fixed appointments/commitments that cannot be moved.**
+` : '';
+
+    // 7. Use Gemini AI to generate plan - Using 2.0 Flash for ultra-fast planning
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2048,
+      }
+    });
 
     // Prepare weather context for AI
     const weatherContext = weatherData ? `
@@ -118,18 +148,13 @@ export async function POST(request: NextRequest) {
 
     const prompt = `AI Planner: Create ${planType} schedule for ${startDate}${endDate ? `-${endDate}` : ''}. ${languageInstruction}
 
-**Tasks:**
-${JSON.stringify(tasksWithAnalysis.map((t: any) => ({
-  id: t.id,
-  title: t.title,
-  desc: t.description?.substring(0, 80) || '',
-  priority: t.priority,
-  status: t.status,
-  est: t.estimatedHours,
-  hist: t.historicalAvgTime,
-  cat: t.categoryName,
-  tags: t.tags
-})), null, 1)}
+**IMPORTANT: You MUST use the exact task UUIDs provided below. DO NOT generate fake IDs like "task-1" or "buffer-1".**
+
+**Available Tasks (USE THESE EXACT IDs):**
+${tasksWithAnalysis.map((t: any) =>
+  `- UUID: "${t.id}" | Title: "${t.title}" | Priority: ${t.priority} | Est: ${t.estimatedHours || 'N/A'}h | Status: ${t.status}`
+).join('\n')}
+${calendarContext}
 ${weatherContext}
 **Constraints:**
 - Hours: ${workStartHour}:00-${workEndHour}:00
@@ -137,27 +162,31 @@ ${breakTimes?.length > 0 ? `- Breaks: ${JSON.stringify(breakTimes)}` : ''}
 ${preferences ? `- Prefs: ${preferences}` : ''}
 
 **Rules:**
-1. Time: Use hist>est>estimate (simple:0.5-1h, med:1-2h, complex:2-4h). In-progress: -30-50%
-2. Priority: HIGH/URGENT early (peak energy)
-3. Max 6h focus/day, 15-30min buffers
-4. Group similar tasks
-5. Weather: Outdoor only in good weather UNLESS urgent
-6. USE EXACT date ${startDate}
+1. CRITICAL: NEVER schedule tasks during calendar event times - these are blocked/busy times
+2. CRITICAL: Use ONLY the exact task UUIDs listed above in "taskId" - DO NOT create fake IDs
+3. Time: Use hist>est>estimate (simple:0.5-1h, med:1-2h, complex:2-4h). In-progress: -30-50%
+4. Priority: HIGH/URGENT early (peak energy)
+5. Max 6h focus/day, 15-30min buffers
+6. Group similar tasks
+7. Weather: Outdoor only in good weather UNLESS urgent
+8. USE EXACT date ${startDate}
 
-JSON only:
+JSON only (copy task UUIDs EXACTLY as provided):
 {
   "plan": [{
-    "date": "YYYY-MM-DD",
+    "date": "${startDate}",
     "tasks": [{
-      "taskId": "uuid",
-      "startTime": "HH:00",
+      "taskId": "${tasksWithAnalysis.length > 0 ? tasksWithAnalysis[0].id : 'EXACT-UUID-FROM-ABOVE-LIST'}",
+      "startTime": "10:00",
       "durationHours": 1.5,
-      "reasoning": "brief why"
+      "reasoning": "High priority morning task"
     }]
   }],
-  "summary": "strategy",
-  "recommendations": ["tip1","tip2"]
-}`;
+  "summary": "Organized by priority with weather consideration",
+  "recommendations": ["Take regular breaks","Review progress"]
+}
+
+REMINDER: Each "taskId" MUST be copied EXACTLY from the UUID list above. DO NOT make up IDs.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -172,7 +201,48 @@ JSON only:
 
     const aiPlan = JSON.parse(textResponse);
 
-    // 6. Force correct dates (in case AI didn't follow instructions)
+    // 8. Validate and filter task UUIDs (remove AI-generated fake IDs like "buffer-1")
+    const validTaskIds = new Set(tasks.map((t: any) => t.id));
+    const invalidUUIDs: string[] = [];
+    let removedCount = 0;
+
+    // Filter out invalid task IDs (like "buffer-1", "break-1", etc.) from the plan
+    aiPlan.plan = aiPlan.plan?.map((dayPlan: any) => {
+      const validTasks = dayPlan.tasks?.filter((plannedTask: any) => {
+        const isValid = validTaskIds.has(plannedTask.taskId);
+        if (!isValid) {
+          invalidUUIDs.push(plannedTask.taskId);
+          removedCount++;
+          console.log(`Removing invalid task ID "${plannedTask.taskId}" from plan (likely a buffer/break)`);
+        }
+        return isValid;
+      }) || [];
+
+      return {
+        ...dayPlan,
+        tasks: validTasks,
+      };
+    });
+
+    // Log what was removed for debugging
+    if (removedCount > 0) {
+      console.log(`Filtered out ${removedCount} invalid task IDs:`, invalidUUIDs);
+      console.log(`Kept ${aiPlan.plan.reduce((sum: number, d: any) => sum + (d.tasks?.length || 0), 0)} valid tasks`);
+    }
+
+    // Check if we have ANY valid tasks left
+    const totalValidTasks = aiPlan.plan.reduce((sum: number, d: any) => sum + (d.tasks?.length || 0), 0);
+
+    if (totalValidTasks === 0) {
+      console.error('No valid tasks in AI plan after filtering. Invalid IDs:', invalidUUIDs);
+      console.error('Available task IDs were:', Array.from(validTaskIds));
+      return NextResponse.json({
+        error: 'AI did not schedule any real tasks. Please try again.',
+        details: `The AI only generated placeholder tasks like "${invalidUUIDs[0]}" instead of using your actual tasks.`,
+      }, { status: 400 });
+    }
+
+    // 9. Force correct dates (in case AI didn't follow instructions)
     if (planType === 'day') {
       // For single day plan, ensure the date is exactly startDate
       if (aiPlan.plan && aiPlan.plan.length > 0) {
@@ -189,7 +259,7 @@ JSON only:
       }
     }
 
-    // 7. Enhance plan with full task details
+    // 10. Enhance plan with full task details
     const enhancedPlan = {
       ...aiPlan,
       plan: aiPlan.plan.map((dayPlan: any) => ({

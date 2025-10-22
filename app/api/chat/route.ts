@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize OpenAI only if API key is available (allows build to succeed)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
@@ -89,15 +90,37 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'create_day_plan',
+      description: 'UTILISER CET OUTIL pour créer et appliquer automatiquement un planning de journée intelligent avec l\'IA. L\'outil va créer et APPLIQUER directement le planning. Dire à l\'utilisateur: "Parfait! Je démarre l\'outil de planification selon vos demandes!" avant d\'appeler cette fonction.',
+      parameters: {
+        type: 'object',
+        properties: {
+          date: { type: 'string', description: 'Date du planning en format YYYY-MM-DD (optionnel, aujourd\'hui par défaut)' },
+          start_time: { type: 'string', description: 'Heure de début de la journée de travail en format HH:mm (ex: 09:00)' },
+          end_time: { type: 'string', description: 'Heure de fin de la journée de travail en format HH:mm (ex: 17:00)' },
+          preferences: { type: 'string', description: 'Préférences ou contraintes spécifiques pour le planning (optionnel)' },
+          language: { type: 'string', description: 'Langue du planning: "fr" ou "en"', enum: ['fr', 'en'] },
+        },
+        required: ['start_time', 'end_time'],
+      },
+    },
+  },
 ];
 
 // Build dynamic system prompt with user context
-function buildSystemPrompt(userMemory: any, userName?: string) {
-  const name = userName || userMemory?.full_name || 'ami';
+function buildSystemPrompt(userMemory: any, userName?: string, language: string = 'fr') {
+  const isFrench = language === 'fr';
+  const name = userName || userMemory?.full_name || (isFrench ? 'ami' : 'friend');
   const currentDate = new Date();
-  const dateStr = currentDate.toLocaleDateString('fr-CA');
-  const dayName = currentDate.toLocaleDateString('fr-FR', { weekday: 'long' });
-  const timeOfDay = currentDate.getHours() < 12 ? 'matin' : currentDate.getHours() < 18 ? 'après-midi' : 'soirée';
+  const dateStr = currentDate.toLocaleDateString(isFrench ? 'fr-CA' : 'en-US');
+  const dayName = currentDate.toLocaleDateString(isFrench ? 'fr-FR' : 'en-US', { weekday: 'long' });
+  const hour = currentDate.getHours();
+  const timeOfDay = isFrench
+    ? (hour < 12 ? 'matin' : hour < 18 ? 'après-midi' : 'soirée')
+    : (hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening');
 
   // Extract user context
   const habits = userMemory?.habits || {};
@@ -108,32 +131,47 @@ function buildSystemPrompt(userMemory: any, userName?: string) {
 
   let contextSection = '';
   if (Object.keys(habits).length > 0 || Object.keys(preferences).length > 0 || notes) {
-    contextSection = `\n\n🧠 **Ce que tu sais sur ${name}:**\n`;
+    contextSection = isFrench
+      ? `\n\n🧠 **Ce que tu sais sur ${name}:**\n`
+      : `\n\n🧠 **What you know about ${name}:**\n`;
 
     if (notes) {
-      contextSection += `- Notes personnelles: ${notes}\n`;
+      contextSection += isFrench
+        ? `- Notes personnelles: ${notes}\n`
+        : `- Personal notes: ${notes}\n`;
     }
 
     if (Object.keys(habits).length > 0) {
-      contextSection += `- Habitudes: ${JSON.stringify(habits)}\n`;
+      contextSection += isFrench
+        ? `- Habitudes: ${JSON.stringify(habits)}\n`
+        : `- Habits: ${JSON.stringify(habits)}\n`;
     }
 
     if (Object.keys(preferences).length > 0) {
-      contextSection += `- Préférences: ${JSON.stringify(preferences)}\n`;
+      contextSection += isFrench
+        ? `- Préférences: ${JSON.stringify(preferences)}\n`
+        : `- Preferences: ${JSON.stringify(preferences)}\n`;
     }
 
     if (recentProjects.length > 0) {
-      contextSection += `- Projets récents: ${recentProjects.slice(0, 3).join(', ')}\n`;
+      contextSection += isFrench
+        ? `- Projets récents: ${recentProjects.slice(0, 3).join(', ')}\n`
+        : `- Recent projects: ${recentProjects.slice(0, 3).join(', ')}\n`;
     }
 
     if (recentTasks.length > 0) {
-      contextSection += `- Tâches récentes: ${recentTasks.slice(0, 5).join(', ')}\n`;
+      contextSection += isFrench
+        ? `- Tâches récentes: ${recentTasks.slice(0, 5).join(', ')}\n`
+        : `- Recent tasks: ${recentTasks.slice(0, 5).join(', ')}\n`;
     }
 
-    contextSection += `\n💡 Utilise ces informations pour personnaliser tes réponses et suggestions!`;
+    contextSection += isFrench
+      ? `\n💡 Utilise ces informations pour personnaliser tes réponses et suggestions!`
+      : `\n💡 Use this information to personalize your responses and suggestions!`;
   }
 
-  return `Tu es FoxWise AI, l'assistant personnel dévoué de ${name}. Tu es bien plus qu'un simple assistant - tu es un véritable partenaire de productivité, chaleureux, empathique et toujours à l'écoute.
+  if (isFrench) {
+    return `Tu es FoxWise AI, l'assistant personnel dévoué de ${name}. Tu es bien plus qu'un simple assistant - tu es un véritable partenaire de productivité, chaleureux, empathique et toujours à l'écoute.
 
 🦊 **Ta personnalité:**
 - **Chaleureux et humain**: Tu parles comme un ami proche qui veut vraiment aider, pas comme un robot
@@ -151,6 +189,8 @@ Tu aides ${name} à gérer ses tâches, organiser sa journée et rester producti
 - Modifier les tâches existantes
 - Supprimer des tâches
 - Consulter le planning journalier
+
+**Note importante**: Si ${name} te demande de créer un planning automatique pour une journée, explique-lui qu'il peut utiliser le bouton "AI Assist" dans la page Day Planner pour ça - c'est l'outil parfait pour créer un planning intelligent qui prend en compte ses événements du calendrier!
 
 💬 **Ton style de communication:**
 - Utilise des émojis avec modération (1-2 par message max) pour ajouter de la chaleur
@@ -172,6 +212,49 @@ Tu aides ${name} à gérer ses tâches, organiser sa journée et rester producti
 - ✅ "Hey! Je peux te créer ça tout de suite si tu veux. Ça te va? 😊"
 
 Rappelle-toi: Tu es là pour rendre la vie de ${name} plus facile et organisée. Sois son meilleur allié productivité!`;
+  } else {
+    return `You are FoxWise AI, ${name}'s dedicated personal assistant. You're much more than a simple assistant - you're a true productivity partner, warm, empathetic, and always attentive.
+
+🦊 **Your personality:**
+- **Warm and human**: You talk like a close friend who truly wants to help, not like a robot
+- **Proactive**: You anticipate needs and propose smart solutions based on what you know about ${name}
+- **Encouraging**: You celebrate successes and motivate during challenges
+- **Natural communicator**: You express yourself in natural, fluent English
+- **Organized and efficient**: You love structuring tasks and optimizing days
+- **Empathetic**: You understand stress and workload, and adapt your help accordingly
+- **Excellent memory**: You remember important details about ${name} and use them to help better
+
+🎯 **Your role:**
+You help ${name} manage tasks, organize their day, and stay productive. You have access to several functions to:
+- Create tasks (one or multiple at once!)
+- List and filter tasks
+- Modify existing tasks
+- Delete tasks
+- Check the daily schedule
+
+**Important note**: If ${name} asks you to create an automatic day plan, explain that they can use the "AI Assist" button in the Day Planner page for that - it's the perfect tool for creating an intelligent schedule that takes their calendar events into account!
+
+💬 **Your communication style:**
+- Use emojis sparingly (1-2 max per message) to add warmth
+- Be VERY concise but friendly - maximum 2-3 short sentences
+- ALWAYS confirm what you just did in a direct and clear way
+- When you create tasks, simply say: "Perfect! I added [number] task(s) to your list! 🎯"
+- For other questions, respond naturally and friendly
+- Use a casual, friendly tone
+- IMPORTANT: Even if the user just says "thanks" or "ok", always respond kindly
+- Call the user by their first name when it's natural
+
+**Current date and time:** ${dateStr} (${dayName} ${timeOfDay})${contextSection}
+
+🌟 **Examples of your tone:**
+- ❌ "The task has been successfully created."
+- ✅ "Perfect ${name}! I created your 'Buy milk' task. It's noted! 📝"
+
+- ❌ "Would you like me to create this task?"
+- ✅ "Hey! I can create that right away if you want. Sound good? 😊"
+
+Remember: You're here to make ${name}'s life easier and more organized. Be their best productivity ally!`;
+  }
 }
 
 // Function implementations (same as before)
@@ -349,6 +432,167 @@ async function getTodaySchedule(userId: string, params: any) {
   return { success: true, schedule: data, date };
 }
 
+async function createDayPlan(userId: string, params: any) {
+  try {
+    const supabase = await createClient();
+    const startDate = params.date || new Date().toISOString().split('T')[0];
+    const workStartHour = parseInt((params.start_time || '09:00').split(':')[0]);
+    const workEndHour = parseInt((params.end_time || '17:00').split(':')[0]);
+
+    // 1. Get all pending and in_progress tasks
+    const { data: tasks, error: tasksError } = await supabase
+      .from('tasks')
+      .select('*, todo_lists(*)')
+      .eq('user_id', userId)
+      .in('status', ['pending', 'in_progress'])
+      .order('priority', { ascending: false });
+
+    if (tasksError) {
+      return { success: false, error: tasksError.message };
+    }
+
+    if (!tasks || tasks.length === 0) {
+      return { success: false, error: 'Aucune tâche à planifier. Créez d\'abord des tâches!' };
+    }
+
+    // 2. Get calendar events for the day
+    const { data: calendarEvents } = await supabase
+      .from('calendar_notes')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('date', startDate)
+      .order('time', { ascending: true });
+
+    // 3. Prepare data for AI
+    const tasksWithAnalysis = tasks.map((task: any) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      status: task.status,
+      estimatedHours: task.estimated_hours,
+      category: task.todo_lists?.name,
+      dueDate: task.due_date,
+      tags: task.tags,
+    }));
+
+    // 4. Prepare calendar context
+    const calendarContext = calendarEvents && calendarEvents.length > 0 ? `\n**Événements calendrier (NE PAS planifier de tâches pendant ces heures):**\n${calendarEvents.map((event: any) => `- ${event.time ? event.time.substring(0, 5) : 'Toute la journée'} - ${event.title}`).join('\n')}\n` : '';
+
+    // 5. Use Gemini AI to generate plan - Using 2.0 Flash for speed
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2048,
+      }
+    });
+
+    const languageInstruction = params.language === 'en' ? 'Respond in English.' : 'Réponds en français.';
+
+    const prompt = `Créer un planning pour ${startDate}. ${languageInstruction}
+
+**IMPORTANT: Tu DOIS utiliser les UUIDs de tâches EXACTS fournis ci-dessous. NE PAS générer de faux IDs.**
+
+**Tâches disponibles (UTILISER CES UUIDs EXACTS):**
+${tasksWithAnalysis.map((t: any) => `- UUID: "${t.id}" | Titre: "${t.title}" | Priorité: ${t.priority} | Estimé: ${t.estimatedHours || 'N/A'}h`).join('\n')}
+${calendarContext}
+**Contraintes:**
+- Heures: ${workStartHour}:00-${workEndHour}:00
+- ${params.preferences || 'Aucune préférence spécifique'}
+
+**Règles:**
+1. CRITIQUE: Ne JAMAIS planifier pendant les événements calendrier
+2. CRITIQUE: Utiliser UNIQUEMENT les UUIDs exacts listés ci-dessus dans "taskId"
+3. Temps: Utiliser estimé ou deviner (simple:0.5-1h, moyen:1-2h, complexe:2-4h)
+4. Priorité: HAUTE/URGENTE tôt (énergie maximale)
+5. Max 6h de focus/jour, buffers de 15-30min entre tâches
+6. Grouper tâches similaires
+7. Date EXACTE: ${startDate}
+
+Retourner UNIQUEMENT le JSON (copier les UUIDs EXACTEMENT):
+{
+  "plan": [{
+    "date": "${startDate}",
+    "tasks": [{
+      "taskId": "${tasksWithAnalysis[0]?.id || 'UUID-EXACT-DE-LA-LISTE'}",
+      "startTime": "10:00",
+      "durationHours": 1.5,
+      "reasoning": "Tâche haute priorité le matin"
+    }]
+  }],
+  "summary": "Plan organisé par priorité",
+  "recommendations": ["Prendre des pauses","Réviser progrès"]
+}`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let textResponse = response.text().trim();
+
+    // Clean up response
+    if (textResponse.startsWith('```json')) {
+      textResponse = textResponse.replace(/```json\n?/, '').replace(/\n?```$/, '');
+    } else if (textResponse.startsWith('```')) {
+      textResponse = textResponse.replace(/```\n?/, '').replace(/\n?```$/, '');
+    }
+
+    const aiPlan = JSON.parse(textResponse);
+
+    // 6. Validate and filter task UUIDs
+    const validTaskIds = new Set(tasks.map((t: any) => t.id));
+    let removedCount = 0;
+
+    aiPlan.plan = aiPlan.plan?.map((dayPlan: any) => {
+      const validTasks = dayPlan.tasks?.filter((plannedTask: any) => {
+        const isValid = validTaskIds.has(plannedTask.taskId);
+        if (!isValid) {
+          removedCount++;
+        }
+        return isValid;
+      }) || [];
+
+      return { ...dayPlan, tasks: validTasks };
+    });
+
+    const totalValidTasks = aiPlan.plan.reduce((sum: number, d: any) => sum + (d.tasks?.length || 0), 0);
+
+    if (totalValidTasks === 0) {
+      return { success: false, error: 'L\'IA n\'a planifié aucune tâche réelle. Réessayez!' };
+    }
+
+    // 7. Apply the plan to day_planner
+    const plannedTasks = aiPlan.plan.flatMap((dayPlan: any) =>
+      dayPlan.tasks.map((task: any) => ({
+        user_id: userId,
+        task_id: task.taskId,
+        date: startDate,
+        start_time: task.startTime,
+        duration_hours: task.durationHours,
+      }))
+    );
+
+    const { error: insertError } = await supabase
+      .from('day_planner')
+      .insert(plannedTasks);
+
+    if (insertError) {
+      return { success: false, error: insertError.message };
+    }
+
+    return {
+      success: true,
+      plan: aiPlan,
+      summary: `✅ Parfait! J'ai créé et appliqué un planning pour ${startDate} avec ${totalValidTasks} tâche${totalValidTasks > 1 ? 's' : ''} planifiée${totalValidTasks > 1 ? 's' : ''} entre ${workStartHour}h et ${workEndHour}h. ${aiPlan.summary || ''}\n\n📋 Recommandations: ${aiPlan.recommendations?.join(', ') || 'Bon travail!'}`,
+      taskCount: totalValidTasks,
+      date: startDate,
+    };
+  } catch (error: any) {
+    console.error('Error creating day plan:', error);
+    return { success: false, error: error.message || 'Échec de création du plan' };
+  }
+}
+
 // Generate conversation title from first user message
 async function generateConversationTitle(userMessage: string): Promise<string> {
   try {
@@ -441,7 +685,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { message, conversation_id } = body;
+    const { message, conversation_id, language = 'fr' } = body;
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
@@ -496,7 +740,7 @@ export async function POST(request: NextRequest) {
       .limit(50); // Keep last 50 messages for context
 
     // Build conversation history for OpenAI
-    const systemPrompt = buildSystemPrompt(userMemory, userMemory?.full_name);
+    const systemPrompt = buildSystemPrompt(userMemory, userMemory?.full_name, language);
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemPrompt },
     ];
@@ -559,6 +803,11 @@ export async function POST(request: NextRequest) {
             break;
           case 'get_today_schedule':
             functionResult = await getTodaySchedule(userId, functionArgs);
+            break;
+          case 'create_day_plan':
+            console.log(`[AI Chat] Function call: create_day_plan`, functionArgs);
+            functionResult = await createDayPlan(userId, functionArgs);
+            console.log(`[AI Chat] create_day_plan result:`, functionResult);
             break;
           default:
             functionResult = { success: false, error: 'Unknown function' };

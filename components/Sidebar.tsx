@@ -69,8 +69,8 @@ export default function Sidebar() {
       gradient: "from-teal-500 to-cyan-500"
     },
     {
-      name: (t.nav as any)?.categories || "Categories",
-      href: "/categories",
+      name: language === 'fr' ? "Listes" : "Lists",
+      href: "/lists",
       icon: FolderKanban,
       gradient: "from-green-500 to-emerald-500"
     },

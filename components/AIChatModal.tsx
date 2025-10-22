@@ -38,13 +38,14 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [chatLanguage, setChatLanguage] = useState<'en' | 'fr'>('fr'); // Separate from UI language
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Whisper speech recognition hook with language support
-  const speechLang = language === 'fr' ? 'fr' : 'en';
+  // Whisper speech recognition hook with language support (uses chat language preference)
+  const speechLang = chatLanguage === 'fr' ? 'fr' : 'en';
   const {
     isRecording,
     isProcessing,
@@ -58,7 +59,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     language: speechLang,
     onTranscript: async (text) => {
       // Auto-submit when transcript is received from Whisper
-      if (text.trim() && isVoiceMode) {
+      if (text.trim()) {
         await submitMessage(text);
         resetTranscript();
         setInput('');
@@ -216,9 +217,45 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
       if (response.ok) {
         const data = await response.json();
         setUserMemory(data);
+
+        // Load chat language preference if it exists
+        if (data?.preferences?.chatLanguage) {
+          setChatLanguage(data.preferences.chatLanguage);
+          console.log('[Chat] Loaded chat language preference:', data.preferences.chatLanguage);
+        }
       }
     } catch (error) {
       console.error('Error fetching user memory:', error);
+    }
+  };
+
+  const saveChatLanguagePreference = async (newLanguage: 'en' | 'fr') => {
+    try {
+      const currentPreferences = userMemory?.preferences || {};
+      const response = await fetch('/api/user-memory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          preferences: {
+            ...currentPreferences,
+            chatLanguage: newLanguage,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        console.log('[Chat] Saved chat language preference:', newLanguage);
+        // Update local state
+        setUserMemory((prev: any) => ({
+          ...prev,
+          preferences: {
+            ...currentPreferences,
+            chatLanguage: newLanguage,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error('Error saving chat language preference:', error);
     }
   };
 
@@ -329,10 +366,49 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     startRecording();
   };
 
+  // Simple language detection based on common French words/patterns
+  const detectLanguage = (text: string): 'en' | 'fr' => {
+    const lowerText = text.toLowerCase();
+
+    // French indicators
+    const frenchWords = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'est', 'sont', 'suis',
+                         'être', 'avoir', 'ça', 'çà', 'où', 'être', 'faire', 'quel', 'quelle', 'quels', 'quelles',
+                         'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'votre', 'leur',
+                         'bonjour', 'merci', 'stp', 'svp', 'pourquoi', 'comment', 'quand', 'combien'];
+
+    // English indicators
+    const englishWords = ['the', 'is', 'are', 'am', 'was', 'were', 'have', 'has', 'had', 'will', 'would',
+                          'can', 'could', 'should', 'my', 'your', 'his', 'her', 'our', 'their',
+                          'what', 'when', 'where', 'why', 'how', 'hello', 'thanks', 'please'];
+
+    const words = lowerText.split(/\s+/);
+    let frenchScore = 0;
+    let englishScore = 0;
+
+    words.forEach(word => {
+      if (frenchWords.includes(word)) frenchScore++;
+      if (englishWords.includes(word)) englishScore++;
+    });
+
+    // If we have a clear winner, use it. Otherwise keep current language
+    if (frenchScore > englishScore) return 'fr';
+    if (englishScore > frenchScore) return 'en';
+
+    return chatLanguage; // Keep current if ambiguous
+  };
+
   const submitMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
     const userMessage = messageText.trim();
+
+    // Detect language from user message
+    const detectedLang = detectLanguage(userMessage);
+    if (detectedLang !== chatLanguage) {
+      console.log('[Chat] Language switched from', chatLanguage, 'to', detectedLang);
+      setChatLanguage(detectedLang);
+      saveChatLanguagePreference(detectedLang);
+    }
 
     // Check if we should start a new conversation (2h inactivity)
     let conversationToUse = currentConversationId;
@@ -364,6 +440,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         body: JSON.stringify({
           message: userMessage,
           conversation_id: conversationToUse,
+          language: chatLanguage, // Pass chat language preference (independent from UI language)
         }),
       });
 
@@ -403,7 +480,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
       // Add error message
       const errorMessage: Message = {
         role: 'assistant',
-        content: language === 'fr'
+        content: chatLanguage === 'fr'
           ? 'Désolé, j\'ai rencontré une erreur. Veuillez réessayer.'
           : 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),

@@ -71,9 +71,7 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
 
   useEffect(() => {
     if (isOpen) {
-      fetchLists();
-
-      // Populate form if editing
+      // Populate form if editing - DO THIS FIRST before fetching lists
       if (editTask) {
         // Extract date and time directly from ISO string to avoid timezone issues
         let dateValue = '';
@@ -105,6 +103,9 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
           email_reminder_hour: false,
         });
       }
+
+      // Fetch lists AFTER setting form data to avoid race condition
+      fetchLists();
 
       // Initialize Speech Recognition
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -146,7 +147,8 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded, editTask }:
       if (response.ok) {
         const data = await response.json();
         setLists(data);
-        if (data.length > 0 && !formData.list_id) {
+        // Only set default list if we're creating a new task (not editing) and list_id is empty
+        if (data.length > 0 && !editTask && !formData.list_id) {
           setFormData(prev => ({ ...prev, list_id: data[0].id }));
         }
       }

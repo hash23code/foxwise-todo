@@ -60,14 +60,14 @@ export default function ReportsPage() {
       completionRate: "Completion Rate",
       inProgress: "In Progress",
       productivity: "Productivity Score",
-      timeByCategory: "Time by Category",
+      timeByCategory: "Time by List",
       topPriorities: "Top Priority Tasks",
 
       // Monthly report
       totalHours: "Total Hours",
       averageCompletion: "Average Completion",
       projectProgress: "Project Progress",
-      categoryBreakdown: "Category Breakdown",
+      categoryBreakdown: "List Breakdown",
       trends: "Trends",
       improvement: "vs Last Month",
     },
@@ -87,14 +87,14 @@ export default function ReportsPage() {
       completionRate: "Taux de Complétion",
       inProgress: "En Cours",
       productivity: "Score de Productivité",
-      timeByCategory: "Temps par Catégorie",
+      timeByCategory: "Temps par Liste",
       topPriorities: "Tâches Prioritaires",
 
       // Monthly report
       totalHours: "Heures Totales",
       averageCompletion: "Complétion Moyenne",
       projectProgress: "Progression des Projets",
-      categoryBreakdown: "Répartition par Catégorie",
+      categoryBreakdown: "Répartition par Liste",
       trends: "Tendances",
       improvement: "vs Mois Dernier",
     }

@@ -33,14 +33,15 @@ export async function getUserSettings(userId: string): Promise<UserSettings | nu
       if (response.status === 404) {
         return null;
       }
-      throw new Error('Failed to fetch user settings');
+      console.error('Failed to fetch user settings, status:', response.status);
+      return null; // Return null instead of throwing
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error fetching user settings:', error);
-    throw error;
+    return null; // Return null instead of throwing
   }
 }
 

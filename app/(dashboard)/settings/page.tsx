@@ -42,23 +42,36 @@ export default function SettingsPage() {
   const loadSettings = async () => {
     try {
       setLoading(true);
+      console.log('[Settings] Loading settings for user:', user?.id);
 
       // Load user settings from database
       const userSettings = await getUserSettings(user!.id);
+      console.log('[Settings] User settings loaded:', userSettings);
 
       // Load user memory (including timezone)
       const memoryResponse = await fetch('/api/user-memory');
-      const userMemory = await memoryResponse.json();
+      console.log('[Settings] Memory response status:', memoryResponse.status);
+
+      let userMemory = null;
+      if (memoryResponse.ok) {
+        userMemory = await memoryResponse.json();
+        console.log('[Settings] User memory loaded:', userMemory);
+      } else {
+        console.error('[Settings] Failed to load user memory:', memoryResponse.status);
+      }
 
       setSettings(prev => ({
         ...prev,
         theme: userSettings?.theme || "dark",
         timezone: userMemory?.timezone || "America/Toronto",
       }));
+
+      console.log('[Settings] Settings updated successfully');
     } catch (error) {
-      console.error("Error loading settings:", error);
+      console.error("[Settings] Error loading settings:", error);
     } finally {
       setLoading(false);
+      console.log('[Settings] Loading complete');
     }
   };
 
@@ -593,8 +606,8 @@ export default function SettingsPage() {
 
             <p className="text-xs text-gray-400 italic">
               {language === 'fr'
-                ? '💡 Les rapports incluent : tâches complétées, temps passé par catégorie, progression des projets, et statistiques de productivité.'
-                : '💡 Reports include: completed tasks, time spent by category, project progress, and productivity statistics.'}
+                ? '💡 Les rapports incluent : tâches complétées, temps passé par liste, progression des projets, et statistiques de productivité.'
+                : '💡 Reports include: completed tasks, time spent by list, project progress, and productivity statistics.'}
             </p>
           </div>
         </motion.div>
