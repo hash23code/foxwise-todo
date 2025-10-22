@@ -24,8 +24,8 @@ export async function getUserTimezone(userId: string): Promise<string> {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('user_memory')
+    const { data, error } = await (supabase
+      .from('user_memory') as any)
       .select('timezone')
       .eq('user_id', userId)
       .single();
@@ -52,24 +52,24 @@ export async function updateUserTimezone(userId: string, timezone: string): Prom
     const supabase = await createClient();
 
     // Vérifier si l'entrée user_memory existe
-    const { data: existing } = await supabase
-      .from('user_memory')
+    const { data: existing } = await (supabase
+      .from('user_memory') as any)
       .select('id')
       .eq('user_id', userId)
       .single();
 
     if (existing) {
       // Update existing
-      const { error } = await supabase
-        .from('user_memory')
+      const { error } = await (supabase
+        .from('user_memory') as any)
         .update({ timezone })
         .eq('user_id', userId);
 
       return !error;
     } else {
       // Insert new
-      const { error } = await supabase
-        .from('user_memory')
+      const { error } = await (supabase
+        .from('user_memory') as any)
         .insert({ user_id: userId, timezone });
 
       return !error;
