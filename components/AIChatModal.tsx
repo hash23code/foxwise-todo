@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, User, Sparkles, Plus, Trash2, MessageCircle, Menu, Mic, MicOff, Volume2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { useWhisperRecognition } from '@/hooks/useWhisperRecognition';
 import Image from 'next/image';
 
 interface Message {
@@ -43,17 +43,31 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Speech recognition hook with language support
-  const speechLang = language === 'fr' ? 'fr-CA' : 'en-US';
+  // Whisper speech recognition hook with language support
+  const speechLang = language === 'fr' ? 'fr' : 'en';
   const {
-    isListening,
+    isRecording,
+    isProcessing,
     transcript,
-    startListening,
-    stopListening,
+    startRecording,
+    stopRecording,
     resetTranscript,
     isSupported: isSpeechSupported,
     error: speechError,
-  } = useSpeechRecognition({ language: speechLang });
+  } = useWhisperRecognition({
+    language: speechLang,
+    onTranscript: async (text) => {
+      // Auto-submit when transcript is received from Whisper
+      if (text.trim() && isVoiceMode) {
+        await submitMessage(text);
+        resetTranscript();
+        setInput('');
+      }
+    }
+  });
+
+  // isListening combines recording and processing states
+  const isListening = isRecording || isProcessing;
 
   const t = language === 'fr' ? {
     title: 'Assistant IA Personnel',
@@ -158,32 +172,13 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     }
   }, [isOpen, currentConversationId, userMemory, conversations]);
 
-  // Handle speech transcript updates with auto-silence detection
+  // With Whisper, transcript arrives once after recording stops
+  // Auto-submit is handled in the onTranscript callback
   useEffect(() => {
-    if (transcript && isListening) {
+    if (transcript) {
       setInput(transcript);
-
-      // Reset silence timer on new speech
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-      }
-
-      // Auto-submit after 2 seconds of silence
-      silenceTimerRef.current = setTimeout(async () => {
-        const finalTranscript = transcript.trim();
-        if (finalTranscript && isListening) {
-          stopListening();
-
-          // Submit the message directly
-          await submitMessage(finalTranscript);
-
-          // Clean up
-          resetTranscript();
-          setInput('');
-        }
-      }, 2000);
     }
-  }, [transcript, isListening]);
+  }, [transcript]);
 
   // Stop audio when modal closes
   useEffect(() => {
@@ -197,11 +192,11 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
       }
       setIsPlayingAudio(false);
       setIsVoiceMode(false);
-      if (isListening) {
-        stopListening();
+      if (isRecording) {
+        stopRecording();
       }
     }
-  }, [isOpen]);
+  }, [isOpen, isRecording, stopRecording]);
 
   const fetchConversations = async () => {
     try {
@@ -331,7 +326,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     setIsVoiceMode(true);
     resetTranscript();
     setInput('');
-    startListening();
+    startRecording();
   };
 
   const submitMessage = async (messageText: string) => {
