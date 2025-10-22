@@ -4,9 +4,10 @@ import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
+// Initialize OpenAI only if API key is available (allows build to succeed)
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}) : null;
 
 // Define function tools that the AI can use
 const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
@@ -351,6 +352,9 @@ async function getTodaySchedule(userId: string, params: any) {
 // Generate conversation title from first user message
 async function generateConversationTitle(userMessage: string): Promise<string> {
   try {
+    if (!openai) {
+      throw new Error('OpenAI client not initialized');
+    }
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -377,6 +381,9 @@ async function generateConversationTitle(userMessage: string): Promise<string> {
 // Extract key information from conversation to update user memory
 async function extractUserInfo(messages: any[]): Promise<any> {
   try {
+    if (!openai) {
+      throw new Error('OpenAI client not initialized');
+    }
     const conversationText = messages
       .filter(m => m.role === 'user')
       .map(m => m.content)
@@ -427,6 +434,10 @@ export async function POST(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!openai) {
+      return NextResponse.json({ error: 'OpenAI service unavailable' }, { status: 503 });
     }
 
     const body = await request.json();
