@@ -205,10 +205,21 @@ export function getSpeedDayTier(minutesSaved: number): BadgeTier {
 }
 
 // Fonction pour vérifier si une heure est après 20h
+// Utilise la timezone America/Toronto (Québec) pour éviter les décalages
 export function isAfterHours(timestamp: string): boolean {
   const date = new Date(timestamp);
-  const hour = date.getHours();
-  return hour >= BADGE_CONFIG.after_hours.start_hour;
+
+  // Obtenir l'heure en timezone locale de l'utilisateur (Québec)
+  // En utilisant toLocaleString avec la timezone appropriée
+  const hourInQuebec = parseInt(
+    date.toLocaleString('en-US', {
+      timeZone: 'America/Toronto',
+      hour: 'numeric',
+      hour12: false
+    })
+  );
+
+  return hourInQuebec >= BADGE_CONFIG.after_hours.start_hour;
 }
 
 // Fonction pour déterminer le tier du badge exceptional_day

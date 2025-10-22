@@ -22,10 +22,18 @@ export async function POST(request: NextRequest) {
     }
 
     const completionDate = new Date(actual_completion);
-    // Utiliser la date locale pour éviter le décalage UTC
-    const year = completionDate.getFullYear();
-    const month = String(completionDate.getMonth() + 1).padStart(2, '0');
-    const day = String(completionDate.getDate()).padStart(2, '0');
+
+    // Utiliser la timezone de Québec (America/Toronto) pour la date locale
+    const dateInQuebec = completionDate.toLocaleString('en-CA', {
+      timeZone: 'America/Toronto',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    // Format: YYYY-MM-DD
+    const [datePartQuebec, timePartQuebec] = dateInQuebec.split(', ');
+    const [year, month, day] = datePartQuebec.split('-');
     const dateStr = `${year}-${month}-${day}`;
 
     const supabase = await createClient();
@@ -161,6 +169,15 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!existingAfterHours) {
+        // Obtenir l'heure en timezone Québec
+        const hourInQuebec = parseInt(
+          completionDate.toLocaleString('en-US', {
+            timeZone: 'America/Toronto',
+            hour: 'numeric',
+            hour12: false
+          })
+        );
+
         const { data: afterHoursBadge, error: afterHoursError } = await (supabase
           .from('user_badges') as any)
           .insert({
@@ -169,7 +186,7 @@ export async function POST(request: NextRequest) {
             badge_type: 'after_hours',
             metadata: {
               task_id,
-              completion_hour: completionDate.getHours(),
+              completion_hour: hourInQuebec,
             },
           })
           .select()
