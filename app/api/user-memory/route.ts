@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
         recent_projects: [],
         recent_tasks: [],
         personal_notes: null,
+        timezone: 'America/Toronto', // Default timezone
       });
     }
 
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { full_name, preferences, habits, recent_projects, recent_tasks, personal_notes } = body;
+    const { full_name, preferences, habits, recent_projects, recent_tasks, personal_notes, timezone } = body;
 
     const supabase = await createClient();
 
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
     if (recent_projects !== undefined) updateData.recent_projects = recent_projects;
     if (recent_tasks !== undefined) updateData.recent_tasks = recent_tasks;
     if (personal_notes !== undefined) updateData.personal_notes = personal_notes;
+    if (timezone !== undefined) updateData.timezone = timezone;
 
     let data, error;
 

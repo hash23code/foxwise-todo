@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
-import { calculateTimeSaved, isAfterHours, BADGE_CONFIG } from '@/lib/badges';
+import { calculateTimeSaved, BADGE_CONFIG } from '@/lib/badges';
+import { getUserTimezone } from '@/lib/user-timezone';
 
 // POST: Enregistrer le temps de complétion d'une tâche
 export async function POST(request: NextRequest) {
@@ -21,19 +22,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Récupérer la timezone de l'utilisateur
+    const userTimezone = await getUserTimezone(userId);
     const completionDate = new Date(actual_completion);
 
-    // Utiliser la timezone de Québec (America/Toronto) pour la date locale
-    const dateInQuebec = completionDate.toLocaleString('en-CA', {
-      timeZone: 'America/Toronto',
+    // Utiliser la timezone de l'utilisateur pour la date locale
+    const dateInUserTz = completionDate.toLocaleString('en-CA', {
+      timeZone: userTimezone,
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
     });
 
     // Format: YYYY-MM-DD
-    const [datePartQuebec, timePartQuebec] = dateInQuebec.split(', ');
-    const [year, month, day] = datePartQuebec.split('-');
+    const [datePart, timePart] = dateInUserTz.split(', ');
+    const [year, month, day] = datePart.split('-');
     const dateStr = `${year}-${month}-${day}`;
 
     const supabase = await createClient();
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier si complétée après 20h
-    const completedAfterHours = isAfterHours(actual_completion);
+    const completedAfterHours = isAfterHours(actual_completion, userTimezone);
 
     // Enregistrer le temps de complétion
     const { data: completion, error: completionError } = await (supabase
@@ -169,10 +172,10 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!existingAfterHours) {
-        // Obtenir l'heure en timezone Québec
-        const hourInQuebec = parseInt(
+        // Obtenir l'heure en timezone de l'utilisateur
+        const hourInUserTz = parseInt(
           completionDate.toLocaleString('en-US', {
-            timeZone: 'America/Toronto',
+            timeZone: userTimezone,
             hour: 'numeric',
             hour12: false
           })
@@ -186,7 +189,7 @@ export async function POST(request: NextRequest) {
             badge_type: 'after_hours',
             metadata: {
               task_id,
-              completion_hour: hourInQuebec,
+              completion_hour: hourInUserTz,
             },
           })
           .select()

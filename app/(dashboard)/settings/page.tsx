@@ -6,6 +6,7 @@ import { User, Bell, Lock, Palette, Globe, Save, FileText } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { getUserSettings, updateUserSettings, CURRENCIES } from "@/lib/api/userSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TIMEZONES } from "@/lib/user-timezone";
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -13,6 +14,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState({
     currency: "CAD",
+    timezone: "America/Toronto",
     notifications: {
       email: true,
       push: false,
@@ -40,14 +42,19 @@ export default function SettingsPage() {
   const loadSettings = async () => {
     try {
       setLoading(true);
+
+      // Load user settings from database
       const userSettings = await getUserSettings(user!.id);
-      if (userSettings) {
-        // Settings loaded (currency is for display only in ToDo app)
-        setSettings({
-          ...settings,
-          theme: userSettings.theme || "dark",
-        });
-      }
+
+      // Load user memory (including timezone)
+      const memoryResponse = await fetch('/api/user-memory');
+      const userMemory = await memoryResponse.json();
+
+      setSettings({
+        ...settings,
+        theme: userSettings?.theme || "dark",
+        timezone: userMemory?.timezone || "America/Toronto",
+      });
     } catch (error) {
       console.error("Error loading settings:", error);
     } finally {
@@ -58,22 +65,30 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       // Language is already saved automatically via LanguageContext (localStorage)
-      // Only save other settings to database if needed
+      // Save theme and timezone to database
 
-      // For now, just show success since language changes automatically
-      // Theme and other settings will be saved when the database table is ready
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 2000);
+      // Save timezone to user_memory
+      await fetch('/api/user-memory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timezone: settings.timezone,
+        }),
+      });
 
-      // Optionally try to save to database (don't fail if it doesn't work)
+      // Save theme to user_settings
       try {
         await updateUserSettings(user!.id, {
           theme: settings.theme as 'light' | 'dark',
         });
       } catch (dbError) {
         console.log("Database save skipped (table may not exist yet):", dbError);
-        // Don't show error to user - settings still work via localStorage
       }
+
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
     } catch (error) {
       console.error("Error saving settings:", error);
     }
@@ -189,6 +204,29 @@ export default function SettingsPage() {
               </select>
               <p className="text-xs text-green-500 mt-1">✓ Changes automatically</p>
             </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              {language === 'fr' ? 'Fuseau horaire' : 'Timezone'}
+            </label>
+            <select
+              value={settings.timezone}
+              onChange={(e) =>
+                setSettings({ ...settings, timezone: e.target.value })
+              }
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+            >
+              {TIMEZONES.map((tz) => (
+                <option key={tz.value} value={tz.value}>
+                  {tz.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {language === 'fr'
+                ? 'Utilisé pour les badges et les calculs de temps'
+                : 'Used for badges and time calculations'}
+            </p>
           </div>
         </motion.div>
 
