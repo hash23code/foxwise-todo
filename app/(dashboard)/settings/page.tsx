@@ -50,11 +50,11 @@ export default function SettingsPage() {
       const memoryResponse = await fetch('/api/user-memory');
       const userMemory = await memoryResponse.json();
 
-      setSettings({
-        ...settings,
+      setSettings(prev => ({
+        ...prev,
         theme: userSettings?.theme || "dark",
         timezone: userMemory?.timezone || "America/Toronto",
-      });
+      }));
     } catch (error) {
       console.error("Error loading settings:", error);
     } finally {
