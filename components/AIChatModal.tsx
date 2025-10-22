@@ -43,7 +43,8 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Speech recognition hook
+  // Speech recognition hook with language support
+  const speechLang = language === 'fr' ? 'fr-CA' : 'en-US';
   const {
     isListening,
     transcript,
@@ -52,7 +53,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     resetTranscript,
     isSupported: isSpeechSupported,
     error: speechError,
-  } = useSpeechRecognition();
+  } = useSpeechRecognition({ language: speechLang });
 
   const t = language === 'fr' ? {
     title: 'Assistant IA Personnel',

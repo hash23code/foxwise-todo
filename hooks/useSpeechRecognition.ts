@@ -10,7 +10,12 @@ interface SpeechRecognitionHook {
   error: string | null;
 }
 
-export function useSpeechRecognition(): SpeechRecognitionHook {
+interface UseSpeechRecognitionOptions {
+  language?: string;
+}
+
+export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}): SpeechRecognitionHook {
+  const { language = 'fr-CA' } = options;
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +33,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'fr-CA'; // Quebec French
+        recognition.lang = language; // Dynamic language based on user preference
 
         recognition.onstart = () => {
           setIsListening(true);
@@ -75,7 +80,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [language]);
 
   const startListening = useCallback(() => {
     if (recognitionRef.current && !isListening) {
