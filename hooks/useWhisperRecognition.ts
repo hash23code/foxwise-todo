@@ -30,6 +30,10 @@ export function useWhisperRecognition(options: UseWhisperRecognitionOptions = {}
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   const startRecording = useCallback(async () => {
     if (!isSupported) {
@@ -61,6 +65,21 @@ export function useWhisperRecognition(options: UseWhisperRecognitionOptions = {}
       mediaRecorder.onstop = async () => {
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
+
+        // Clean up audio analysis resources
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+        if (silenceTimeoutRef.current) {
+          clearTimeout(silenceTimeoutRef.current);
+          silenceTimeoutRef.current = null;
+        }
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+          audioContextRef.current = null;
+        }
+        analyserRef.current = null;
 
         if (audioChunksRef.current.length === 0) {
           setError('No audio data recorded');
@@ -117,6 +136,62 @@ export function useWhisperRecognition(options: UseWhisperRecognitionOptions = {}
       mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
 
+      // Set up silence detection using Web Audio API
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      // Silence detection threshold (0-255)
+      const SILENCE_THRESHOLD = 5;
+      const SILENCE_DURATION = 2000; // 2 seconds of silence
+
+      const checkAudioLevel = () => {
+        if (!analyserRef.current || !mediaRecorderRef.current) return;
+
+        analyser.getByteTimeDomainData(dataArray);
+
+        // Calculate RMS (root mean square) to detect volume
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const normalized = (dataArray[i] - 128) / 128;
+          sum += normalized * normalized;
+        }
+        const rms = Math.sqrt(sum / bufferLength);
+        const volume = rms * 100;
+
+        // If speaking (above threshold), reset silence timer
+        if (volume > SILENCE_THRESHOLD) {
+          if (silenceTimeoutRef.current) {
+            clearTimeout(silenceTimeoutRef.current);
+            silenceTimeoutRef.current = null;
+          }
+        } else {
+          // If silent and no timer running, start silence timer
+          if (!silenceTimeoutRef.current) {
+            silenceTimeoutRef.current = setTimeout(() => {
+              console.log('[Whisper] Silence detected, stopping recording');
+              if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                mediaRecorderRef.current.stop();
+              }
+            }, SILENCE_DURATION);
+          }
+        }
+
+        // Continue checking
+        animationFrameRef.current = requestAnimationFrame(checkAudioLevel);
+      };
+
+      // Start monitoring audio level
+      checkAudioLevel();
+
     } catch (err: any) {
       console.error('Error starting recording:', err);
       setError(err.message || 'Failed to start recording');
@@ -127,6 +202,22 @@ export function useWhisperRecognition(options: UseWhisperRecognitionOptions = {}
   const stopRecording = useCallback(async () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
+
+      // Clean up audio analysis
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current);
+        silenceTimeoutRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      analyserRef.current = null;
+
       // Note: isRecording will be set to false in the onstop handler
     }
   }, [isRecording]);
