@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
-import { calculateTimeSaved, BADGE_CONFIG } from '@/lib/badges';
+import { calculateTimeSaved, BADGE_CONFIG, isAfterHours } from '@/lib/badges';
 import { getUserTimezone } from '@/lib/user-timezone';
 
 // POST: Enregistrer le temps de complétion d'une tâche
