@@ -466,7 +466,7 @@ export default function RoutinesPage() {
                         type="time"
                         value={formData.start_time}
                         onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 [color-scheme:dark]"
                         required
                       />
                     </div>
@@ -498,14 +498,14 @@ export default function RoutinesPage() {
                           key={type}
                           type="button"
                           onClick={() => setFormData({ ...formData, frequency_type: type })}
-                          className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                          className={`px-2 sm:px-4 py-2 rounded-lg border-2 transition-all text-xs sm:text-sm ${
                             formData.frequency_type === type
                               ? 'border-blue-500 bg-blue-500/20 text-blue-400'
                               : 'border-gray-700 text-gray-400 hover:border-gray-600'
                           }`}
                         >
                           {type === 'daily' && (language === 'fr' ? 'Quotidien' : 'Daily')}
-                          {type === 'weekly' && (language === 'fr' ? 'Hebdomadaire' : 'Weekly')}
+                          {type === 'weekly' && (language === 'fr' ? 'Hebdo.' : 'Weekly')}
                           {type === 'monthly' && (language === 'fr' ? 'Mensuel' : 'Monthly')}
                         </button>
                       ))}
