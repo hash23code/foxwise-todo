@@ -62,15 +62,26 @@ export default function RoutinesPage() {
   const [expandedRoutine, setExpandedRoutine] = useState<string | null>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    category: 'family' | 'leisure' | 'work' | 'sport' | 'wellness';
+    frequency_type: 'daily' | 'weekly' | 'monthly';
+    start_time: string;
+    duration_hours: number;
+    weekly_days: number[];
+    monthly_days: number[];
+    skip_weekends: boolean;
+    is_active: boolean;
+  }>({
     title: '',
     description: '',
-    category: 'family' as const,
-    frequency_type: 'daily' as const,
+    category: 'family',
+    frequency_type: 'daily',
     start_time: '09:00',
     duration_hours: 1,
-    weekly_days: [] as number[],
-    monthly_days: [] as number[],
+    weekly_days: [],
+    monthly_days: [],
     skip_weekends: false,
     is_active: true,
   });
@@ -427,7 +438,7 @@ export default function RoutinesPage() {
                           <button
                             key={category.id}
                             type="button"
-                            onClick={() => setFormData({ ...formData, category: category.id as any })}
+                            onClick={() => setFormData({ ...formData, category: category.id as 'family' | 'leisure' | 'work' | 'sport' | 'wellness' })}
                             className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
                               isSelected
                                 ? 'border-current'
