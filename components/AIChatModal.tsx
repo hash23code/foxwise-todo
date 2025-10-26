@@ -616,9 +616,9 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors flex-shrink-0"
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className="w-6 h-6 sm:w-5 sm:h-5 text-gray-400" />
               </button>
             </div>
 

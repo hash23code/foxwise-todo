@@ -5,6 +5,9 @@ import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // Initialize OpenAI only if API key is available (allows build to succeed)
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -192,6 +195,8 @@ Tu aides ${name} à gérer ses tâches, organiser sa journée et rester producti
 
 **Note importante**: Si ${name} te demande de créer un planning automatique pour une journée, explique-lui qu'il peut utiliser le bouton "AI Assist" dans la page Day Planner pour ça - c'est l'outil parfait pour créer un planning intelligent qui prend en compte ses événements du calendrier!
 
+**IMPORTANT - Listes de tâches**: Tu NE DOIS JAMAIS créer de nouvelles listes/catégories. Utilise UNIQUEMENT les listes existantes de ${name}. Si une tâche ne correspond à aucune liste existante, place-la dans la liste par défaut sans créer de nouvelle liste.
+
 💬 **Ton style de communication:**
 - Utilise des émojis avec modération (1-2 par message max) pour ajouter de la chaleur
 - Sois TRÈS concis mais amical - maximum 2-3 phrases courtes
@@ -234,6 +239,8 @@ You help ${name} manage tasks, organize their day, and stay productive. You have
 
 **Important note**: If ${name} asks you to create an automatic day plan, explain that they can use the "AI Assist" button in the Day Planner page for that - it's the perfect tool for creating an intelligent schedule that takes their calendar events into account!
 
+**IMPORTANT - Task lists**: You MUST NEVER create new lists/categories. Use ONLY ${name}'s existing lists. If a task doesn't fit any existing list, place it in the default list without creating a new one.
+
 💬 **Your communication style:**
 - Use emojis sparingly (1-2 max per message) to add warmth
 - Be VERY concise but friendly - maximum 2-3 short sentences
@@ -272,28 +279,8 @@ async function createTask(userId: string, params: any) {
 
     if (existingList && !findError) {
       todoListId = existingList.id;
-    } else {
-      const { data: newList, error: listError } = await supabase
-        .from('todo_lists')
-        .insert({
-          user_id: userId,
-          name: params.category,
-          color: '#3b82f6',
-          icon: 'list',
-          is_default: false,
-          position: 0,
-        })
-        .select('id')
-        .single();
-
-      if (listError) {
-        console.error('[AI Chat] Error creating list:', listError);
-      }
-
-      if (newList) {
-        todoListId = newList.id;
-      }
     }
+    // If category doesn't exist, do NOT create a new list - use default instead
   }
 
   if (!todoListId) {
