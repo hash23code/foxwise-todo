@@ -505,12 +505,12 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-6xl h-[600px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-purple-500/30 flex overflow-hidden"
+          className="relative w-full max-w-6xl h-full sm:h-[600px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 sm:rounded-2xl shadow-2xl border border-purple-500/30 flex overflow-hidden"
         >
           {/* Sidebar */}
           <AnimatePresence>
