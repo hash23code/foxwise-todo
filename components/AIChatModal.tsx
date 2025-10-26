@@ -71,7 +71,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const isListening = isRecording || isProcessing;
 
   const t = language === 'fr' ? {
-    title: 'Assistant IA Personnel',
+    title: 'Foxy',
     placeholder: 'Demandez-moi n\'importe quoi...',
     send: 'Envoyer',
     newChat: 'Nouvelle conversation',
@@ -91,7 +91,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
       '💡 "Planifie ma journée de demain"',
     ],
   } : {
-    title: 'Personal AI Assistant',
+    title: 'Foxy',
     placeholder: 'Ask me anything...',
     send: 'Send',
     newChat: 'New conversation',
@@ -598,7 +598,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
                 <div className="relative">
                   <Image
                     src="/fox-icon.png"
-                    alt="FoxWise AI"
+                    alt="Foxy"
                     width={40}
                     height={40}
                     className="object-contain"
