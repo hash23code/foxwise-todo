@@ -490,12 +490,17 @@ export default function DayPlannerPage() {
                     ) : (
                       <div className="flex flex-col gap-1.5 sm:gap-2">
                         {tasksAtHour.map((plannedTask) => {
+                          const isRoutine = (plannedTask as any).isRoutine;
+                          const colorClass = isRoutine
+                            ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                            : getPriorityColor(plannedTask.task.priority);
+
                           return (
                             <motion.div
                               key={plannedTask.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className={`w-full max-w-full p-2 sm:p-3 lg:p-4 rounded-md sm:rounded-lg border-2 ${getPriorityColor(plannedTask.task.priority)} flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 relative z-10`}
+                              className={`w-full max-w-full p-2 sm:p-3 lg:p-4 rounded-md sm:rounded-lg border-2 ${colorClass} flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 relative z-10`}
                             >
                               {/* Task Content */}
                               <div className="flex-1 min-w-0 w-full sm:w-auto">
