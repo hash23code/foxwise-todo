@@ -44,6 +44,13 @@ interface PlannedTask {
   task: Task;
 }
 
+interface TodoList {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+}
+
 export default function DayPlannerPage() {
   const { t, language } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -55,6 +62,8 @@ export default function DayPlannerPage() {
   const [showAIPlanner, setShowAIPlanner] = useState(false);
   const [weatherData, setWeatherData] = useState<any>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
+  const [todoLists, setTodoLists] = useState<TodoList[]>([]);
+  const [selectedListFilter, setSelectedListFilter] = useState<string>("all");
 
   // Generate hours from 6 AM to 5 AM (next day)
   // 6,7,8...23 (18 hours), then 0,1,2,3,4,5 (6 hours) = 24 hours total
@@ -67,6 +76,7 @@ export default function DayPlannerPage() {
     fetchTasks();
     fetchPlannedTasks();
     fetchBadges();
+    fetchTodoLists();
   }, [selectedDate]);
 
   const fetchTasks = async () => {
@@ -172,6 +182,18 @@ export default function DayPlannerPage() {
       }
     } catch (error) {
       console.error('Error fetching badges:', error);
+    }
+  };
+
+  const fetchTodoLists = async () => {
+    try {
+      const response = await fetch('/api/todo-lists');
+      if (response.ok) {
+        const data = await response.json();
+        setTodoLists(data);
+      }
+    } catch (error) {
+      console.error('Error fetching todo lists:', error);
     }
   };
 
@@ -621,6 +643,7 @@ export default function DayPlannerPage() {
                   onClick={() => {
                     setShowTaskSelector(false);
                     setSelectedTimeSlot("");
+                    setSelectedListFilter("all");
                   }}
                   className="p-2 text-gray-400 hover:text-white transition-colors"
                 >
@@ -628,22 +651,63 @@ export default function DayPlannerPage() {
                 </button>
               </div>
 
+              {/* List Filter */}
+              <div className="mb-4">
+                <label className="text-sm text-gray-400 mb-2 block">
+                  {language === 'fr' ? 'Filtrer par liste' : 'Filter by list'}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedListFilter("all")}
+                    className={`px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+                      selectedListFilter === "all"
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    {language === 'fr' ? 'Toutes' : 'All'}
+                  </button>
+                  {todoLists.map((list) => (
+                    <button
+                      key={list.id}
+                      onClick={() => setSelectedListFilter(list.id)}
+                      className={`px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+                        selectedListFilter === list.id
+                          ? 'text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                      style={
+                        selectedListFilter === list.id
+                          ? { backgroundColor: list.color }
+                          : {}
+                      }
+                    >
+                      {list.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-3">
-                {tasks.length === 0 ? (
+                {tasks.filter(task =>
+                  selectedListFilter === "all" || task.list_id === selectedListFilter
+                ).length === 0 ? (
                   <div className="text-center text-gray-400 py-12">
                     <CheckSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
                     <p>{t.dayPlanner.noTasksAvailable}</p>
                   </div>
                 ) : (
-                  tasks.map((task) => (
-                    <TaskSelectorItem
-                      key={task.id}
-                      task={task}
-                      onSelect={(duration) => addTaskToTimeSlot(task.id, duration)}
-                      getPriorityColor={getPriorityColor}
-                      t={t}
-                    />
-                  ))
+                  tasks
+                    .filter(task => selectedListFilter === "all" || task.list_id === selectedListFilter)
+                    .map((task) => (
+                      <TaskSelectorItem
+                        key={task.id}
+                        task={task}
+                        onSelect={(duration) => addTaskToTimeSlot(task.id, duration)}
+                        getPriorityColor={getPriorityColor}
+                        t={t}
+                      />
+                    ))
                 )}
               </div>
             </motion.div>
