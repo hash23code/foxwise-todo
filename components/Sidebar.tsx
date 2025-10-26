@@ -15,7 +15,8 @@ import {
   Folder,
   Menu,
   X,
-  BarChart3
+  BarChart3,
+  Repeat
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,6 +62,12 @@ export default function Sidebar() {
       href: "/day-planner",
       icon: Clock,
       gradient: "from-indigo-500 to-blue-500"
+    },
+    {
+      name: language === 'fr' ? "Routines" : "Routines",
+      href: "/routines",
+      icon: Repeat,
+      gradient: "from-cyan-500 to-teal-500"
     },
     {
       name: language === 'fr' ? "Projets" : "Projects",

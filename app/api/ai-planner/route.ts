@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // POST - Generate AI day plan
@@ -54,6 +57,14 @@ export async function POST(request: NextRequest) {
     if (calendarError) {
       console.error('Error fetching calendar events:', calendarError);
     }
+
+    // 2b. Get routines that apply to this date
+    const routinesResponse = await fetch(`${request.nextUrl.origin}/api/routines/for-date?date=${startDate}`, {
+      headers: {
+        'Cookie': request.headers.get('cookie') || '',
+      },
+    });
+    const routines = routinesResponse.ok ? await routinesResponse.json() : [];
 
     // 3. Get historical day planner data to analyze actual time spent
     const { data: historicalData, error: historyError } = await supabase
@@ -113,6 +124,16 @@ ${calendarEvents.map((event: any) =>
 **CRITICAL: You MUST avoid scheduling any tasks during calendar event times. These are fixed appointments/commitments that cannot be moved.**
 ` : '';
 
+    // 6b. Prepare routines context
+    const routinesContext = routines && routines.length > 0 ? `
+**Daily Routines (MUST BE INCLUDED - These are recurring activities that MUST appear in the schedule):**
+${routines.map((routine: any) =>
+  `- ${routine.start_time} (${routine.duration_hours}h) - ${routine.title}${routine.description ? `: ${routine.description}` : ''} [Category: ${routine.category}]`
+).join('\n')}
+
+**CRITICAL: You MUST include ALL these routines in the day plan at their specified times. These are non-negotiable recurring activities.**
+` : '';
+
     // 7. Use Gemini AI to generate plan - Using 2.0 Flash for ultra-fast planning
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash-exp',
@@ -154,6 +175,7 @@ ${calendarEvents.map((event: any) =>
 ${tasksWithAnalysis.map((t: any) =>
   `- UUID: "${t.id}" | Title: "${t.title}" | Priority: ${t.priority} | Est: ${t.estimatedHours || 'N/A'}h | Status: ${t.status}`
 ).join('\n')}
+${routinesContext}
 ${calendarContext}
 ${weatherContext}
 **Constraints:**
@@ -162,14 +184,16 @@ ${breakTimes?.length > 0 ? `- Breaks: ${JSON.stringify(breakTimes)}` : ''}
 ${preferences ? `- Prefs: ${preferences}` : ''}
 
 **Rules:**
-1. CRITICAL: NEVER schedule tasks during calendar event times - these are blocked/busy times
-2. CRITICAL: Use ONLY the exact task UUIDs listed above in "taskId" - DO NOT create fake IDs
-3. Time: Use hist>est>estimate (simple:0.5-1h, med:1-2h, complex:2-4h). In-progress: -30-50%
-4. Priority: HIGH/URGENT early (peak energy)
-5. Max 6h focus/day, 15-30min buffers
-6. Group similar tasks
-7. Weather: Outdoor only in good weather UNLESS urgent
-8. USE EXACT date ${startDate}
+1. CRITICAL: INCLUDE ALL routines in the schedule at their specified times - they are mandatory recurring activities
+2. CRITICAL: NEVER schedule tasks during calendar event times - these are blocked/busy times
+3. CRITICAL: Use ONLY the exact task UUIDs listed above in "taskId" - DO NOT create fake IDs
+4. Time: Use hist>est>estimate (simple:0.5-1h, med:1-2h, complex:2-4h). In-progress: -30-50%
+5. Priority: HIGH/URGENT early (peak energy)
+6. Max 6h focus/day, 15-30min buffers, and respect routine times
+7. Group similar tasks
+8. Weather: Outdoor only in good weather UNLESS urgent
+9. USE EXACT date ${startDate}
+10. Schedule regular tasks AROUND the routines, not during them
 
 JSON only (copy task UUIDs EXACTLY as provided):
 {

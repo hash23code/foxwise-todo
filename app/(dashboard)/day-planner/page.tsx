@@ -95,14 +95,61 @@ export default function DayPlannerPage() {
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const day = String(selectedDate.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
+
+      // Fetch planned tasks
       const response = await fetch(`/api/day-planner?date=${dateStr}`);
+      let plannedTasksData = [];
       if (response.ok) {
-        const data = await response.json();
-        setPlannedTasks(data);
+        plannedTasksData = await response.json();
       }
+
+      // Fetch routines for this date
+      const routinesResponse = await fetch(`/api/routines/for-date?date=${dateStr}`);
+      let routinesData = [];
+      if (routinesResponse.ok) {
+        routinesData = await routinesResponse.json();
+      }
+
+      // Convert routines to planned task format
+      const routinesAsPlannedTasks = routinesData.map((routine: any) => ({
+        id: `routine-${routine.id}`,
+        task_id: null,
+        date: dateStr,
+        start_time: routine.start_time,
+        duration_hours: routine.duration_hours,
+        task: {
+          id: `routine-${routine.id}`,
+          title: routine.title,
+          description: routine.description,
+          priority: 'medium' as const,
+          status: 'pending' as const,
+          due_date: null,
+          list_id: 'routine',
+          tags: [routine.category],
+          todo_lists: {
+            name: language === 'fr' ? 'Routine' : 'Routine',
+            color: getCategoryColor(routine.category),
+          },
+        },
+        isRoutine: true,
+      }));
+
+      // Combine planned tasks and routines
+      setPlannedTasks([...plannedTasksData, ...routinesAsPlannedTasks]);
     } catch (error) {
       console.error('Error fetching planned tasks:', error);
     }
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      family: '#3b82f6',
+      leisure: '#8b5cf6',
+      work: '#f59e0b',
+      sport: '#ef4444',
+      wellness: '#10b981',
+    };
+    return colors[category] || '#6b7280';
   };
 
   const fetchBadges = async () => {
@@ -190,7 +237,12 @@ export default function DayPlannerPage() {
     }
   };
 
-  const removePlannedTask = async (plannedTaskId: string) => {
+  const removePlannedTask = async (plannedTaskId: string, isRoutine?: boolean) => {
+    if (isRoutine) {
+      alert(language === 'fr' ? 'Les routines ne peuvent pas être retirées du planning. Allez dans la section Routines pour les désactiver.' : 'Routines cannot be removed from the planner. Go to the Routines section to deactivate them.');
+      return;
+    }
+
     if (!confirm(language === 'fr' ? 'Retirer cette tâche du planning ?' : 'Remove this task from day planner?')) {
       return;
     }
@@ -460,62 +512,70 @@ export default function DayPlannerPage() {
 
                               {/* Action Buttons */}
                               <div className="flex sm:flex-col gap-1.5 sm:gap-2 flex-shrink-0 w-full sm:w-auto">
-                                {/* Complete Button */}
-                                <button
-                                  onClick={() => updateTaskStatus(plannedTask.task.id, 'completed')}
-                                  className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
-                                    plannedTask.task.status === 'completed'
-                                      ? 'bg-green-500/30 border-green-500 text-green-400'
-                                      : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
-                                  }`}
-                                  title={t.dayPlanner.markAsCompleted}
-                                >
-                                  <CheckSquare className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                  <span className="hidden xs:inline">{t.dayPlanner.complete}</span>
-                                </button>
+                                {!(plannedTask as any).isRoutine ? (
+                                  <>
+                                    {/* Complete Button */}
+                                    <button
+                                      onClick={() => updateTaskStatus(plannedTask.task.id, 'completed')}
+                                      className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
+                                        plannedTask.task.status === 'completed'
+                                          ? 'bg-green-500/30 border-green-500 text-green-400'
+                                          : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
+                                      }`}
+                                      title={t.dayPlanner.markAsCompleted}
+                                    >
+                                      <CheckSquare className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                      <span className="hidden xs:inline">{t.dayPlanner.complete}</span>
+                                    </button>
 
-                                {/* In Progress Button */}
-                                <button
-                                  onClick={() => updateTaskStatus(plannedTask.task.id, 'in_progress')}
-                                  className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
-                                    plannedTask.task.status === 'in_progress'
-                                      ? 'bg-yellow-500/30 border-yellow-500 text-yellow-400'
-                                      : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
-                                  }`}
-                                  title={t.dayPlanner.needMoreTime}
-                                >
-                                  <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                  <span className="hidden xs:inline">{t.dayPlanner.moreTime}</span>
-                                </button>
+                                    {/* In Progress Button */}
+                                    <button
+                                      onClick={() => updateTaskStatus(plannedTask.task.id, 'in_progress')}
+                                      className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
+                                        plannedTask.task.status === 'in_progress'
+                                          ? 'bg-yellow-500/30 border-yellow-500 text-yellow-400'
+                                          : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
+                                      }`}
+                                      title={t.dayPlanner.needMoreTime}
+                                    >
+                                      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                      <span className="hidden xs:inline">{t.dayPlanner.moreTime}</span>
+                                    </button>
 
-                                {/* Postpone Button */}
-                                <button
-                                  onClick={() => updateTaskStatus(plannedTask.task.id, 'pending')}
-                                  className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
-                                    plannedTask.task.status === 'pending'
-                                      ? 'bg-red-500/30 border-red-500 text-red-400'
-                                      : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
-                                  }`}
-                                  title={t.dayPlanner.postponeTask}
-                                >
-                                  <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                  <span className="hidden xs:inline">{t.dayPlanner.postpone}</span>
-                                </button>
+                                    {/* Postpone Button */}
+                                    <button
+                                      onClick={() => updateTaskStatus(plannedTask.task.id, 'pending')}
+                                      className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${
+                                        plannedTask.task.status === 'pending'
+                                          ? 'bg-red-500/30 border-red-500 text-red-400'
+                                          : 'bg-gray-600/20 border-gray-600/50 text-gray-400 hover:bg-gray-600/30'
+                                      }`}
+                                      title={t.dayPlanner.postponeTask}
+                                    >
+                                      <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                      <span className="hidden xs:inline">{t.dayPlanner.postpone}</span>
+                                    </button>
 
-                                {/* Remove from Planner Button */}
-                                <button
-                                  onClick={() => {
-                                    if (plannedTask.id) {
-                                      removePlannedTask(plannedTask.id);
-                                    }
-                                  }}
-                                  disabled={!plannedTask.id}
-                                  className="flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  title={language === 'fr' ? 'Retirer du planning' : 'Remove from planner'}
-                                >
-                                  <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                  <span className="hidden xs:inline">{language === 'fr' ? 'Retirer' : 'Remove'}</span>
-                                </button>
+                                    {/* Remove from Planner Button */}
+                                    <button
+                                      onClick={() => {
+                                        if (plannedTask.id) {
+                                          removePlannedTask(plannedTask.id, (plannedTask as any).isRoutine);
+                                        }
+                                      }}
+                                      disabled={!plannedTask.id}
+                                      className="flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title={language === 'fr' ? 'Retirer du planning' : 'Remove from planner'}
+                                    >
+                                      <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                      <span className="hidden xs:inline">{language === 'fr' ? 'Retirer' : 'Remove'}</span>
+                                    </button>
+                                  </>
+                                ) : (
+                                  <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-500/20 border border-blue-500/50 rounded-md sm:rounded-lg text-[10px] sm:text-xs text-blue-400 text-center">
+                                    {language === 'fr' ? 'Routine quotidienne' : 'Daily routine'}
+                                  </div>
+                                )}
                               </div>
                             </motion.div>
                           );

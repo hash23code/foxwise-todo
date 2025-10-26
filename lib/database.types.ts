@@ -295,6 +295,56 @@ export interface Database {
           updated_at?: string
         }
       }
+      routines: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string | null
+          category: 'family' | 'leisure' | 'work' | 'sport' | 'wellness'
+          frequency_type: 'daily' | 'weekly' | 'monthly'
+          start_time: string
+          duration_hours: number
+          weekly_days: number[] | null
+          monthly_days: number[] | null
+          skip_weekends: boolean
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          description?: string | null
+          category: 'family' | 'leisure' | 'work' | 'sport' | 'wellness'
+          frequency_type: 'daily' | 'weekly' | 'monthly'
+          start_time: string
+          duration_hours?: number
+          weekly_days?: number[] | null
+          monthly_days?: number[] | null
+          skip_weekends?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          description?: string | null
+          category?: 'family' | 'leisure' | 'work' | 'sport' | 'wellness'
+          frequency_type?: 'daily' | 'weekly' | 'monthly'
+          start_time?: string
+          duration_hours?: number
+          weekly_days?: number[] | null
+          monthly_days?: number[] | null
+          skip_weekends?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -317,6 +367,7 @@ export type TaskAttachment = Database['public']['Tables']['task_attachments']['R
 export type TaskComment = Database['public']['Tables']['task_comments']['Row']
 export type UserSettings = Database['public']['Tables']['user_settings']['Row']
 export type DayPlanner = Database['public']['Tables']['day_planner']['Row']
+export type Routine = Database['public']['Tables']['routines']['Row']
 
 export type TodoListInsert = Database['public']['Tables']['todo_lists']['Insert']
 export type TaskInsert = Database['public']['Tables']['tasks']['Insert']
@@ -326,3 +377,4 @@ export type TaskAttachmentInsert = Database['public']['Tables']['task_attachment
 export type TaskCommentInsert = Database['public']['Tables']['task_comments']['Insert']
 export type UserSettingsInsert = Database['public']['Tables']['user_settings']['Insert']
 export type DayPlannerInsert = Database['public']['Tables']['day_planner']['Insert']
+export type RoutineInsert = Database['public']['Tables']['routines']['Insert']
