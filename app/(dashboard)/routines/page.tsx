@@ -476,9 +476,9 @@ export default function RoutinesPage() {
                       </label>
                       <input
                         type="number"
-                        min="0.5"
+                        min="0.25"
                         max="24"
-                        step="0.5"
+                        step="0.25"
                         value={formData.duration_hours}
                         onChange={(e) => setFormData({ ...formData, duration_hours: parseFloat(e.target.value) })}
                         className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"

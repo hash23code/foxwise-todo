@@ -134,8 +134,14 @@ export default function DayPlannerPage() {
         isRoutine: true,
       }));
 
-      // Combine planned tasks and routines
-      setPlannedTasks([...plannedTasksData, ...routinesAsPlannedTasks]);
+      // Combine planned tasks and routines, then sort by start_time
+      const combinedTasks = [...plannedTasksData, ...routinesAsPlannedTasks];
+      combinedTasks.sort((a, b) => {
+        const timeA = a.start_time || '';
+        const timeB = b.start_time || '';
+        return timeA.localeCompare(timeB);
+      });
+      setPlannedTasks(combinedTasks);
     } catch (error) {
       console.error('Error fetching planned tasks:', error);
     }
@@ -202,10 +208,17 @@ export default function DayPlannerPage() {
 
   const getTasksForHour = (hour: number) => {
     // Return all tasks that START within this hour (e.g., for hour 17, include 17:00, 17:15, 17:30, 17:45)
-    return plannedTasks.filter(pt => {
+    const tasksInHour = plannedTasks.filter(pt => {
       const taskHour = parseInt(pt.start_time.split(':')[0]);
       return taskHour === hour;
     });
+
+    // Sort by start_time to ensure correct order (16:00 before 16:30)
+    tasksInHour.sort((a, b) => {
+      return a.start_time.localeCompare(b.start_time);
+    });
+
+    return tasksInHour;
   };
 
   // Check if an hour slot is occupied by a task that started earlier
