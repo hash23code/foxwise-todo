@@ -746,7 +746,7 @@ function TaskSelectorItem({
 
   return (
     <div className={`p-4 rounded-lg border-2 ${getPriorityColor(task.priority)}`}>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3">
         <div className="flex-1">
           <h4 className="font-semibold text-white mb-1">{task.title}</h4>
           {task.description && (
@@ -763,9 +763,9 @@ function TaskSelectorItem({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-center gap-1">
-            <label className="text-xs text-gray-400">{t.dayPlanner.hours}</label>
+        <div className="flex items-center justify-between gap-4 pt-2 border-t border-gray-700/50">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-400">{t.dayPlanner.hours}:</label>
             <input
               type="number"
               min="0.5"
@@ -778,7 +778,7 @@ function TaskSelectorItem({
           </div>
           <button
             onClick={() => onSelect(duration)}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
           >
             {t.dayPlanner.add}
           </button>

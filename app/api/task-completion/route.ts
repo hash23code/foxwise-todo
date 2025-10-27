@@ -4,6 +4,9 @@ import { auth } from '@clerk/nextjs/server';
 import { calculateTimeSaved, BADGE_CONFIG, isAfterHours } from '@/lib/badges';
 import { getUserTimezone } from '@/lib/user-timezone';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // POST: Enregistrer le temps de complétion d'une tâche
 export async function POST(request: NextRequest) {
   try {
@@ -26,17 +29,21 @@ export async function POST(request: NextRequest) {
     const userTimezone = await getUserTimezone(userId);
     const completionDate = new Date(actual_completion);
 
-    // Utiliser la timezone de l'utilisateur pour la date locale
-    const dateInUserTz = completionDate.toLocaleString('en-CA', {
+    // Obtenir l'année, le mois et le jour dans la timezone de l'utilisateur
+    const year = completionDate.toLocaleString('en-US', {
       timeZone: userTimezone,
-      year: 'numeric',
-      month: '2-digit',
+      year: 'numeric'
+    });
+    const month = completionDate.toLocaleString('en-US', {
+      timeZone: userTimezone,
+      month: '2-digit'
+    });
+    const day = completionDate.toLocaleString('en-US', {
+      timeZone: userTimezone,
       day: '2-digit'
     });
 
     // Format: YYYY-MM-DD
-    const [datePart, timePart] = dateInUserTz.split(', ');
-    const [year, month, day] = datePart.split('-');
     const dateStr = `${year}-${month}-${day}`;
 
     const supabase = await createClient();
