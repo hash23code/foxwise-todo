@@ -44,20 +44,35 @@ export default function SettingsPage() {
       setLoading(true);
       console.log('[Settings] Loading settings for user:', user?.id);
 
-      // Load user settings from database
-      const userSettings = await getUserSettings(user!.id);
-      console.log('[Settings] User settings loaded:', userSettings);
+      // Load user settings from database with timeout
+      let userSettings = null;
+      try {
+        const settingsPromise = getUserSettings(user!.id);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        userSettings = await Promise.race([settingsPromise, timeoutPromise]) as any;
+        console.log('[Settings] User settings loaded:', userSettings);
+      } catch (settingsError) {
+        console.error('[Settings] Error loading user settings:', settingsError);
+      }
 
-      // Load user memory (including timezone)
-      const memoryResponse = await fetch('/api/user-memory');
-      console.log('[Settings] Memory response status:', memoryResponse.status);
-
+      // Load user memory (including timezone) with timeout
       let userMemory = null;
-      if (memoryResponse.ok) {
-        userMemory = await memoryResponse.json();
-        console.log('[Settings] User memory loaded:', userMemory);
-      } else {
-        console.error('[Settings] Failed to load user memory:', memoryResponse.status);
+      try {
+        const memoryPromise = fetch('/api/user-memory');
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        const memoryResponse = await Promise.race([memoryPromise, timeoutPromise]) as Response;
+        console.log('[Settings] Memory response status:', memoryResponse?.status);
+
+        if (memoryResponse?.ok) {
+          userMemory = await memoryResponse.json();
+          console.log('[Settings] User memory loaded:', userMemory);
+        }
+      } catch (memoryError) {
+        console.error('[Settings] Error loading user memory:', memoryError);
       }
 
       setSettings(prev => ({

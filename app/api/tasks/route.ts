@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // GET all tasks for the current user
 export async function GET(request: NextRequest) {
   try {
@@ -177,21 +180,35 @@ export async function PATCH(request: NextRequest) {
       try {
         // Importer la logique de badge
         const { calculateTimeSaved, isAfterHours, BADGE_CONFIG } = await import('@/lib/badges');
+        const { getUserTimezone } = await import('@/lib/user-timezone');
 
         const completionDate = new Date();
-        // Utiliser la date locale pour éviter le décalage UTC
-        const year = completionDate.getFullYear();
-        const month = String(completionDate.getMonth() + 1).padStart(2, '0');
-        const day = String(completionDate.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
         const actual_completion = completionDate.toISOString();
+
+        // Récupérer la timezone de l'utilisateur
+        const userTimezone = await getUserTimezone(userId);
+
+        // Obtenir l'année, le mois et le jour dans la timezone de l'utilisateur
+        const year = completionDate.toLocaleString('en-US', {
+          timeZone: userTimezone,
+          year: 'numeric'
+        });
+        const month = completionDate.toLocaleString('en-US', {
+          timeZone: userTimezone,
+          month: '2-digit'
+        });
+        const day = completionDate.toLocaleString('en-US', {
+          timeZone: userTimezone,
+          day: '2-digit'
+        });
+        const dateStr = `${year}-${month}-${day}`;
 
         console.log('🐛 DEBUG TIMEZONE - Completion Date:', {
           now: completionDate.toString(),
+          userTimezone,
           year, month, day,
           dateStr,
-          actual_completion,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          actual_completion
         });
 
         // Vérifier si la tâche était dans le day planner
@@ -225,7 +242,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         // Vérifier si complétée après 20h
-        const completedAfterHours = isAfterHours(actual_completion);
+        const completedAfterHours = isAfterHours(actual_completion, userTimezone);
 
         // Enregistrer le temps de complétion
         await (supabase
