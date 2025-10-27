@@ -50,8 +50,15 @@ function TasksPageContent() {
     return searchParams.get('list') || null;
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>(() => {
+    // Initialize from URL parameter
+    return searchParams.get('status') || 'all';
+  });
   const [filterPriority, setFilterPriority] = useState<string>("all");
+  const [specialFilter, setSpecialFilter] = useState<string | null>(() => {
+    // Initialize from URL parameter
+    return searchParams.get('filter') || null;
+  });
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -169,6 +176,14 @@ function TasksPageContent() {
 
     // Hide completed filter
     const shouldShow = !hideCompleted || task.status !== 'completed';
+
+    // Special filter: overdue
+    if (specialFilter === 'overdue') {
+      const isOverdue = task.status !== 'completed' &&
+        task.due_date &&
+        new Date(task.due_date) < new Date();
+      return matchesSearch && shouldShow && isOverdue;
+    }
 
     return matchesSearch && shouldShow;
   });
