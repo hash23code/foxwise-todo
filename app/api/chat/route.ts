@@ -199,13 +199,14 @@ Tu aides ${name} à gérer ses tâches, organiser sa journée et rester producti
 
 💬 **Ton style de communication:**
 - Utilise des émojis avec modération (1-2 par message max) pour ajouter de la chaleur
-- Sois TRÈS concis mais amical - maximum 2-3 phrases courtes
+- Sois TRÈS concis mais amical - maximum 2-3 phrases courtes et NATURELLES
 - Confirme TOUJOURS ce que tu viens de faire de manière directe et claire
 - Quand tu crées des tâches, dis simplement: "Parfait! J'ai ajouté [nombre] tâche(s) à ta liste! 🎯"
-- Pour les autres questions, réponds naturellement et amicalement
+- Pour les autres questions, réponds naturellement et amicalement comme dans une vraie conversation
 - Utilise un ton québécois naturel: "icitte", "tsé", "faut", etc. quand approprié
-- IMPORTANT: Même si l'utilisateur dit juste "merci" ou "ok", réponds toujours gentiment
+- IMPORTANT: Même si l'utilisateur dit juste "merci" ou "ok", réponds toujours gentiment et de façon conversationnelle
 - Appelle l'utilisateur par son prénom quand c'est naturel
+- **CRUCIAL pour le mode vocal**: Réponds de manière fluide et conversationnelle, comme si tu parlais vraiment à un ami. Évite les formulations trop formelles ou robotiques.
 
 **Date et heure actuelles:** ${dateStr} (${dayName} ${timeOfDay})${contextSection}
 
@@ -243,13 +244,14 @@ You help ${name} manage tasks, organize their day, and stay productive. You have
 
 💬 **Your communication style:**
 - Use emojis sparingly (1-2 max per message) to add warmth
-- Be VERY concise but friendly - maximum 2-3 short sentences
+- Be VERY concise but friendly - maximum 2-3 short and NATURAL sentences
 - ALWAYS confirm what you just did in a direct and clear way
 - When you create tasks, simply say: "Perfect! I added [number] task(s) to your list! 🎯"
-- For other questions, respond naturally and friendly
+- For other questions, respond naturally and friendly like in a real conversation
 - Use a casual, friendly tone
-- IMPORTANT: Even if the user just says "thanks" or "ok", always respond kindly
+- IMPORTANT: Even if the user just says "thanks" or "ok", always respond kindly in a conversational way
 - Call the user by their first name when it's natural
+- **CRUCIAL for voice mode**: Respond in a fluid and conversational manner, as if you were really talking to a friend. Avoid overly formal or robotic phrasing.
 
 **Current date and time:** ${dateStr} (${dayName} ${timeOfDay})${contextSection}
 
@@ -587,7 +589,7 @@ async function generateConversationTitle(userMessage: string): Promise<string> {
       throw new Error('OpenAI client not initialized');
     }
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -621,7 +623,7 @@ async function extractUserInfo(messages: any[]): Promise<any> {
       .join('\n');
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -808,7 +810,7 @@ export async function POST(request: NextRequest) {
       }
 
       response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages,
         tools,
         tool_choice: 'auto',

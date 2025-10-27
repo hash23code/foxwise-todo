@@ -340,13 +340,18 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
       audio.onended = () => {
         setIsPlayingAudio(false);
         URL.revokeObjectURL(audioUrl);
-        // Auto-désactive le mode vocal après la réponse
-        setIsVoiceMode(false);
+        // Redémarre automatiquement l'écoute si le mode vocal est toujours actif
+        if (isVoiceMode) {
+          setTimeout(() => {
+            startRecording();
+          }, 500); // Petit délai pour éviter les problèmes audio
+        }
       };
 
       audio.onerror = () => {
         setIsPlayingAudio(false);
         URL.revokeObjectURL(audioUrl);
+        // En cas d'erreur, désactive le mode vocal
         setIsVoiceMode(false);
       };
 
