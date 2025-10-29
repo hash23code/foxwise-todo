@@ -18,106 +18,148 @@ export async function GET(request: NextRequest) {
     const apiKey = process.env.OPENWEATHER_API_KEY;
 
     if (!apiKey) {
-      // Return mock data if no API key (for development)
+      console.error('OpenWeather API key not found. Using mock data.');
       return NextResponse.json(getMockWeatherData(date));
     }
 
-    // Use OpenWeatherMap One Call API 2.5 for hourly forecast (free tier compatible)
-    const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&units=metric&lang=fr&appid=${apiKey}`;
+    // Step 1: Get current weather for location name
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${apiKey}`;
 
-    const response = await fetch(url, {
-      cache: 'no-store' // Disable cache to always get fresh data
-    });
+    // Step 2: Get 5-day forecast (free tier)
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${apiKey}`;
 
-    if (!response.ok) {
-      console.error('OpenWeather API error:', response.status, response.statusText);
-      // Return mock data on error
+    console.log('Fetching real weather from OpenWeather API...');
+
+    const [currentResponse, forecastResponse] = await Promise.all([
+      fetch(currentWeatherUrl, { cache: 'no-store' }),
+      fetch(forecastUrl, { cache: 'no-store' })
+    ]);
+
+    if (!currentResponse.ok || !forecastResponse.ok) {
+      console.error('OpenWeather API error:', {
+        current: currentResponse.status,
+        forecast: forecastResponse.status
+      });
+      console.error('Using mock data as fallback');
       return NextResponse.json(getMockWeatherData(date));
     }
 
-    const data = await response.json();
+    const currentData = await currentResponse.json();
+    const forecastData = await forecastResponse.json();
+
+    console.log('Real weather data received from API');
 
     // Get the requested date
     const requestDate = new Date(date);
-    requestDate.setHours(0, 0, 0, 0);
+    const requestDateStr = requestDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // Find forecasts for the requested date
-    const dailyForecast = data.daily?.find((day: any) => {
-      const forecastDate = new Date(day.dt * 1000);
-      forecastDate.setHours(0, 0, 0, 0);
-      return forecastDate.getTime() === requestDate.getTime();
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const isToday = requestDateStr === todayStr;
+
+    console.log(`Requested date: ${requestDateStr}, Today: ${todayStr}, Is today: ${isToday}`);
+
+    // Filter forecast data for the requested date (use more flexible date matching)
+    const forecastsForDate = forecastData.list.filter((item: any) => {
+      const itemDateStr = new Date(item.dt * 1000).toISOString().split('T')[0];
+      return itemDateStr === requestDateStr;
     });
 
-    // Get hourly forecasts for morning (8-12h), afternoon (12-18h), evening (18-23h)
-    const hourlyForecasts = data.hourly?.filter((hour: any) => {
-      const hourDate = new Date(hour.dt * 1000);
-      hourDate.setHours(hourDate.getHours(), 0, 0, 0);
-      const reqDate = new Date(date);
-      return hourDate.toDateString() === reqDate.toDateString();
-    });
+    console.log(`Found ${forecastsForDate.length} forecasts for ${requestDateStr}`);
 
-    const morning = hourlyForecasts?.filter((h: any) => {
-      const hour = new Date(h.dt * 1000).getHours();
+    // If no forecast for this date and it's not today, use mock data
+    if (forecastsForDate.length === 0 && !isToday) {
+      console.log(`No forecast available for ${date}, using mock data`);
+      return NextResponse.json(getMockWeatherData(date));
+    }
+
+    // Group forecasts by time period
+    const morning = forecastsForDate.find((item: any) => {
+      const hour = new Date(item.dt * 1000).getHours();
       return hour >= 6 && hour < 12;
-    })[0];
+    });
 
-    const afternoon = hourlyForecasts?.filter((h: any) => {
-      const hour = new Date(h.dt * 1000).getHours();
+    const afternoon = forecastsForDate.find((item: any) => {
+      const hour = new Date(item.dt * 1000).getHours();
       return hour >= 12 && hour < 18;
-    })[0];
+    });
 
-    const evening = hourlyForecasts?.filter((h: any) => {
-      const hour = new Date(h.dt * 1000).getHours();
+    const evening = forecastsForDate.find((item: any) => {
+      const hour = new Date(item.dt * 1000).getHours();
       return hour >= 18 && hour < 24;
-    })[0];
+    });
+
+    // Calculate daily min/max from all forecasts for the day
+    // If it's today and we have current data, include it
+    const temps = forecastsForDate.map((item: any) => item.main.temp);
+    if (isToday && currentData.main) {
+      temps.push(currentData.main.temp);
+    }
+
+    const minTemp = temps.length > 0 ? Math.min(...temps) : currentData.main.temp_min;
+    const maxTemp = temps.length > 0 ? Math.max(...temps) : currentData.main.temp_max;
+
+    // Use the most common weather condition for the day
+    const mainWeather = forecastsForDate[0]?.weather[0] || currentData.weather[0];
+
+    // Average precipitation probability
+    const avgPrecipitation = forecastsForDate.length > 0
+      ? forecastsForDate.reduce((sum: number, item: any) =>
+          sum + (item.pop || 0), 0) / forecastsForDate.length * 100
+      : 0; // Default to 0 if no forecast data
 
     const weatherData = {
       date,
       location: {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
-        name: data.timezone || 'Montreal',
+        name: currentData.name || 'Location',
       },
-      daily: dailyForecast ? {
+      daily: {
         temp: {
-          min: Math.round(dailyForecast.temp.min),
-          max: Math.round(dailyForecast.temp.max),
+          min: Math.round(minTemp),
+          max: Math.round(maxTemp),
         },
-        description: dailyForecast.weather[0].description,
-        icon: dailyForecast.weather[0].icon,
-        main: dailyForecast.weather[0].main,
-        precipitation: dailyForecast.pop * 100, // Probability of precipitation
-        humidity: dailyForecast.humidity,
-        windSpeed: dailyForecast.wind_speed,
-        clouds: dailyForecast.clouds,
-      } : null,
+        description: mainWeather.description,
+        icon: mainWeather.icon,
+        main: mainWeather.main,
+        precipitation: Math.round(avgPrecipitation),
+        humidity: forecastsForDate[0]?.main.humidity || currentData.main.humidity,
+        windSpeed: forecastsForDate[0]?.wind.speed || currentData.wind.speed,
+        clouds: forecastsForDate[0]?.clouds.all || currentData.clouds.all,
+      },
       periods: {
         morning: morning ? {
-          temp: Math.round(morning.temp),
+          temp: Math.round(morning.main.temp),
           description: morning.weather[0].description,
           icon: morning.weather[0].icon,
           main: morning.weather[0].main,
-          precipitation: morning.pop * 100,
+          precipitation: Math.round((morning.pop || 0) * 100),
           time: '6h-12h',
         } : null,
         afternoon: afternoon ? {
-          temp: Math.round(afternoon.temp),
+          temp: Math.round(afternoon.main.temp),
           description: afternoon.weather[0].description,
           icon: afternoon.weather[0].icon,
           main: afternoon.weather[0].main,
-          precipitation: afternoon.pop * 100,
+          precipitation: Math.round((afternoon.pop || 0) * 100),
           time: '12h-18h',
         } : null,
         evening: evening ? {
-          temp: Math.round(evening.temp),
+          temp: Math.round(evening.main.temp),
           description: evening.weather[0].description,
           icon: evening.weather[0].icon,
           main: evening.weather[0].main,
-          precipitation: evening.pop * 100,
+          precipitation: Math.round((evening.pop || 0) * 100),
           time: '18h-23h',
         } : null,
       },
-      suitable: getSuitabilityInfo(dailyForecast, morning, afternoon, evening),
+      suitable: getSuitabilityInfo(
+        { weather: [mainWeather], temp: { day: (minTemp + maxTemp) / 2 } },
+        morning,
+        afternoon,
+        evening
+      ),
     };
 
     return NextResponse.json(weatherData);
@@ -139,9 +181,10 @@ function getSuitabilityInfo(daily: any, morning: any, afternoon: any, evening: a
       return;
     }
 
-    const main = data.weather?.[0]?.main || daily?.weather?.[0]?.main;
-    const precipitation = data.pop * 100;
-    const temp = data.temp || daily?.temp?.day;
+    // Handle both old format (dailyForecast) and new format (forecast API)
+    const main = data.weather?.[0]?.main || data.main?.weather?.[0]?.main || daily?.weather?.[0]?.main;
+    const precipitation = data.pop ? data.pop * 100 : (data.precipitation || 0);
+    const temp = data.main?.temp || data.temp || daily?.temp?.day;
 
     let suitable = true;
     let reason = 'Idéal pour activités extérieures';
