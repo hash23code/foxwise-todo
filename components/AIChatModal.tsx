@@ -371,6 +371,20 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     startRecording();
   };
 
+  const stopVoiceMode = () => {
+    // Arrête le mode vocal
+    setIsVoiceMode(false);
+    if (isRecording) {
+      stopRecording();
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setIsPlayingAudio(false);
+    resetTranscript();
+  };
+
   // Simple language detection based on common French words/patterns
   const detectLanguage = (text: string): 'en' | 'fr' => {
     const lowerText = text.toLowerCase();
@@ -619,12 +633,23 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors flex-shrink-0"
-              >
-                <X className="w-6 h-6 sm:w-5 sm:h-5 text-gray-400" />
-              </button>
+              <div className="flex items-center gap-2">
+                {isVoiceMode && (
+                  <button
+                    onClick={stopVoiceMode}
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                  >
+                    <MicOff className="w-4 h-4" />
+                    {language === 'fr' ? 'Arrêter vocal' : 'Stop voice'}
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors flex-shrink-0"
+                >
+                  <X className="w-6 h-6 sm:w-5 sm:h-5 text-gray-400" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

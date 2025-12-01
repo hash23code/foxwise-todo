@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // POST parse voice input into project fields using Gemini
 export async function POST(request: NextRequest) {
   try {

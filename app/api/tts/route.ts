@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
+// Initialize OpenAI only if API key is available
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}) : null;
 
 // POST - Text-to-Speech using OpenAI
 export async function POST(request: NextRequest) {
@@ -13,6 +17,10 @@ export async function POST(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!openai) {
+      return NextResponse.json({ error: 'OpenAI service unavailable' }, { status: 503 });
     }
 
     const body = await request.json();

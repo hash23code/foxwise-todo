@@ -117,11 +117,18 @@ export function useWhisperRecognition(options: UseWhisperRecognitionOptions = {}
 
           const data = await response.json();
 
-          if (data.text) {
+          // Validate transcription - must have at least 3 characters and not be just noise/numbers
+          const transcribedText = data.text?.trim() || '';
+          const isValidTranscription = transcribedText.length >= 3 && /[a-zA-ZÀ-ÿ]{2,}/.test(transcribedText);
+
+          if (data.text && isValidTranscription) {
             setTranscript(data.text);
             if (onTranscript) {
               onTranscript(data.text);
             }
+          } else {
+            console.log('[Whisper] Transcription rejected (too short or noise):', transcribedText);
+            setError('Transcription trop courte ou bruit ambiant détecté');
           }
         } catch (err: any) {
           console.error('Error transcribing audio:', err);
@@ -149,8 +156,8 @@ export function useWhisperRecognition(options: UseWhisperRecognitionOptions = {}
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 
-      // Silence detection threshold (0-255)
-      const SILENCE_THRESHOLD = 5;
+      // Silence detection threshold (0-255) - increased to avoid ambient noise
+      const SILENCE_THRESHOLD = 15; // Increased from 5 to reduce false positives
       const SILENCE_DURATION = 2000; // 2 seconds of silence
 
       const checkAudioLevel = () => {

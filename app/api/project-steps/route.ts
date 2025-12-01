@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // POST create a new project step
 export async function POST(request: NextRequest) {
   try {

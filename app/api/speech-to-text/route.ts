@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // Initialize OpenAI only if API key is available
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

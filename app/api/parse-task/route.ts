@@ -3,6 +3,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -1,5 +1,18 @@
 # Configuration de la Météo - Day Planner
 
+## ⚠️ PROBLÈME FRÉQUENT: Mauvaise Météo Affichée
+
+**Symptôme**: L'app affiche "pluie" mais il neige chez vous, ou la météo ne correspond pas du tout.
+
+**Cause**: L'app utilise **Montréal par défaut** si la géolocalisation n'est pas activée!
+
+**Solution Rapide**:
+1. Cliquez sur l'icône 📍 en haut à droite du widget météo
+2. Autorisez la géolocalisation dans votre navigateur
+3. La météo sera maintenant VOTRE vraie météo locale! ❄️
+
+---
+
 ## 🌤️ Vue d'ensemble
 
 Le Day Planner intègre maintenant la météo pour planifier intelligemment tes tâches. L'IA considère la météo pour:
@@ -43,21 +56,36 @@ C'est tout! La vraie météo est maintenant active! 🎉
 
 ## 🌍 Géolocalisation Automatique
 
-### Utiliser ta position actuelle (NOUVEAU! 📍)
+### Utiliser ta position actuelle (📍 ESSENTIEL!)
 
-Le widget météo dispose maintenant d'un **bouton de géolocalisation** automatique!
+Le widget météo dispose maintenant d'un **bouton de géolocalisation** automatique ET d'un **indicateur de localisation**!
 
 **Comment l'utiliser:**
 1. Dans le Day Planner, regarde le widget météo
-2. Clique sur l'icône **📍** (MapPin) en haut à droite du widget
-3. Le navigateur te demandera la permission d'accéder à ta position
-4. Accepte → La météo s'affichera pour ta position actuelle!
+2. **En haut du widget**, tu verras la localisation actuelle (ex: "Montreal" ou "Votre Ville")
+3. Clique sur l'icône **📍** (MapPin) à droite du widget
+4. Le navigateur te demandera la permission d'accéder à ta position
+5. Accepte → La météo s'affichera pour ta position actuelle!
+
+**Nouveau: Indicateur de Localisation**
+En haut du widget météo, tu verras maintenant:
+```
+📍 Montreal          Défaut
+```
+ou
+```
+📍 Votre Ville       GPS
+```
+
+- **"Défaut"** = Montréal utilisé (pas ta vraie météo!) ⚠️
+- **"GPS"** = Ta position réelle utilisée (météo locale précise!) ✅
 
 **Caractéristiques:**
 - ✅ Détection automatique de ta position GPS
 - ✅ Se souvient de ton choix (localStorage)
 - ✅ Mise à jour automatique quand tu changes de date
 - ✅ Clique à nouveau pour désactiver et revenir à Montréal
+- ✅ **NOUVEAU**: Affichage du nom de la ville détectée
 
 **Icône bleue = Géolocalisation active** 🔵
 **Icône grise = Position par défaut (Montréal)** ⚫
@@ -169,6 +197,30 @@ Tâches intérieures:
 - "Écrire documentation" (indoor)
 - "Meeting équipe" (indoor)
 ```
+
+### Vérifier que la Météo Est Correcte
+
+**Ouvre la console (F12) et cherche:**
+```
+🌤️ [Weather API] Request: {
+  date: "2025-11-30",
+  location: { lat: "45.52", lon: "-73.57" },
+  hasCustomLocation: true    // ← Doit être TRUE pour GPS!
+}
+
+🌤️ [Weather API] Real weather data received: {
+  location: "Votre Ville",    // ← Doit être VOTRE ville, pas Montreal!
+  current: {
+    temp: -5,
+    main: "Snow",             // ← Doit correspondre à la vraie météo
+    description: "neige modérée"
+  }
+}
+```
+
+Si tu vois:
+- `hasCustomLocation: false` → La géolocalisation n'est PAS activée
+- `location: "Montreal"` → Tu vois la météo de Montréal, pas la tienne!
 
 ---
 

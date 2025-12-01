@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getUserSubscription, isEligibleForPremiumBonus } from '@/lib/subscription';
 
+// Force cette route à être dynamique car elle utilise auth() qui dépend de headers()
+export const dynamic = 'force-dynamic';
+
 /**
  * GET - Récupère l'abonnement de l'utilisateur
  */

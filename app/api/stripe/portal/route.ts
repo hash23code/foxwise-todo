@@ -3,6 +3,9 @@ import { auth } from '@clerk/nextjs/server';
 import { createPortalSession } from '@/lib/stripe';
 import { getUserSubscription } from '@/lib/subscription';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 /**
  * Crée une session de portail Stripe pour gérer l'abonnement
  */

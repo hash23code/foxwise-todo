@@ -8,6 +8,9 @@ import {
 } from '@/lib/subscription';
 import { stripe, STRIPE_PLANS } from '@/lib/stripe';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 /**
  * POST - Réclamer le bonus 1 mois Premium gratuit après 3 mois de PRO
  */

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // GET all todo lists for the current user
 export async function GET(request: NextRequest) {
   try {

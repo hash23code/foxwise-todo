@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });

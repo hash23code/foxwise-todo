@@ -10,6 +10,12 @@ export async function GET(request: NextRequest) {
   const lat = searchParams.get('lat') || '45.5017'; // Montreal by default
   const lon = searchParams.get('lon') || '-73.5673';
 
+  console.log('🌤️ [Weather API] Request:', {
+    date,
+    location: { lat, lon },
+    hasCustomLocation: searchParams.has('lat') && searchParams.has('lon')
+  });
+
   try {
     if (!date) {
       return NextResponse.json({ error: 'Date parameter is required (YYYY-MM-DD)' }, { status: 400 });
@@ -47,7 +53,15 @@ export async function GET(request: NextRequest) {
     const currentData = await currentResponse.json();
     const forecastData = await forecastResponse.json();
 
-    console.log('Real weather data received from API');
+    console.log('🌤️ [Weather API] Real weather data received:', {
+      location: currentData.name,
+      current: {
+        temp: currentData.main.temp,
+        main: currentData.weather[0].main,
+        description: currentData.weather[0].description
+      },
+      forecastItems: forecastData.list.length
+    });
 
     // Get the requested date
     const requestDate = new Date(date);
@@ -101,6 +115,12 @@ export async function GET(request: NextRequest) {
 
     // Use the most common weather condition for the day
     const mainWeather = forecastsForDate[0]?.weather[0] || currentData.weather[0];
+
+    console.log('🌤️ [Weather API] Main weather condition:', {
+      main: mainWeather.main,
+      description: mainWeather.description,
+      icon: mainWeather.icon
+    });
 
     // Average precipitation probability
     const avgPrecipitation = forecastsForDate.length > 0

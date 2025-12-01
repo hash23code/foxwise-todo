@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import { Badge, BadgeType, BadgeTier } from '@/lib/badges';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 // GET: Récupérer les badges pour une date
 export async function GET(request: NextRequest) {
   try {

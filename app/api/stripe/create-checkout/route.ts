@@ -4,6 +4,9 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
 import { createStripeCustomer, createCheckoutSession, STRIPE_PLANS } from '@/lib/stripe';
 import { getUserSubscription, canStartProTrial } from '@/lib/subscription';
 
+// Force cette route à être dynamique car elle utilise auth()
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();

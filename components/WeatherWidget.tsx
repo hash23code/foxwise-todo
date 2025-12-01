@@ -143,18 +143,24 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
   }, [date, coords, useGeolocation]);
 
   const getWeatherIcon = (main: string, size: number = 24) => {
+    const iconClass = `w-${size} h-${size}`;
+
     switch (main) {
       case 'Clear':
-        return <Sun className={`w-${size} h-${size} text-yellow-400`} />;
+        return <Sun className={`${iconClass} text-yellow-400`} />;
       case 'Rain':
+        return <CloudRain className={`${iconClass} text-blue-400`} />;
       case 'Drizzle':
-        return <CloudRain className={`w-${size} h-${size} text-blue-400`} />;
+        return <CloudRain className={`${iconClass} text-blue-300`} />;
       case 'Snow':
-        return <CloudSnow className={`w-${size} h-${size} text-blue-200`} />;
+        return <CloudSnow className={`${iconClass} text-blue-100`} />;
+      case 'Thunderstorm':
+        return <CloudRain className={`${iconClass} text-purple-400`} />;
       case 'Clouds':
-        return <Cloud className={`w-${size} h-${size} text-gray-400`} />;
+        return <Cloud className={`${iconClass} text-gray-400`} />;
       default:
-        return <Cloud className={`w-${size} h-${size} text-gray-400`} />;
+        console.warn(`Unknown weather type: ${main}`);
+        return <Cloud className={`${iconClass} text-gray-400`} />;
     }
   };
 
@@ -231,6 +237,19 @@ export default function WeatherWidget({ date, onWeatherLoad }: WeatherWidgetProp
 
   return (
     <div className="bg-gradient-to-br from-blue-900/20 via-gray-900/40 to-gray-800/20 rounded-lg p-3 border border-blue-800/20 backdrop-blur-sm">
+      {/* Location indicator - Visible for debugging */}
+      <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-gray-700/30">
+        <div className="flex items-center gap-1.5">
+          <MapPin className={`w-3 h-3 ${useGeolocation ? 'text-blue-400' : 'text-gray-500'}`} />
+          <span className="text-xs text-gray-400">
+            {weather.location.name || `${weather.location.lat.toFixed(2)}, ${weather.location.lon.toFixed(2)}`}
+          </span>
+        </div>
+        <span className="text-[10px] text-gray-500">
+          {useGeolocation ? (language === 'fr' ? 'GPS' : 'GPS') : (language === 'fr' ? 'Défaut' : 'Default')}
+        </span>
+      </div>
+
       {/* Compact Header - Single line on desktop */}
       <div className="flex items-center justify-between gap-3 mb-2">
         {/* Left: Weather icon + temp + description */}
